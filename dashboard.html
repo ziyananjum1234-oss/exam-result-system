@@ -144,11 +144,16 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-800">
                 <div>
                     <h2 class="text-xl font-bold text-white tracking-tight">Student Enrollment & Directory</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Manage Active & Left Students</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Dynamic Classes & Custom Sections</p>
                 </div>
-                <div class="flex items-center space-x-3 bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl text-xs">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-slate-300 font-medium">Portal: <b class="text-indigo-400">Admin Active</b></span>
+                <div class="flex items-center space-x-3">
+                    <button type="button" onclick="window.promptAddNewClassOrSection()" class="px-3.5 py-2 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus-circle text-xs"></i> Add New Class / Section
+                    </button>
+                    <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-slate-300 font-medium">Portal: <b class="text-indigo-400">Admin Active</b></span>
+                    </div>
                 </div>
             </div>
 
@@ -181,7 +186,7 @@
                     <h3 class="font-bold text-white text-sm flex items-center gap-2">
                         <i class="fa-solid fa-file-excel text-emerald-400 text-lg"></i> Bulk Excel Upload
                     </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Upload entire student list instantly via Excel</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Upload entire student list instantly with any custom class or section</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                     <button type="button" onclick="window.downloadSampleExcel()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2 transition-all">
@@ -232,45 +237,30 @@
                             </select>
                         </div>
                         
+                        <!-- DYNAMIC CLASS SELECT -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Class / Grade *</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                                <span>Class / Grade *</span>
+                                <span class="text-[10px] text-indigo-400 cursor-pointer hover:underline" onclick="window.promptAddNewClassOrSection('class')">+ Add Class</span>
+                            </label>
                             <select id="s_class" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500">
-                                <optgroup label="Junior Section">
-                                    <option value="Nursery">Nursery</option>
-                                    <option value="Prep">Prep (KG)</option>
-                                    <option value="Class 1">Class 1</option>
-                                    <option value="Class 2">Class 2</option>
-                                    <option value="Class 3">Class 3</option>
-                                    <option value="Class 4">Class 4</option>
-                                    <option value="Class 5">Class 5</option>
-                                </optgroup>
-                                <optgroup label="Middle Section">
-                                    <option value="Class 6">Class 6</option>
-                                    <option value="Class 7">Class 7</option>
-                                    <option value="Class 8">Class 8</option>
-                                </optgroup>
-                                <optgroup label="Senior / Matric">
-                                    <option value="Class 9">Class 9</option>
-                                    <option value="Class 10" selected>Class 10</option>
-                                </optgroup>
-                                <optgroup label="College / Intermediate">
-                                    <option value="1st Year">1st Year (11th)</option>
-                                    <option value="2nd Year">2nd Year (12th)</option>
-                                </optgroup>
+                                <!-- Populated Dynamically -->
                             </select>
                         </div>
 
+                        <!-- DYNAMIC SECTION AUTO-COMPLETE / INPUT -->
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Group / Section *</label>
-                            <select id="s_group" required class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500">
-                                <option value="General / Primary">General / Primary</option>
-                                <option value="Pre-Medical">Pre-Medical</option>
-                                <option value="Pre-Engineering">Pre-Engineering</option>
-                                <option value="ICS (Computer)">ICS (Computer)</option>
-                                <option value="Commerce (I.Com)">Commerce (I.Com)</option>
-                                <option value="Arts / Humanities">Arts / Humanities</option>
-                            </select>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                                <span>Section / House / Group *</span>
+                                <span class="text-[10px] text-indigo-400 cursor-pointer hover:underline" onclick="window.promptAddNewClassOrSection('section')">+ Add Section</span>
+                            </label>
+                            <input type="text" id="s_group" list="sectionDatalist" required placeholder="e.g. Jinnah, Blue, Green, Pre-Medical" 
+                                class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500">
+                            <datalist id="sectionDatalist">
+                                <!-- Populated Dynamically with all sections -->
+                            </datalist>
                         </div>
+
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1.5">Phone / Contact No *</label>
                             <input type="text" id="s_phone" required placeholder="e.g. 0300-1234567" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500 font-mono">
@@ -307,7 +297,7 @@
                         </div>
 
                         <div class="w-full sm:w-64 relative">
-                            <input type="text" id="tableSearch" onkeyup="window.filterStudents()" placeholder="Search by Roll No, Name, Phone..." class="w-full pl-8 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-1 focus:ring-indigo-500">
+                            <input type="text" id="tableSearch" onkeyup="window.filterStudents()" placeholder="Search by Roll No, Name, Section..." class="w-full pl-8 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-1 focus:ring-indigo-500">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                         </div>
 
@@ -325,7 +315,7 @@
                                 <th class="py-3 px-4">Student Name</th>
                                 <th class="py-3 px-4">Father Name</th>
                                 <th class="py-3 px-3">Phone</th>
-                                <th class="py-3 px-3">Class</th>
+                                <th class="py-3 px-3">Class & Section</th>
                                 <th class="py-3 px-3">Status</th>
                                 <th class="py-3 px-4 text-center">Actions</th>
                             </tr>
@@ -355,39 +345,19 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 mb-1">Select Class</label>
                     <select id="filterClass" onchange="window.renderClassWiseList()" class="px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="All">All Classes</option>
-                        <option value="Nursery">Nursery</option>
-                        <option value="Prep">Prep (KG)</option>
-                        <option value="Class 1">Class 1</option>
-                        <option value="Class 2">Class 2</option>
-                        <option value="Class 3">Class 3</option>
-                        <option value="Class 4">Class 4</option>
-                        <option value="Class 5">Class 5</option>
-                        <option value="Class 6">Class 6</option>
-                        <option value="Class 7">Class 7</option>
-                        <option value="Class 8">Class 8</option>
-                        <option value="Class 9">Class 9</option>
-                        <option value="Class 10" selected>Class 10</option>
-                        <option value="1st Year">1st Year (11th)</option>
-                        <option value="2nd Year">2nd Year (12th)</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-1">Filter by Group / Section</label>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Filter by Section / House / Group</label>
                     <select id="filterGroup" onchange="window.renderClassWiseList()" class="px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="All">All Groups</option>
-                        <option value="General / Primary">General / Primary</option>
-                        <option value="Pre-Medical">Pre-Medical</option>
-                        <option value="Pre-Engineering">Pre-Engineering</option>
-                        <option value="ICS (Computer)">ICS (Computer)</option>
-                        <option value="Commerce (I.Com)">Commerce (I.Com)</option>
-                        <option value="Arts / Humanities">Arts / Humanities</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
 
                 <div class="ml-auto bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-xs flex items-center gap-4">
-                    <span class="text-slate-400">Class Total (Active): <b id="cw_total" class="text-indigo-400">0</b></span>
+                    <span class="text-slate-400">Total (Active): <b id="cw_total" class="text-indigo-400">0</b></span>
                     <span class="text-blue-400">Boys: <b id="cw_boys">0</b></span>
                     <span class="text-pink-400">Girls: <b id="cw_girls">0</b></span>
                 </div>
@@ -419,7 +389,7 @@
                                 <th class="py-2.5 px-4">Student Full Name</th>
                                 <th class="py-2.5 px-4">Father Name</th>
                                 <th class="py-2.5 px-3">Phone Number</th>
-                                <th class="py-2.5 px-3">Group / Section</th>
+                                <th class="py-2.5 px-3">Section / House / Group</th>
                             </tr>
                         </thead>
                         <tbody id="classListTableBody" class="divide-y divide-slate-300 text-slate-800"></tbody>
@@ -428,7 +398,7 @@
 
                 <div class="mt-8 pt-4 border-t-2 border-slate-800">
                     <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-12">
-                        <span>Total Students in Class: <b id="printTotalBottom" class="text-slate-950 font-black">0</b></span>
+                        <span>Total Students: <b id="printTotalBottom" class="text-slate-950 font-black">0</b></span>
                         <span>Boys: <b id="printBoysBottom">0</b> | Girls: <b id="printGirlsBottom">0</b></span>
                     </div>
 
@@ -498,10 +468,11 @@
                         </div>
                     </div>
 
+                    <!-- DYNAMIC TARGET CLASSES BUILDER -->
                     <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wider">
-                                <i class="fa-solid fa-school mr-1.5"></i> Target Classes (Nursery to 12th) *
+                                <i class="fa-solid fa-school mr-1.5"></i> Target Classes *
                             </label>
                             <label class="inline-flex items-center gap-2 cursor-pointer bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
                                 <input type="checkbox" id="checkAllClasses" onchange="window.toggleAllClasses(this)" class="w-3.5 h-3.5 rounded text-indigo-600">
@@ -509,21 +480,8 @@
                             </label>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Nursery" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Nursery</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Prep" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Prep</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 1" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 1</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 2" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 2</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 3" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 3</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 4" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 4</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 5" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 5</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 6" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 6</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 7" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 7</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 8" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 8</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 9" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 9</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="Class 10" checked class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">Class 10</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="1st Year" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">1st Year</span></label>
-                            <label class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700"><input type="checkbox" name="targetClass" value="2nd Year" class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600"><span class="text-xs font-semibold text-slate-200">2nd Year</span></label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5" id="targetClassesCheckboxContainer">
+                            <!-- Populated Dynamically from master classes -->
                         </div>
                     </div>
 
@@ -619,20 +577,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Select Class *</label>
                     <select id="me_classSelect" onchange="window.onExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="Nursery">Nursery</option>
-                        <option value="Prep">Prep (KG)</option>
-                        <option value="Class 1">Class 1</option>
-                        <option value="Class 2">Class 2</option>
-                        <option value="Class 3">Class 3</option>
-                        <option value="Class 4">Class 4</option>
-                        <option value="Class 5">Class 5</option>
-                        <option value="Class 6">Class 6</option>
-                        <option value="Class 7">Class 7</option>
-                        <option value="Class 8">Class 8</option>
-                        <option value="Class 9">Class 9</option>
-                        <option value="Class 10" selected>Class 10</option>
-                        <option value="1st Year">1st Year (11th)</option>
-                        <option value="2nd Year">2nd Year (12th)</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
 
@@ -729,20 +674,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Select Class *</label>
                     <select id="cr_classSelect" onchange="window.generateConsolidatedSheet(window.isBlankMode)" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="Nursery">Nursery</option>
-                        <option value="Prep">Prep (KG)</option>
-                        <option value="Class 1">Class 1</option>
-                        <option value="Class 2">Class 2</option>
-                        <option value="Class 3">Class 3</option>
-                        <option value="Class 4">Class 4</option>
-                        <option value="Class 5">Class 5</option>
-                        <option value="Class 6">Class 6</option>
-                        <option value="Class 7">Class 7</option>
-                        <option value="Class 8">Class 8</option>
-                        <option value="Class 9">Class 9</option>
-                        <option value="Class 10" selected>Class 10</option>
-                        <option value="1st Year">1st Year (11th)</option>
-                        <option value="2nd Year">2nd Year (12th)</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
 
@@ -868,9 +800,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Class *</label>
                     <select id="ana_classSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
-                        <option value="Class 10" selected>Class 10</option>
-                        <option value="Class 9">Class 9</option>
-                        <option value="Class 8">Class 8</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
                 <div>
@@ -1029,20 +959,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Select Class *</label>
                     <select id="dmc_classSelect" onchange="window.onDmcExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="Nursery">Nursery</option>
-                        <option value="Prep">Prep (KG)</option>
-                        <option value="Class 1">Class 1</option>
-                        <option value="Class 2">Class 2</option>
-                        <option value="Class 3">Class 3</option>
-                        <option value="Class 4">Class 4</option>
-                        <option value="Class 5">Class 5</option>
-                        <option value="Class 6">Class 6</option>
-                        <option value="Class 7">Class 7</option>
-                        <option value="Class 8">Class 8</option>
-                        <option value="Class 9">Class 9</option>
-                        <option value="Class 10" selected>Class 10</option>
-                        <option value="1st Year">1st Year (11th)</option>
-                        <option value="2nd Year">2nd Year (12th)</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
 
@@ -1080,20 +997,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Select Target Class *</label>
                     <select id="comb_classSelect" onchange="window.onCombinedClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="Nursery">Nursery</option>
-                        <option value="Prep">Prep (KG)</option>
-                        <option value="Class 1">Class 1</option>
-                        <option value="Class 2">Class 2</option>
-                        <option value="Class 3">Class 3</option>
-                        <option value="Class 4">Class 4</option>
-                        <option value="Class 5">Class 5</option>
-                        <option value="Class 6">Class 6</option>
-                        <option value="Class 7">Class 7</option>
-                        <option value="Class 8">Class 8</option>
-                        <option value="Class 9">Class 9</option>
-                        <option value="Class 10" selected>Class 10</option>
-                        <option value="1st Year">1st Year (11th)</option>
-                        <option value="2nd Year">2nd Year (12th)</option>
+                        <!-- Populated Dynamically -->
                     </select>
                 </div>
 
@@ -1138,13 +1042,17 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // ================= DATA STORES WITH SAFE DEFAULT FALLBACKS =================
+        // ================= DATA STORES WITH SAFE DYNAMIC FALLBACKS =================
         let studentsList = [];
         let examsSetupList = [];
         let marksDatabase = {};
         let directoryStatusFilter = 'All';
         let currentConsolidatedRows = [];
         window.isBlankMode = false;
+
+        // MASTER DYNAMIC CLASSES & SECTIONS LISTS
+        let masterClassesList = ["Nursery", "Prep", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "1st Year", "2nd Year"];
+        let masterSectionsList = ["Jinnah", "Iqbal", "Sir Syed", "Blue", "Green", "Rose", "Section A", "Section B", "Pre-Medical", "Pre-Engineering", "ICS (Computer)", "Commerce", "Arts / General"];
 
         let currentFormSubjects = [
             { name: "English", marks: 100 },
@@ -1176,14 +1084,30 @@
 
             if (!Array.isArray(studentsList) || studentsList.length === 0) {
                 studentsList = [
-                    { rollNo: "101", name: "Muhammad Ali", father: "Tariq Mehmood", gender: "Male", class: "Class 10", group: "Pre-Engineering", phone: "0300-1234567", status: "Active" },
+                    { rollNo: "101", name: "Muhammad Ali", father: "Tariq Mehmood", gender: "Male", class: "Class 10", group: "Jinnah", phone: "0300-1234567", status: "Active" },
                     { rollNo: "102", name: "Fatima Noor", father: "Abdul Rehman", gender: "Female", class: "Class 10", group: "Pre-Medical", phone: "0321-7654321", status: "Active" },
-                    { rollNo: "103", name: "Hamza Ahmed", father: "Ahmed Raza", gender: "Male", class: "Class 9", group: "ICS (Computer)", phone: "0333-9876543", status: "Active" },
-                    { rollNo: "104", name: "Ayesha Bibi", father: "Muhammad Saleem", gender: "Female", class: "Class 9", group: "Pre-Medical", phone: "0345-1122334", status: "Left" },
-                    { rollNo: "105", name: "Zain Ali", father: "Ghulam Ali", gender: "Male", class: "Class 10", group: "ICS (Computer)", phone: "0302-5566778", status: "Active" }
+                    { rollNo: "103", name: "Hamza Ahmed", father: "Ahmed Raza", gender: "Male", class: "Class 9", group: "Blue", phone: "0333-9876543", status: "Active" },
+                    { rollNo: "104", name: "Ayesha Bibi", father: "Muhammad Saleem", gender: "Female", class: "Class 9", group: "Rose", phone: "0345-1122334", status: "Left" },
+                    { rollNo: "105", name: "Zain Ali", father: "Ghulam Ali", gender: "Male", class: "Class 10", group: "Green", phone: "0302-5566778", status: "Active" }
                 ];
             }
             studentsList.forEach(s => { if (!s.status) s.status = "Active"; });
+
+            try {
+                const savedClasses = JSON.parse(localStorage.getItem('ccs_master_classes'));
+                if (Array.isArray(savedClasses) && savedClasses.length > 0) masterClassesList = savedClasses;
+            } catch(e) {}
+
+            try {
+                const savedSections = JSON.parse(localStorage.getItem('ccs_master_sections'));
+                if (Array.isArray(savedSections) && savedSections.length > 0) masterSectionsList = savedSections;
+            } catch(e) {}
+
+            // Auto-harvest any custom classes or sections found in students list
+            studentsList.forEach(s => {
+                if (s.class && !masterClassesList.includes(s.class)) masterClassesList.push(s.class);
+                if (s.group && !masterSectionsList.includes(s.group)) masterSectionsList.push(s.group);
+            });
 
             try {
                 examsSetupList = JSON.parse(localStorage.getItem('ccs_exams_setup')) || [];
@@ -1254,12 +1178,208 @@
 
         initDataStore();
 
+        // ================= DYNAMIC CLASSES & SECTIONS POPULATION ENGINE =================
+        window.getUniqueClasses = function() {
+            let list = [...masterClassesList];
+            studentsList.forEach(s => { if (s.class && !list.includes(s.class)) list.push(s.class); });
+            examsSetupList.forEach(ex => {
+                if (Array.isArray(ex.classes)) ex.classes.forEach(c => { if (!list.includes(c)) list.push(c); });
+            });
+            return list;
+        };
+
+        window.getUniqueSections = function() {
+            let list = [...masterSectionsList];
+            studentsList.forEach(s => { if (s.group && !list.includes(s.group)) list.push(s.group); });
+            return list;
+        };
+
+        window.refreshAllClassAndSectionDropdowns = function() {
+            const classes = window.getUniqueClasses();
+            const sections = window.getUniqueSections();
+
+            // 1. Enrollment Form Class Select
+            const sClassSelect = document.getElementById('s_class');
+            if (sClassSelect) {
+                const currentVal = sClassSelect.value || "Class 10";
+                sClassSelect.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === currentVal) opt.selected = true;
+                    sClassSelect.appendChild(opt);
+                });
+            }
+
+            // 2. Section Datalist for fast auto-complete
+            const sDatalist = document.getElementById('sectionDatalist');
+            if (sDatalist) {
+                sDatalist.innerHTML = '';
+                sections.forEach(sec => {
+                    const opt = document.createElement('option');
+                    opt.value = sec;
+                    sDatalist.appendChild(opt);
+                });
+            }
+
+            // 3. Class Wise List Filter Selects
+            const filterClass = document.getElementById('filterClass');
+            if (filterClass) {
+                const cur = filterClass.value || "All";
+                filterClass.innerHTML = '<option value="All">All Classes</option>';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    filterClass.appendChild(opt);
+                });
+            }
+
+            const filterGroup = document.getElementById('filterGroup');
+            if (filterGroup) {
+                const cur = filterGroup.value || "All";
+                filterGroup.innerHTML = '<option value="All">All Sections / Houses</option>';
+                sections.forEach(sec => {
+                    const opt = document.createElement('option');
+                    opt.value = sec;
+                    opt.textContent = sec;
+                    if (sec === cur) opt.selected = true;
+                    filterGroup.appendChild(opt);
+                });
+            }
+
+            // 4. Marks Entry Class Select
+            const meClass = document.getElementById('me_classSelect');
+            if (meClass) {
+                const cur = meClass.value || "Class 10";
+                meClass.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    meClass.appendChild(opt);
+                });
+            }
+
+            // 5. Consolidated Gazette Class Select
+            const crClass = document.getElementById('cr_classSelect');
+            if (crClass) {
+                const cur = crClass.value || "Class 10";
+                crClass.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    crClass.appendChild(opt);
+                });
+            }
+
+            // 6. Result Analytics Class Select
+            const anaClass = document.getElementById('ana_classSelect');
+            if (anaClass) {
+                const cur = anaClass.value || "Class 10";
+                anaClass.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    anaClass.appendChild(opt);
+                });
+            }
+
+            // 7. DMC Class Select
+            const dmcClass = document.getElementById('dmc_classSelect');
+            if (dmcClass) {
+                const cur = dmcClass.value || "Class 10";
+                dmcClass.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    dmcClass.appendChild(opt);
+                });
+            }
+
+            // 8. Combined DMC Class Select
+            const combClass = document.getElementById('comb_classSelect');
+            if (combClass) {
+                const cur = combClass.value || "Class 10";
+                combClass.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    combClass.appendChild(opt);
+                });
+            }
+
+            // 9. Exam Setup Target Classes Checkboxes
+            const targetContainer = document.getElementById('targetClassesCheckboxContainer');
+            if (targetContainer) {
+                targetContainer.innerHTML = '';
+                classes.forEach(c => {
+                    const isChecked = (c === 'Class 10' || c === 'Class 9') ? 'checked' : '';
+                    const lbl = document.createElement('label');
+                    lbl.className = "flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700";
+                    lbl.innerHTML = `
+                        <input type="checkbox" name="targetClass" value="${c}" ${isChecked} class="class-checkbox w-3.5 h-3.5 rounded text-indigo-600">
+                        <span class="text-xs font-semibold text-slate-200">${c}</span>
+                    `;
+                    targetContainer.appendChild(lbl);
+                });
+            }
+        };
+
+        window.promptAddNewClassOrSection = function(type = 'both') {
+            if (type === 'class') {
+                const newCls = prompt("Enter New Class Name (e.g. Nursery-A, Playgroup, 11th, Hifz Class):");
+                if (newCls && newCls.trim() !== "") {
+                    const cleanName = newCls.trim();
+                    if (!masterClassesList.includes(cleanName)) {
+                        masterClassesList.push(cleanName);
+                        localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                        window.refreshAllClassAndSectionDropdowns();
+                        alert(`Success: Class "${cleanName}" added dynamically across the system!`);
+                    } else {
+                        alert(`Class "${cleanName}" already exists!`);
+                    }
+                }
+            } else if (type === 'section') {
+                const newSec = prompt("Enter New Section / House / Group Name (e.g. Jinnah, Iqbal, Blue, Green, Pre-Medical):");
+                if (newSec && newSec.trim() !== "") {
+                    const cleanSec = newSec.trim();
+                    if (!masterSectionsList.includes(cleanSec)) {
+                        masterSectionsList.push(cleanSec);
+                        localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                        window.refreshAllClassAndSectionDropdowns();
+                        alert(`Success: Section "${cleanSec}" added to list!`);
+                    } else {
+                        alert(`Section "${cleanSec}" already exists!`);
+                    }
+                }
+            } else {
+                const choice = prompt("What would you like to add?\nType '1' for New Class\nType '2' for New Section");
+                if (choice === '1') window.promptAddNewClassOrSection('class');
+                else if (choice === '2') window.promptAddNewClassOrSection('section');
+            }
+        };
+
         window.repairAndResetData = function() {
             if (confirm("Do you want to reset sample exams, classes and demo records? This will repair any corrupted cache!")) {
                 localStorage.removeItem('ccs_students_list');
                 localStorage.removeItem('ccs_exams_setup');
                 localStorage.removeItem('ccs_marks_database');
+                localStorage.removeItem('ccs_master_classes');
+                localStorage.removeItem('ccs_master_sections');
                 initDataStore();
+                window.refreshAllClassAndSectionDropdowns();
                 window.showTab('enrollment');
                 alert("Success: Database repaired and sample records restored!");
             }
@@ -1344,7 +1464,7 @@
                     window.populateAnalyticsDropdowns();
                 }
                 const examId = document.getElementById('ana_examSelect')?.value;
-                const cls = document.getElementById('ana_classSelect')?.value || 'Class 10';
+                const cls = document.getElementById('ana_classSelect')?.value || (window.getUniqueClasses()[0] || 'Class 10');
                 
                 let exam = examsSetupList.find(e => e.id === examId) || examsSetupList[0];
                 if (!exam) return;
@@ -1930,7 +2050,7 @@
                                             <span class="text-indigo-950 font-black text-xs font-mono">${st.rollNo}</span>
                                         </div>
                                         <div>
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider">Class & Group</span>
+                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider">Class & Section</span>
                                             <span class="text-slate-950 font-bold uppercase">${st.class} — ${st.group}</span>
                                         </div>
                                     </div>
@@ -2317,7 +2437,7 @@
                                             <span class="text-indigo-950 font-black text-sm font-mono">${st.rollNo}</span>
                                         </div>
                                         <div>
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Class & Group</span>
+                                            <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Class & Section</span>
                                             <span class="text-slate-950 font-bold uppercase">${st.class} — ${st.group}</span>
                                         </div>
                                     </div>
@@ -3112,7 +3232,7 @@
             let girlsCount = 0;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-medium">No active students found in this class/group.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-medium">No active students found in this class/section.</td></tr>`;
             } else {
                 filtered.forEach((s, idx) => {
                     if (s.gender === 'Male') boysCount++; else girlsCount++;
@@ -3125,7 +3245,7 @@
                         <td class="py-2 px-4 font-bold text-slate-900">${s.name}</td>
                         <td class="py-2 px-4 text-slate-700">${s.father}</td>
                         <td class="py-2 px-3 font-mono text-slate-700">${s.phone || '-'}</td>
-                        <td class="py-2 px-3 text-slate-700">${s.group}</td>
+                        <td class="py-2 px-3 text-slate-700 font-semibold">${s.group}</td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -3205,7 +3325,10 @@
                     <td class="py-3 px-4 font-semibold text-white">${s.name}</td>
                     <td class="py-3 px-4 text-slate-400">${s.father}</td>
                     <td class="py-3 px-3 text-slate-300 font-mono text-[11px]">${s.phone || '-'}</td>
-                    <td class="py-3 px-3"><span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-lg">${s.class}</span></td>
+                    <td class="py-3 px-3">
+                        <span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-lg">${s.class}</span>
+                        <span class="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-2 py-0.5 rounded-lg text-[10px] ml-1 font-semibold">${s.group}</span>
+                    </td>
                     <td class="py-3 px-3">${statusBadge}</td>
                     <td class="py-3 px-4 text-center">
                         <div class="flex items-center justify-center gap-1.5">
@@ -3235,6 +3358,7 @@
                 s.rollNo.toLowerCase().includes(query) || 
                 s.father.toLowerCase().includes(query) || 
                 s.class.toLowerCase().includes(query) || 
+                (s.group && s.group.toLowerCase().includes(query)) ||
                 (s.phone && s.phone.toLowerCase().includes(query))
             );
             window.renderStudentsTable(filtered);
@@ -3296,9 +3420,19 @@
             const father = document.getElementById('s_fatherName').value.trim();
             const gender = document.getElementById('s_gender').value;
             const cls = document.getElementById('s_class').value;
-            const group = document.getElementById('s_group').value;
+            const group = document.getElementById('s_group').value.trim() || "General";
             const phone = document.getElementById('s_phone').value.trim();
             const status = document.getElementById('s_status').value;
+
+            // Auto-harvest new class or section dynamically
+            if (!masterClassesList.includes(cls)) {
+                masterClassesList.push(cls);
+                localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+            }
+            if (!masterSectionsList.includes(group)) {
+                masterSectionsList.push(group);
+                localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+            }
 
             if (editRoll) {
                 const idx = studentsList.findIndex(s => s.rollNo === editRoll);
@@ -3318,6 +3452,7 @@
                 e.target.reset();
             }
 
+            window.refreshAllClassAndSectionDropdowns();
             window.renderStudentsTable();
         };
 
@@ -3331,8 +3466,8 @@
         window.downloadSampleExcel = function() {
             if (typeof XLSX === 'undefined') { alert('Excel library loading, please try again.'); return; }
             const sampleData = [
-                { "Roll No": "105", "Student Name": "Zain Ali", "Father Name": "Ghulam Ali", "Phone": "0300-1234567", "Gender": "Male", "Class": "Class 10", "Group": "Pre-Medical", "Status": "Active" },
-                { "Roll No": "106", "Student Name": "Sana Khan", "Father Name": "Imran Khan", "Phone": "0321-7654321", "Gender": "Female", "Class": "Class 5", "Group": "General / Primary", "Status": "Active" }
+                { "Roll No": "105", "Student Name": "Zain Ali", "Father Name": "Ghulam Ali", "Phone": "0300-1234567", "Gender": "Male", "Class": "Class 10", "Section / House": "Jinnah", "Status": "Active" },
+                { "Roll No": "106", "Student Name": "Sana Khan", "Father Name": "Imran Khan", "Phone": "0321-7654321", "Gender": "Female", "Class": "Class 9", "Section / House": "Blue", "Status": "Active" }
             ];
             const ws = XLSX.utils.json_to_sheet(sampleData);
             const wb = XLSX.utils.book_new();
@@ -3361,16 +3496,23 @@
                     let gender = String(row["Gender"] || "Male").trim();
                     if (gender.toLowerCase().startsWith('f')) gender = 'Female'; else gender = 'Male';
                     const cls = String(row["Class"] || "Class 10").trim();
-                    const group = String(row["Group"] || "Pre-Engineering").trim();
+                    const group = String(row["Section / House"] || row["Section"] || row["Group"] || "General").trim();
                     const status = String(row["Status"] || "Active").trim();
 
                     if (rollNo && name) {
+                        if (!masterClassesList.includes(cls)) masterClassesList.push(cls);
+                        if (!masterSectionsList.includes(group)) masterSectionsList.push(group);
+
                         const idx = studentsList.findIndex(s => s.rollNo === rollNo);
                         if (idx >= 0) studentsList[idx] = { rollNo, name, father, gender, class: cls, group, phone, status };
                         else studentsList.unshift({ rollNo, name, father, gender, class: cls, group, phone, status });
                         addedCount++;
                     }
                 });
+
+                localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                window.refreshAllClassAndSectionDropdowns();
                 window.renderStudentsTable();
                 alert(`Success: ${addedCount} Students imported from Excel into Chenab College Database!`);
                 e.target.value = '';
@@ -3382,7 +3524,7 @@
             if (studentsList.length === 0) { alert('No students to export!'); return; }
             if (typeof XLSX === 'undefined') { alert('Excel library loading, please try again.'); return; }
             const exportData = studentsList.map(s => ({
-                "Roll No": s.rollNo, "Student Name": s.name, "Father Name": s.father, "Phone": s.phone, "Gender": s.gender, "Class": s.class, "Group": s.group, "Status": s.status || "Active"
+                "Roll No": s.rollNo, "Student Name": s.name, "Father Name": s.father, "Phone": s.phone, "Gender": s.gender, "Class": s.class, "Section / House": s.group, "Status": s.status || "Active"
             }));
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
@@ -3393,6 +3535,7 @@
         // Initialize Everything Safely on Load
         window.addEventListener('DOMContentLoaded', () => {
             try {
+                window.refreshAllClassAndSectionDropdowns();
                 window.renderStudentsTable();
                 window.renderSubjectRows();
                 window.renderExamsTable();
