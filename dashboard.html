@@ -34,7 +34,7 @@
             main { padding: 0 !important; margin: 0 !important; width: 100% !important; max-height: none !important; overflow: visible !important; }
             
             .print-table { border: 1.5px solid #0f172a !important; width: 100% !important; border-collapse: collapse !important; }
-            .print-table th, .print-table td { border: 1px solid #334155 !important; padding: 4.5px 5px !important; color: black !important; font-size: 10px !important; }
+            .print-table th, .print-table td { border: 1px solid #334155 !important; padding: 4px 5px !important; color: black !important; font-size: 9.5px !important; }
             .print-table th { background-color: #f8fafc !important; font-weight: bold !important; }
             .print-paper { box-shadow: none !important; border: none !important; padding: 0 !important; }
             
@@ -52,12 +52,37 @@
                 box-sizing: border-box !important;
             }
             .dmc-card-page:last-child { page-break-after: avoid !important; break-after: avoid !important; }
+
+            /* 2 Slips Per A4 Page */
+            .roll-slip-page-wrapper {
+                page-break-after: always !important;
+                break-after: page !important;
+                height: 98vh !important;
+                max-height: 287mm !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                margin: 0 auto !important;
+                padding: 4mm 0 !important;
+                box-sizing: border-box !important;
+            }
+            .roll-slip-page-wrapper:last-child { page-break-after: avoid !important; break-after: avoid !important; }
+            .roll-slip-half-card {
+                height: 48.5% !important;
+                box-sizing: border-box !important;
+                border: 2px solid #0f172a !important;
+                padding: 8px 12px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                position: relative !important;
+            }
         }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
 
-    <!-- 1. SIDEBAR MENU (ALL 8 BUTTONS) -->
+    <!-- 1. SIDEBAR MENU (ALL 9 MODULES) -->
     <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between flex-shrink-0 no-print overflow-y-auto max-h-screen">
         <div>
             <!-- Chenab College Logo & Branding -->
@@ -91,31 +116,37 @@
                     <span>Exam Setup</span>
                 </button>
 
-                <!-- 4. Marks Entry -->
+                <!-- 4. NEW: Date Sheet & Roll No Slips -->
+                <button type="button" id="navDateSheetBtn" onclick="window.showTab('dateSheet')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-semibold text-xs transition-all text-left border border-violet-500/20 bg-violet-500/5">
+                    <i class="fa-solid fa-id-card-clip text-xs w-4 text-center text-violet-400"></i>
+                    <span class="text-violet-300">Roll No Slips & Date Sheet</span>
+                </button>
+
+                <!-- 5. Marks Entry -->
                 <button type="button" id="navMarksBtn" onclick="window.showTab('marksEntry')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
                     <i class="fa-solid fa-file-pen text-xs w-4 text-center text-emerald-400"></i>
                     <span>Marks Entry</span>
                 </button>
 
-                <!-- 5. Consolidative Result Sheet -->
+                <!-- 6. Consolidative Result Sheet -->
                 <button type="button" id="navConsolidatedBtn" onclick="window.showTab('consolidated')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
                     <i class="fa-solid fa-square-poll-vertical text-xs w-4 text-center text-amber-400"></i>
                     <span>Consolidative Sheet</span>
                 </button>
 
-                <!-- 6. DEDICATED SEPARATE TAB: Result Summary & Graphs -->
+                <!-- 7. Result Summary & Graphs -->
                 <button type="button" id="navAnalyticsBtn" onclick="window.showTab('resultAnalytics')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-bold text-xs transition-all text-left border border-amber-500/20 bg-amber-500/5">
                     <i class="fa-solid fa-chart-pie text-xs w-4 text-center text-amber-400"></i>
                     <span class="text-amber-300">Result Summary & Graphs</span>
                 </button>
 
-                <!-- 7. Single Exam Result Card / DMC -->
+                <!-- 8. Single Exam Result Card / DMC -->
                 <button type="button" id="navDmcBtn" onclick="window.showTab('dmc')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
                     <i class="fa-solid fa-graduation-cap text-xs w-4 text-center text-pink-400"></i>
                     <span>Result Card / DMC</span>
                 </button>
 
-                <!-- 8. Combined Multi-Term Result -->
+                <!-- 9. Combined Multi-Term Result -->
                 <button type="button" id="navCombinedBtn" onclick="window.showTab('combined')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
                     <i class="fa-solid fa-layer-group text-xs w-4 text-center text-cyan-400"></i>
                     <span class="font-bold">Combined Result</span>
@@ -548,7 +579,102 @@
             </div>
         </div>
 
-        <!-- ================= TAB 4: SUBJECT-WISE FAST MARKS ENTRY ================= -->
+        <!-- ================= TAB 4: DATE SHEET & ROLL NUMBER SLIPS (NEW DYNAMIC MODULE) ================= -->
+        <div id="dateSheetSection" class="hidden">
+            <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-id-card-clip text-violet-400"></i> Date Sheet & Roll Number Slips (Admit Cards)
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Dynamic Exam Timetable, Custom Rules & 2-Slips Per Page Print</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" onclick="window.printDateSheetNotice()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-calendar-check text-amber-400"></i> Print Notice Board Date Sheet
+                    </button>
+                    <button type="button" onclick="window.printAllRollNoSlips()" class="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-violet-600/30 flex items-center gap-2 transition-all active:scale-95">
+                        <i class="fa-solid fa-print"></i> Bulk Print Roll No Slips (2 Per Page)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters & Mode Selector -->
+            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Select Examination *</label>
+                    <select id="ds_examSelect" onchange="window.loadDateSheetConfig()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-violet-500"></select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Select Class *</label>
+                    <select id="ds_classSelect" onchange="window.loadDateSheetConfig()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-violet-500">
+                        <!-- Populated Dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-violet-400 mb-1.5">3. Select Candidate *</label>
+                    <select id="ds_studentSelect" onchange="window.renderRollNoSlips()" class="w-full px-3.5 py-2.5 bg-violet-950/40 border border-violet-500/40 rounded-xl text-xs text-white font-bold focus:ring-2 focus:ring-violet-500"></select>
+                </div>
+            </div>
+
+            <!-- Date Sheet Schedule Configuration Card -->
+            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl mb-8">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <h3 class="text-xs font-bold text-violet-300 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-violet-400"></i> Configure Date Sheet Timetable for Selected Class
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Specify Paper Date, Day, Timing and Room No for each subject</p>
+                    </div>
+                    <button type="button" onclick="window.saveDateSheetConfig()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Date Sheet
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 text-slate-400 uppercase font-semibold text-[10px]">
+                            <tr>
+                                <th class="py-2.5 px-3 w-12 text-center">Sr #</th>
+                                <th class="py-2.5 px-3">Subject Name</th>
+                                <th class="py-2.5 px-3 w-44">Exam Date (DD-MM-YYYY)</th>
+                                <th class="py-2.5 px-3 w-36">Day</th>
+                                <th class="py-2.5 px-3 w-48">Paper Timing</th>
+                                <th class="py-2.5 px-3 w-40">Room / Hall</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dateSheetScheduleTableBody" class="divide-y divide-slate-800 text-slate-300">
+                            <!-- Populated Dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 100% Dynamic Custom Editable Exam Instructions -->
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square"></i> Candidate Instructions & Rules (Dynamic / Editable)
+                        </label>
+                        <span class="text-[10.5px] text-slate-400">Type whatever rules you want to appear on the Roll No Slip</span>
+                    </div>
+                    <textarea id="ds_customInstructions" rows="3" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:ring-2 focus:ring-violet-500 leading-relaxed font-sans" placeholder="Type candidate exam instructions here..."></textarea>
+                    <div class="mt-2 text-right">
+                        <button type="button" onclick="window.saveDateSheetConfig()" class="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-lg shadow transition-all">
+                            <i class="fa-solid fa-save mr-1"></i> Save Custom Rules
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rendered Roll Number Slips Container (Paper Saver: 2 Per Page) -->
+            <div id="rollNoSlipsContainer" class="space-y-8">
+                <!-- Dynamically Generated 2-Per-Page Slips -->
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: SUBJECT-WISE FAST MARKS ENTRY ================= -->
         <div id="marksEntrySection" class="hidden">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-800">
                 <div>
@@ -637,7 +763,7 @@
             </div>
         </div>
 
-        <!-- ================= TAB 5: CONSOLIDATIVE RESULT SHEET (AUTO-LANDSCAPE PRINT) ================= -->
+        <!-- ================= TAB 6: CONSOLIDATIVE RESULT SHEET (AUTO-LANDSCAPE PRINT) ================= -->
         <div id="consolidatedSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -776,7 +902,7 @@
             </div>
         </div>
 
-        <!-- ================= TAB 6: DEDICATED SEPARATE TAB — RESULT SUMMARY & GRAPHS ================= -->
+        <!-- ================= TAB 7: DEDICATED SEPARATE TAB — RESULT SUMMARY & GRAPHS ================= -->
         <div id="resultAnalyticsSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -929,7 +1055,7 @@
             </div>
         </div>
 
-        <!-- ================= TAB 7: SINGLE EXAM RESULT CARD / DMC ================= -->
+        <!-- ================= TAB 8: SINGLE EXAM RESULT CARD / DMC ================= -->
         <div id="dmcSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -972,7 +1098,7 @@
             <div id="dmcCardsContainer" class="space-y-10"></div>
         </div>
 
-        <!-- ================= TAB 8: COMBINED RESULT & MULTI-TERM WEIGHTED DMC ================= -->
+        <!-- ================= TAB 9: COMBINED RESULT & MULTI-TERM WEIGHTED DMC ================= -->
         <div id="combinedSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -1046,6 +1172,7 @@
         let studentsList = [];
         let examsSetupList = [];
         let marksDatabase = {};
+        let dateSheetsDatabase = {};
         let directoryStatusFilter = 'All';
         let currentConsolidatedRows = [];
         window.isBlankMode = false;
@@ -1174,6 +1301,10 @@
                     "exam_3_102": { "English": 82, "Mathematics": 85, "Physics": 78, "Urdu": 86, "Computer Science": 90 }
                 };
             }
+
+            try {
+                dateSheetsDatabase = JSON.parse(localStorage.getItem('ccs_datesheets_db')) || {};
+            } catch(e) { dateSheetsDatabase = {}; }
         }
 
         initDataStore();
@@ -1250,7 +1381,21 @@
                 });
             }
 
-            // 4. Marks Entry Class Select
+            // 4. Date Sheet Class Select
+            const dsClass = document.getElementById('ds_classSelect');
+            if (dsClass) {
+                const cur = dsClass.value || "Class 10";
+                dsClass.innerHTML = '';
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    dsClass.appendChild(opt);
+                });
+            }
+
+            // 5. Marks Entry Class Select
             const meClass = document.getElementById('me_classSelect');
             if (meClass) {
                 const cur = meClass.value || "Class 10";
@@ -1264,7 +1409,7 @@
                 });
             }
 
-            // 5. Consolidated Gazette Class Select
+            // 6. Consolidated Gazette Class Select
             const crClass = document.getElementById('cr_classSelect');
             if (crClass) {
                 const cur = crClass.value || "Class 10";
@@ -1278,7 +1423,7 @@
                 });
             }
 
-            // 6. Result Analytics Class Select
+            // 7. Result Analytics Class Select
             const anaClass = document.getElementById('ana_classSelect');
             if (anaClass) {
                 const cur = anaClass.value || "Class 10";
@@ -1292,7 +1437,7 @@
                 });
             }
 
-            // 7. DMC Class Select
+            // 8. DMC Class Select
             const dmcClass = document.getElementById('dmc_classSelect');
             if (dmcClass) {
                 const cur = dmcClass.value || "Class 10";
@@ -1306,7 +1451,7 @@
                 });
             }
 
-            // 8. Combined DMC Class Select
+            // 9. Combined DMC Class Select
             const combClass = document.getElementById('comb_classSelect');
             if (combClass) {
                 const cur = combClass.value || "Class 10";
@@ -1320,7 +1465,7 @@
                 });
             }
 
-            // 9. Exam Setup Target Classes Checkboxes
+            // 10. Exam Setup Target Classes Checkboxes
             const targetContainer = document.getElementById('targetClassesCheckboxContainer');
             if (targetContainer) {
                 targetContainer.innerHTML = '';
@@ -1378,6 +1523,7 @@
                 localStorage.removeItem('ccs_marks_database');
                 localStorage.removeItem('ccs_master_classes');
                 localStorage.removeItem('ccs_master_sections');
+                localStorage.removeItem('ccs_datesheets_db');
                 initDataStore();
                 window.refreshAllClassAndSectionDropdowns();
                 window.showTab('enrollment');
@@ -1385,13 +1531,14 @@
             }
         };
 
-        // ================= 100% RELIABLE 8-TAB SWITCHING =================
+        // ================= 100% RELIABLE 9-TAB SWITCHING =================
         window.showTab = function(tabName) {
             try {
                 const sectionMap = {
                     'enrollment': 'enrollmentSection',
                     'classList': 'classListSection',
                     'examSetup': 'examSetupSection',
+                    'dateSheet': 'dateSheetSection',
                     'marksEntry': 'marksEntrySection',
                     'consolidated': 'consolidatedSection',
                     'resultAnalytics': 'resultAnalyticsSection',
@@ -1403,6 +1550,7 @@
                     'enrollment': 'navEnrollBtn',
                     'classList': 'navClassBtn',
                     'examSetup': 'navExamBtn',
+                    'dateSheet': 'navDateSheetBtn',
                     'marksEntry': 'navMarksBtn',
                     'consolidated': 'navConsolidatedBtn',
                     'resultAnalytics': 'navAnalyticsBtn',
@@ -1431,6 +1579,7 @@
                     if (tabName === 'enrollment') window.renderStudentsTable();
                     else if (tabName === 'classList') window.renderClassWiseList();
                     else if (tabName === 'examSetup') { window.renderSubjectRows(); window.renderExamsTable(); }
+                    else if (tabName === 'dateSheet') { window.populateDateSheetDropdowns(); window.loadDateSheetConfig(); }
                     else if (tabName === 'marksEntry') { window.populateExamDropdown(); window.onExamOrClassChange(); }
                     else if (tabName === 'consolidated') { window.populateConsolidatedDropdowns(); window.generateConsolidatedSheet(false); }
                     else if (tabName === 'resultAnalytics') { window.populateAnalyticsDropdowns(); window.loadAnalyticsData(); }
@@ -1444,247 +1593,343 @@
             }
         };
 
-        // ================= TAB 6: DEDICATED RESULT SUMMARY & VISUAL ANALYTICS =================
-        window.populateAnalyticsDropdowns = function() {
-            const select = document.getElementById('ana_examSelect');
-            if (!select) return;
-            select.innerHTML = '';
+        // ================= TAB 4: DATE SHEET & ROLL NO SLIPS (NEW DYNAMIC MODULE) =================
+        window.populateDateSheetDropdowns = function() {
+            const exSelect = document.getElementById('ds_examSelect');
+            if (!exSelect) return;
+            exSelect.innerHTML = '';
+
+            if (!examsSetupList || examsSetupList.length === 0) {
+                exSelect.innerHTML = '<option value="">No Exams Defined Yet</option>';
+                return;
+            }
+
             examsSetupList.forEach(ex => {
                 const opt = document.createElement('option');
                 opt.value = ex.id;
                 opt.textContent = `${ex.name} (${ex.session})`;
-                select.appendChild(opt);
+                exSelect.appendChild(opt);
             });
         };
 
-        window.loadAnalyticsData = function() {
+        window.loadDateSheetConfig = function() {
             try {
-                const examSelect = document.getElementById('ana_examSelect');
-                if (!examSelect || !examSelect.value) {
-                    window.populateAnalyticsDropdowns();
-                }
-                const examId = document.getElementById('ana_examSelect')?.value;
-                const cls = document.getElementById('ana_classSelect')?.value || (window.getUniqueClasses()[0] || 'Class 10');
-                
-                let exam = examsSetupList.find(e => e.id === examId) || examsSetupList[0];
+                const examSelect = document.getElementById('ds_examSelect');
+                const classSelect = document.getElementById('ds_classSelect');
+                const studentSelect = document.getElementById('ds_studentSelect');
+                const tbody = document.getElementById('dateSheetScheduleTableBody');
+                const instructBox = document.getElementById('ds_customInstructions');
+
+                if (!examSelect || !classSelect || !studentSelect || !tbody) return;
+
+                const examId = examSelect.value;
+                const cls = classSelect.value;
+
+                tbody.innerHTML = '';
+                studentSelect.innerHTML = '';
+
+                const exam = examsSetupList.find(e => e.id === examId);
                 if (!exam) return;
 
-                const passCriteria = exam.passPct || 33;
+                const activeStudents = studentsList.filter(s => s.class === cls && s.status !== 'Left');
+                if (activeStudents.length === 0) {
+                    studentSelect.innerHTML = '<option value="">No active students in this class</option>';
+                } else {
+                    const optAll = document.createElement('option');
+                    optAll.value = "ALL";
+                    optAll.textContent = `⭐ Bulk Print All Class Roll No Slips (${activeStudents.length} Students)`;
+                    studentSelect.appendChild(optAll);
+
+                    activeStudents.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.rollNo;
+                        opt.textContent = `Roll #${s.rollNo} - ${s.name} (${s.group})`;
+                        studentSelect.appendChild(opt);
+                    });
+                }
+
+                const dsKey = `${examId}_${cls}`;
+                const savedConfig = dateSheetsDatabase[dsKey] || {};
                 const subjects = exam.subjects || [];
-                const classStudents = studentsList.filter(s => s.class === cls && s.status !== 'Left');
-                const totalMaxMarks = subjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
 
-                let studentResults = [];
+                const defaultInstructions = "1. Candidates must arrive at the examination center 15 minutes before the paper.\n2. Mobile phones, programmable calculators and electronic devices are strictly prohibited.\n3. Bring original Roll No Slip and personal stationery items. Sharing is not allowed.\n4. Strict disciplinary action will be taken in case of any unfair means (UFM).";
+                if (instructBox) {
+                    instructBox.value = savedConfig.instructions || defaultInstructions;
+                }
 
-                classStudents.forEach(s => {
-                    const key = `${exam.id}_${s.rollNo}`;
-                    const savedMarks = marksDatabase[key] || {};
+                subjects.forEach((sub, idx) => {
+                    const subSched = (savedConfig.schedule && savedConfig.schedule[sub.name]) ? savedConfig.schedule[sub.name] : {};
+                    const defaultDate = subSched.date || "";
+                    const defaultDay = subSched.day || "";
+                    const defaultTime = subSched.time || "08:30 AM - 11:30 AM";
+                    const defaultRoom = subSched.room || "Exam Hall";
 
-                    let totalObt = 0;
-                    let isSubjectFail = false;
-                    let hasMarks = false;
-                    let subMarksMap = {};
-
-                    subjects.forEach(sub => {
-                        const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
-                        if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
-                        totalObt += obt;
-                        subMarksMap[sub.name] = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? savedMarks[sub.name] : '-';
-
-                        const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                        if (obt < subPassMin) isSubjectFail = true;
-                    });
-
-                    const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
-
-                    let grade = 'F';
-                    if (percentage >= 80) grade = 'A+';
-                    else if (percentage >= 70) grade = 'A';
-                    else if (percentage >= 60) grade = 'B';
-                    else if (percentage >= 50) grade = 'C';
-                    else if (percentage >= 40) grade = 'D';
-                    else grade = 'E';
-
-                    const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
-                    if (!isPass) grade = 'F';
-
-                    studentResults.push({
-                        rollNo: s.rollNo,
-                        name: s.name,
-                        father: s.father,
-                        gender: s.gender,
-                        subMarksMap,
-                        totalMaxMarks,
-                        totalObt,
-                        percentage,
-                        grade,
-                        status: isPass ? 'PASS' : 'FAIL',
-                        hasMarks
-                    });
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/40";
+                    tr.innerHTML = `
+                        <td class="py-2 px-3 text-center font-bold text-slate-500">${idx + 1}</td>
+                        <td class="py-2 px-3 font-bold text-white uppercase text-[11px]">${sub.name}</td>
+                        <td class="py-2 px-3">
+                            <input type="text" placeholder="e.g. 10-03-2026" value="${defaultDate}" 
+                                data-subject="${sub.name}" class="ds-input-date w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white font-mono">
+                        </td>
+                        <td class="py-2 px-3">
+                            <input type="text" placeholder="e.g. Monday" value="${defaultDay}" 
+                                data-subject="${sub.name}" class="ds-input-day w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200">
+                        </td>
+                        <td class="py-2 px-3">
+                            <input type="text" placeholder="e.g. 08:30 AM - 11:30 AM" value="${defaultTime}" 
+                                data-subject="${sub.name}" class="ds-input-time w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200 font-mono">
+                        </td>
+                        <td class="py-2 px-3">
+                            <input type="text" placeholder="e.g. Main Hall" value="${defaultRoom}" 
+                                data-subject="${sub.name}" class="ds-input-room w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200">
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
                 });
 
-                const totalAppeared = studentResults.length;
-                const passedStudents = studentResults.filter(s => s.status === 'PASS').sort((a, b) => b.totalObt - a.totalObt);
-                const passedCount = passedStudents.length;
-                const failedCount = totalAppeared - passedCount;
-                const passPct = totalAppeared > 0 ? ((passedCount / totalAppeared) * 100).toFixed(1) : 0;
-                const failPct = totalAppeared > 0 ? ((failedCount / totalAppeared) * 100).toFixed(1) : 0;
-
-                const sumPct = studentResults.reduce((acc, s) => acc + s.percentage, 0);
-                const classAvg = totalAppeared > 0 ? (sumPct / totalAppeared).toFixed(1) : 0;
-
-                // 1. KPI Numbers
-                document.getElementById('ana_totalStudents').textContent = totalAppeared;
-                document.getElementById('ana_passedCount').textContent = passedCount;
-                document.getElementById('ana_failedCount').textContent = failedCount;
-                document.getElementById('ana_passPctBadge').textContent = `${passPct}% Pass Ratio`;
-                document.getElementById('ana_failPctBadge').textContent = `${failPct}% Detained`;
-                document.getElementById('ana_classAvgScore').textContent = `${classAvg}%`;
-
-                if (passedStudents.length > 0) {
-                    document.getElementById('ana_highestScore').textContent = `${passedStudents[0].totalObt} Marks (${passedStudents[0].percentage}%)`;
-                    document.getElementById('ana_highestStudent').textContent = `Roll #${passedStudents[0].rollNo} - ${passedStudents[0].name}`;
-                } else {
-                    document.getElementById('ana_highestScore').textContent = "-";
-                    document.getElementById('ana_highestStudent').textContent = "-";
-                }
-
-                // 2. Top 3 Spotlight Podium Cards
-                const podiumContainer = document.getElementById('topHoldersPodiumContainer');
-                if (podiumContainer) {
-                    podiumContainer.innerHTML = '';
-                    const medals = [
-                        { rank: '1st Position 🥇', color: 'from-amber-500/20 to-amber-950/40 border-amber-500/50 text-amber-300', badge: 'bg-amber-500 text-slate-950' },
-                        { rank: '2nd Position 🥈', color: 'from-slate-400/20 to-slate-900 border-slate-400/40 text-slate-200', badge: 'bg-slate-300 text-slate-950' },
-                        { rank: '3rd Position 🥉', color: 'from-amber-700/20 to-amber-950/30 border-amber-700/40 text-amber-400', badge: 'bg-amber-700 text-white' }
-                    ];
-
-                    for (let i = 0; i < 3; i++) {
-                        const st = passedStudents[i];
-                        const card = document.createElement('div');
-                        card.className = `p-4 rounded-2xl bg-gradient-to-br ${medals[i].color} border shadow-lg flex items-center justify-between`;
-                        if (st) {
-                            card.innerHTML = `
-                                <div>
-                                    <span class="px-2.5 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-wider ${medals[i].badge}">${medals[i].rank}</span>
-                                    <h4 class="text-sm font-black text-white mt-1.5">${st.name}</h4>
-                                    <p class="text-[10px] text-slate-400">Roll #${st.rollNo} • ${st.father}</p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-base font-black text-white font-mono block">${st.totalObt}</span>
-                                    <span class="text-xs font-bold text-emerald-400 font-mono">${st.percentage}%</span>
-                                </div>
-                            `;
-                        } else {
-                            card.innerHTML = `
-                                <div>
-                                    <span class="px-2.5 py-0.5 rounded-lg text-[9.5px] font-black uppercase tracking-wider ${medals[i].badge}">${medals[i].rank}</span>
-                                    <h4 class="text-xs font-semibold text-slate-500 mt-2">No candidate</h4>
-                                </div>
-                                <span class="text-slate-600 font-mono">-</span>
-                            `;
-                        }
-                        podiumContainer.appendChild(card);
-                    }
-                }
-
-                // 3. Multi-Color Grade Distribution Progress Bars
-                const gradeContainer = document.getElementById('gradeDistributionBarsContainer');
-                if (gradeContainer) {
-                    gradeContainer.innerHTML = '';
-                    const gradesConfig = [
-                        { label: 'A+ (80% & Above)', grade: 'A+', barColor: 'bg-gradient-to-r from-emerald-500 to-teal-400', textColor: 'text-emerald-400' },
-                        { label: 'A (70% to 79%)', grade: 'A', barColor: 'bg-gradient-to-r from-blue-500 to-indigo-400', textColor: 'text-blue-400' },
-                        { label: 'B (60% to 69%)', grade: 'B', barColor: 'bg-gradient-to-r from-purple-500 to-indigo-500', textColor: 'text-purple-400' },
-                        { label: 'C (50% to 59%)', grade: 'C', barColor: 'bg-gradient-to-r from-amber-500 to-yellow-400', textColor: 'text-amber-400' },
-                        { label: 'D (40% to 49%)', grade: 'D', barColor: 'bg-gradient-to-r from-orange-500 to-amber-600', textColor: 'text-orange-400' },
-                        { label: 'F (Below Passing)', grade: 'F', barColor: 'bg-gradient-to-r from-rose-600 to-red-500', textColor: 'text-rose-400' }
-                    ];
-
-                    gradesConfig.forEach(g => {
-                        const count = studentResults.filter(s => s.grade === g.grade).length;
-                        const pctOfClass = totalAppeared > 0 ? ((count / totalAppeared) * 100).toFixed(0) : 0;
-
-                        const row = document.createElement('div');
-                        row.className = "space-y-1";
-                        row.innerHTML = `
-                            <div class="flex justify-between items-center text-[11px] font-semibold">
-                                <span class="text-slate-300 font-bold">${g.label}</span>
-                                <span class="${g.textColor} font-black font-mono">${count} Students (${pctOfClass}%)</span>
-                            </div>
-                            <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800 p-0.5">
-                                <div class="${g.barColor} h-full rounded-full transition-all duration-500" style="width: ${pctOfClass}%"></div>
-                            </div>
-                        `;
-                        gradeContainer.appendChild(row);
-                    });
-                }
-
-                // 4. Boys vs Girls Pass Comparison
-                const boys = studentResults.filter(s => s.gender === 'Male');
-                const girls = studentResults.filter(s => s.gender === 'Female');
-                const boysPass = boys.length > 0 ? ((boys.filter(s => s.status === 'PASS').length / boys.length) * 100).toFixed(0) : 0;
-                const girlsPass = girls.length > 0 ? ((girls.filter(s => s.status === 'PASS').length / girls.length) * 100).toFixed(0) : 0;
-
-                const bEl = document.getElementById('ana_boysPass');
-                const gEl = document.getElementById('ana_girlsPass');
-                if (bEl) bEl.textContent = `${boysPass}% (${boys.filter(s => s.status === 'PASS').length}/${boys.length})`;
-                if (gEl) gEl.textContent = `${girlsPass}% (${girls.filter(s => s.status === 'PASS').length}/${girls.length})`;
-
-                // 5. Subject-Wise Analytics Table
-                const subTableBody = document.getElementById('subjectAnalyticsTableBody');
-                if (subTableBody) {
-                    subTableBody.innerHTML = '';
-                    subjects.forEach(sub => {
-                        let subPassed = 0;
-                        let subFailed = 0;
-                        let highestObt = -1;
-                        let highestStudentName = "-";
-
-                        studentResults.forEach(s => {
-                            const val = s.subMarksMap[sub.name];
-                            if (val !== '-' && val !== undefined) {
-                                const num = parseInt(val) || 0;
-                                const subMin = (parseInt(sub.marks) * passCriteria) / 100;
-                                if (num >= subMin) subPassed++; else subFailed++;
-
-                                if (num > highestObt) {
-                                    highestObt = num;
-                                    highestStudentName = `${s.name} (${num}/${sub.marks})`;
-                                }
-                            }
-                        });
-
-                        const subTotalApp = subPassed + subFailed;
-                        const subPassPct = subTotalApp > 0 ? ((subPassed / subTotalApp) * 100).toFixed(0) : 0;
-
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-800/40";
-                        tr.innerHTML = `
-                            <td class="py-2.5 px-2.5 font-bold text-white uppercase text-[11px]">${sub.name} <span class="text-slate-500 font-normal">(${sub.marks})</span></td>
-                            <td class="py-2.5 px-2 text-center text-xs font-mono"><span class="text-emerald-400 font-bold">${subPassed}</span> / <span class="text-rose-400 font-bold">${subFailed}</span></td>
-                            <td class="py-2.5 px-2 text-center">
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <div class="w-14 bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
-                                        <div class="${subPassPct >= 70 ? 'bg-emerald-500' : (subPassPct >= 50 ? 'bg-amber-500' : 'bg-rose-500')} h-full" style="width: ${subPassPct}%"></div>
-                                    </div>
-                                    <span class="text-[11px] font-bold font-mono ${subPassPct >= 70 ? 'text-emerald-400' : 'text-amber-400'}">${subPassPct}%</span>
-                                </div>
-                            </td>
-                            <td class="py-2.5 px-2 text-center text-amber-300 font-semibold text-[10.5px] truncate max-w-[150px]" title="${highestStudentName}">${highestStudentName}</td>
-                        `;
-                        subTableBody.appendChild(tr);
-                    });
-                }
-
-            } catch (err) {
-                console.error("Error in loadAnalyticsData:", err);
+                window.renderRollNoSlips();
+            } catch(e) {
+                console.error("Error in loadDateSheetConfig:", e);
             }
         };
 
-        window.printAnalyticsReport = function() {
-            window.setPrintOrientation('portrait');
-            setTimeout(() => { window.print(); }, 250);
+        window.saveDateSheetConfig = function() {
+            const examSelect = document.getElementById('ds_examSelect');
+            const classSelect = document.getElementById('ds_classSelect');
+            const instructBox = document.getElementById('ds_customInstructions');
+
+            if (!examSelect || !classSelect) return;
+            const examId = examSelect.value;
+            const cls = classSelect.value;
+
+            const dsKey = `${examId}_${cls}`;
+            const scheduleMap = {};
+
+            const dateInputs = document.querySelectorAll('.ds-input-date');
+            const dayInputs = document.querySelectorAll('.ds-input-day');
+            const timeInputs = document.querySelectorAll('.ds-input-time');
+            const roomInputs = document.querySelectorAll('.ds-input-room');
+
+            dateInputs.forEach((inp, i) => {
+                const subName = inp.getAttribute('data-subject');
+                scheduleMap[subName] = {
+                    date: inp.value.trim(),
+                    day: dayInputs[i] ? dayInputs[i].value.trim() : '',
+                    time: timeInputs[i] ? timeInputs[i].value.trim() : '08:30 AM - 11:30 AM',
+                    room: roomInputs[i] ? roomInputs[i].value.trim() : 'Exam Hall'
+                };
+            });
+
+            dateSheetsDatabase[dsKey] = {
+                schedule: scheduleMap,
+                instructions: instructBox ? instructBox.value.trim() : ''
+            };
+
+            localStorage.setItem('ccs_datesheets_db', JSON.stringify(dateSheetsDatabase));
+            window.renderRollNoSlips();
+            alert(`Success: Date Sheet & Instructions for "${cls}" saved successfully!`);
+        };
+
+        window.renderRollNoSlips = function() {
+            try {
+                const examSelect = document.getElementById('ds_examSelect');
+                const classSelect = document.getElementById('ds_classSelect');
+                const studentSelect = document.getElementById('ds_studentSelect');
+                const container = document.getElementById('rollNoSlipsContainer');
+
+                if (!examSelect || !classSelect || !studentSelect || !container) return;
+
+                const examId = examSelect.value;
+                const cls = classSelect.value;
+                const rollVal = studentSelect.value;
+
+                container.innerHTML = '';
+
+                const exam = examsSetupList.find(e => e.id === examId);
+                if (!exam) return;
+
+                const dsKey = `${examId}_${cls}`;
+                const savedConfig = dateSheetsDatabase[dsKey] || {};
+                const subjects = exam.subjects || [];
+
+                const classStudents = studentsList.filter(s => s.class === cls && s.status !== 'Left');
+                if (classStudents.length === 0) {
+                    container.innerHTML = `<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500 font-medium">No active students enrolled in "${cls}".</div>`;
+                    return;
+                }
+
+                let studentsToRender = classStudents;
+                if (rollVal && rollVal !== "ALL") {
+                    studentsToRender = classStudents.filter(s => s.rollNo === rollVal);
+                }
+
+                const customRules = savedConfig.instructions || "1. Candidates must arrive at the examination hall 15 minutes before time.\n2. Mobile phones strictly prohibited.\n3. Bring original Roll No Slip and stationery.";
+                const rulesFormatted = customRules.split('\n').map(r => `<p class="leading-tight mb-0.5">• ${r.trim()}</p>`).join('');
+
+                // Render in pairs of 2 (2 Slips per A4 Page)
+                for (let i = 0; i < studentsToRender.length; i += 2) {
+                    const st1 = studentsToRender[i];
+                    const st2 = studentsToRender[i + 1];
+
+                    const generateSingleCardHtml = (st) => {
+                        if (!st) return '';
+
+                        let scheduleRows = '';
+                        subjects.forEach((sub, sIdx) => {
+                            const subSched = (savedConfig.schedule && savedConfig.schedule[sub.name]) ? savedConfig.schedule[sub.name] : {};
+                            const sDate = subSched.date || '-';
+                            const sDay = subSched.day || '-';
+                            const sTime = subSched.time || '08:30 AM - 11:30 AM';
+                            const sRoom = subSched.room || 'Exam Hall';
+
+                            scheduleRows += `
+                                <tr class="${sIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} border-b border-slate-300 text-slate-900">
+                                    <td class="py-1 px-2 text-center font-bold text-slate-700">${sIdx + 1}</td>
+                                    <td class="py-1 px-2.5 font-bold uppercase tracking-tight text-slate-950">${sub.name}</td>
+                                    <td class="py-1 px-2 text-center font-mono font-bold text-slate-900">${sDate}</td>
+                                    <td class="py-1 px-2 text-center font-semibold text-slate-700">${sDay}</td>
+                                    <td class="py-1 px-2 text-center font-mono text-[9px] text-slate-800">${sTime}</td>
+                                    <td class="py-1 px-2 text-center font-bold text-indigo-950">${sRoom}</td>
+                                    <td class="py-1 px-2 text-center border-l border-slate-300"></td>
+                                </tr>
+                            `;
+                        });
+
+                        return `
+                            <div class="roll-slip-half-card bg-white text-slate-900 rounded-2xl p-4 sm:p-5 shadow-lg border-2 border-slate-900 flex flex-col justify-between relative overflow-hidden">
+                                
+                                <div class="absolute inset-0 flex items-center justify-center opacity-[0.035] pointer-events-none z-0">
+                                    <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="Watermark" class="w-64 h-64 object-contain grayscale">
+                                </div>
+
+                                <div class="relative z-10">
+                                    <!-- Header -->
+                                    <div class="flex items-center justify-between pb-2 border-b-2 border-slate-900 gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-white p-0.5 border border-slate-800 flex items-center justify-center shadow flex-shrink-0">
+                                            <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
+                                        </div>
+                                        
+                                        <div class="text-center flex-1">
+                                            <h1 class="font-royal-title text-base sm:text-lg font-black text-slate-950 uppercase tracking-wide leading-tight">
+                                                Chenab College Shorkot
+                                            </h1>
+                                            <p class="font-royal-serif text-[9px] font-bold text-slate-700 uppercase tracking-widest">
+                                                OFFICIAL EXAMINATION ROLL NUMBER SLIP & ADMIT CARD
+                                            </p>
+                                            <span class="inline-block mt-0.5 px-3 py-0.5 bg-slate-950 text-white rounded-full text-[8.5px] font-black uppercase tracking-wider">
+                                                ${exam.name} (${exam.session})
+                                            </span>
+                                        </div>
+
+                                        <div class="w-16 flex-shrink-0 text-right">
+                                            <div class="border border-slate-300 rounded-lg p-1 text-center bg-slate-50">
+                                                <span class="text-[7.5px] font-bold text-slate-500 uppercase block">Roll No</span>
+                                                <span class="text-sm font-mono font-black text-indigo-950">${st.rollNo}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Candidate Info -->
+                                    <div class="grid grid-cols-4 gap-2 my-2 p-2 rounded-xl bg-slate-50 border border-slate-300 text-[10px] font-semibold text-slate-800">
+                                        <div>
+                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Candidate Name</span>
+                                            <span class="text-slate-950 font-black truncate block uppercase">${st.name}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Father Name</span>
+                                            <span class="text-slate-950 font-bold truncate block uppercase">${st.father}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Class & Section</span>
+                                            <span class="text-indigo-950 font-bold block uppercase">${st.class} — ${st.group}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Exam Center</span>
+                                            <span class="text-slate-950 font-bold block">College Campus</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Schedule Table -->
+                                    <div class="overflow-x-auto rounded-lg border border-slate-400 mb-2">
+                                        <table class="print-table w-full text-left text-[9px] border-collapse">
+                                            <thead>
+                                                <tr class="bg-slate-900 text-white font-bold uppercase text-[8px] tracking-wider">
+                                                    <th class="py-1 px-2 text-center w-8 border border-slate-700">Sr #</th>
+                                                    <th class="py-1 px-2.5 border border-slate-700">Subject Description</th>
+                                                    <th class="py-1 px-2 text-center w-24 border border-slate-700">Exam Date</th>
+                                                    <th class="py-1 px-2 text-center w-20 border border-slate-700">Day</th>
+                                                    <th class="py-1 px-2 text-center w-28 border border-slate-700">Paper Timing</th>
+                                                    <th class="py-1 px-2 text-center w-20 border border-slate-700">Room / Hall</th>
+                                                    <th class="py-1 px-2 text-center w-24 border border-slate-700">Invigilator Sign</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${scheduleRows}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Candidate Rules & Footer Signatures -->
+                                <div class="relative z-10 pt-1 border-t border-slate-300">
+                                    <div class="p-1.5 bg-slate-50 rounded-lg border border-slate-200 text-[8px] text-slate-700 font-semibold mb-2">
+                                        <span class="font-bold text-slate-900 uppercase block mb-0.5">Examination Instructions & Code of Conduct:</span>
+                                        ${rulesFormatted}
+                                    </div>
+
+                                    <div class="flex justify-between items-end text-[9px] text-slate-900 font-bold px-2">
+                                        <div class="text-center">
+                                            <div class="w-28 border-b border-slate-900 mb-1"></div>
+                                            <span>Candidate Signature</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-28 border-b border-slate-900 mb-1"></div>
+                                            <span>Class Incharge</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-28 border-b border-slate-900 mb-1"></div>
+                                            <span>Controller of Examinations</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        `;
+                    };
+
+                    const pageWrapper = document.createElement('div');
+                    pageWrapper.className = "roll-slip-page-wrapper max-w-4xl mx-auto space-y-4";
+                    pageWrapper.innerHTML = `
+                        ${generateSingleCardHtml(st1)}
+                        ${st2 ? `
+                            <div class="relative flex items-center justify-center my-1 no-print">
+                                <div class="border-b-2 border-dashed border-slate-400 w-full"></div>
+                                <span class="bg-slate-800 text-slate-400 text-[10px] px-3 py-0.5 rounded-full font-bold absolute flex items-center gap-1">
+                                    <i class="fa-solid fa-scissors"></i> Cut Here (Scissors Line)
+                                </span>
+                            </div>
+                            ${generateSingleCardHtml(st2)}
+                        ` : ''}
+                    `;
+                    container.appendChild(pageWrapper);
+                }
+
+            } catch(e) {
+                console.error("Error in renderRollNoSlips:", e);
+            }
+        };
+
+        window.printAllRollNoSlips = function() {
+            const sel = document.getElementById('ds_studentSelect');
+            if (sel) sel.value = "ALL";
+            window.renderRollNoSlips();
+            window.printPortraitView();
+        };
+
+        window.printDateSheetNotice = function() {
+            window.printPortraitView();
         };
 
         // ================= TAB 7: COMBINED RESULT LOGIC =================
