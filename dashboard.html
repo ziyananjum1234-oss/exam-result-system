@@ -15,6 +15,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- DYNAMIC PRINT ORIENTATION INJECTOR -->
+    <style id="dynamicPrintStyle">
+        @page { size: A4 landscape; margin: 6mm; }
+    </style>
+
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-royal-title { font-family: 'Cinzel Decorative', 'Cinzel', serif; }
@@ -22,11 +27,6 @@
         
         aside::-webkit-scrollbar { width: 4px; }
         aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-
-        @page {
-            size: A4 portrait;
-            margin: 8mm;
-        }
 
         @media print {
             body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
@@ -57,7 +57,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
 
-    <!-- 1. SIDEBAR MENU (ALL 7 BUTTONS) -->
+    <!-- 1. SIDEBAR MENU -->
     <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between flex-shrink-0 no-print overflow-y-auto max-h-screen">
         <div>
             <!-- Chenab College Logo & Branding -->
@@ -71,7 +71,7 @@
                 </div>
             </div>
 
-            <!-- ALL 7 NAVIGATION BUTTONS -->
+            <!-- ALL NAVIGATION BUTTONS -->
             <nav class="space-y-1.5">
                 <!-- 1. Student Enrollment -->
                 <button type="button" id="navEnrollBtn" onclick="window.showTab('enrollment')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition-all text-left">
@@ -97,19 +97,25 @@
                     <span>Marks Entry</span>
                 </button>
 
-                <!-- 5. Consolidative Result Sheet -->
+                <!-- 5. Consolidative Gazette (Landscape Sheet) -->
                 <button type="button" id="navConsolidatedBtn" onclick="window.showTab('consolidated')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
-                    <i class="fa-solid fa-square-poll-vertical text-xs w-4 text-center text-amber-400"></i>
-                    <span>Consolidative Sheet</span>
+                    <i class="fa-solid fa-table text-xs w-4 text-center text-amber-400"></i>
+                    <span>Consolidative Gazette</span>
                 </button>
 
-                <!-- 6. Single Exam Result Card / DMC -->
+                <!-- 6. DEDICATED SEPARATE TAB: Result Summary & Graphs -->
+                <button type="button" id="navAnalyticsBtn" onclick="window.showTab('resultAnalytics')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-bold text-xs transition-all text-left border border-amber-500/20 bg-amber-500/5">
+                    <i class="fa-solid fa-chart-pie text-xs w-4 text-center text-amber-400"></i>
+                    <span class="text-amber-300">Result Summary & Graphs</span>
+                </button>
+
+                <!-- 7. Single Exam Result Card / DMC -->
                 <button type="button" id="navDmcBtn" onclick="window.showTab('dmc')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
                     <i class="fa-solid fa-graduation-cap text-xs w-4 text-center text-pink-400"></i>
                     <span>Result Card / DMC</span>
                 </button>
 
-                <!-- 7. Combined Multi-Term Result -->
+                <!-- 8. Combined Multi-Term Result -->
                 <button type="button" id="navCombinedBtn" onclick="window.showTab('combined')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
                     <i class="fa-solid fa-layer-group text-xs w-4 text-center text-cyan-400"></i>
                     <span class="font-bold">Combined Result</span>
@@ -229,7 +235,7 @@
         <div id="classListSection" class="hidden">
             <div class="no-print flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
                 <h2 class="text-xl font-bold text-white">Class Wise Students List</h2>
-                <button type="button" onclick="window.print()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print List (PDF)</button>
+                <button type="button" onclick="window.printPortraitView()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print List (Portrait PDF)</button>
             </div>
             <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 flex gap-4">
                 <select id="filterClass" onchange="window.renderClassWiseList()" class="px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white"><option value="All">All Classes</option><option value="Class 10" selected>Class 10</option><option value="Class 9">Class 9</option></select>
@@ -280,7 +286,7 @@
 
         <!-- ================= TAB 4: MARKS ENTRY ================= -->
         <div id="marksEntrySection" class="hidden">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800"><h2 class="text-xl font-bold text-white">Subject-Wise Marks Entry</h2><button type="button" onclick="window.printBlankMasterSheet()" class="px-4 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl shadow-lg">Print Blank Sheet</button></div>
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800"><h2 class="text-xl font-bold text-white">Subject-Wise Marks Entry</h2><button type="button" onclick="window.printBlankMasterSheet()" class="px-4 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl shadow-lg">Print Blank Sheet (Landscape)</button></div>
             <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div><label class="block text-xs font-semibold text-slate-300 mb-1">Select Exam</label><select id="me_examSelect" onchange="window.onExamOrClassChange()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white"></select></div>
                 <div><label class="block text-xs font-semibold text-slate-300 mb-1">Select Class</label><select id="me_classSelect" onchange="window.onExamOrClassChange()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white"><option value="Class 10" selected>Class 10</option><option value="Class 9">Class 9</option></select></div>
@@ -292,17 +298,18 @@
             </div>
         </div>
 
-        <!-- ================= TAB 5: CONSOLIDATIVE RESULT SHEET & WORLD-CLASS ANALYTICS ================= -->
+        <!-- ================= TAB 5: CONSOLIDATIVE GAZETTE (AUTO-LANDSCAPE PRINT) ================= -->
         <div id="consolidatedSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Consolidative Result Gazette & Executive Analytics</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Multi-Color Performance Graphs & Detailed Gazette</p>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Consolidative Result Gazette (Full Matrix)</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Official Multi-Subject Class Gazette (A4 Landscape Print)</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2.5">
+                    <button type="button" onclick="window.showTab('resultAnalytics')" class="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-chart-pie"></i> View Graphs & Summary 📊</button>
                     <button type="button" onclick="window.exportConsolidatedExcel()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2"><i class="fa-solid fa-file-export text-emerald-400"></i> Export Excel</button>
                     <button type="button" onclick="window.printBlankMasterSheet()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-file-signature"></i> Blank Sheet</button>
-                    <button type="button" onclick="window.printCalculatedGazette()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-2"><i class="fa-solid fa-print"></i> Print Gazette (PDF)</button>
+                    <button type="button" onclick="window.printCalculatedGazette()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-2"><i class="fa-solid fa-print"></i> Print Gazette (Landscape)</button>
                 </div>
             </div>
 
@@ -333,8 +340,94 @@
                 </div>
             </div>
 
-            <!-- EXECUTIVE ANALYTICS DASHBOARD & COLORED GRAPHS (WORLD-CLASS DESIGN) -->
-            <div id="analyticsDashboardContainer" class="no-print space-y-6 mb-8">
+            <!-- PRINTABLE CONSOLIDATIVE GAZETTE (A4 LANDSCAPE) -->
+            <div class="print-paper bg-white text-slate-900 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-200">
+                <div class="border-b-2 border-slate-900 pb-5 mb-5 flex items-center justify-between gap-4">
+                    <div class="w-20 h-20 flex-shrink-0 flex items-center justify-center">
+                        <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
+                    </div>
+                    <div class="text-center flex-1">
+                        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-950">Chenab College Shorkot</h1>
+                        <p class="text-sm font-black text-slate-800 uppercase tracking-widest mt-1" id="cr_docTitle">CONSOLIDATIVE RESULT SHEET & GAZETTE</p>
+                        <div class="flex justify-center items-center gap-6 text-xs font-semibold text-slate-700 mt-2">
+                            <span>Exam: <b id="cr_printExamTitle" class="text-slate-950 font-bold">Annual Exam</b></span>
+                            <span>Class: <b id="cr_printClassTitle" class="text-slate-950 font-bold underline">Class 10</b></span>
+                            <span>Session: <b>2025-2026</b></span>
+                            <span>Date: <b id="cr_printDate">-</b></span>
+                        </div>
+                    </div>
+                    <div class="w-20 flex-shrink-0"></div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="print-table w-full text-left text-xs">
+                        <thead id="consolidatedTableHead" class="bg-slate-100 text-slate-900 font-bold uppercase border-b-2 border-slate-800"></thead>
+                        <tbody id="consolidatedTableBody" class="divide-y divide-slate-300 text-slate-800"></tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Signatures -->
+                <div class="mt-8 pt-4 border-t-2 border-slate-800">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-10">
+                        <span>Total Candidates: <b id="cr_footTotal" class="text-slate-950 font-black">0</b></span>
+                        <span>Passed: <b id="cr_footPassed" class="text-emerald-700">0</b> | Failed: <b id="cr_footFailed" class="text-rose-700">0</b></span>
+                        <span>Class Pass: <b id="cr_footPct" class="text-indigo-950 font-black">0%</b></span>
+                    </div>
+
+                    <div class="flex justify-between items-end text-xs text-slate-800 font-bold px-4">
+                        <div class="text-center"><div class="w-48 border-b-2 border-slate-900 mb-2"></div><span>Class Incharge</span></div>
+                        <div class="text-center"><div class="w-48 border-b-2 border-slate-900 mb-2"></div><span>Section Head</span></div>
+                        <div class="text-center"><div class="w-48 border-b-2 border-slate-900 mb-2"></div><span>Principal Signature</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 6: DEDICATED SEPARATE TAB — RESULT SUMMARY & GRAPHS ================= -->
+        <div id="resultAnalyticsSection" class="hidden">
+            <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-amber-400"></i> Class Performance Summary & Visual Analytics
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Multi-Color Grade Distribution, Subject Matrix & Merit Podium</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" onclick="window.showTab('consolidated')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2"><i class="fa-solid fa-table"></i> Back to Gazette Table</button>
+                    <button type="button" onclick="window.printAnalyticsReport()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print Executive Summary (PDF)</button>
+                </div>
+            </div>
+
+            <!-- Filter Controls for Analytics -->
+            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Exam for Summary *</label>
+                    <select id="ana_examSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Class *</label>
+                    <select id="ana_classSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
+                        <option value="Class 10" selected>Class 10</option>
+                        <option value="Class 9">Class 9</option>
+                        <option value="Class 8">Class 8</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="button" onclick="window.loadAnalyticsData()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate"></i> Refresh Analytics
+                    </button>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE ANALYTICS DASHBOARD (PRINTABLE & VISUAL) -->
+            <div class="print-paper space-y-6">
+                
+                <!-- Print Letterhead Header for Analytics Report -->
+                <div class="hidden print:block text-center border-b-2 border-slate-900 pb-4 mb-4">
+                    <h1 class="text-2xl font-black uppercase text-slate-950">Chenab College Shorkot</h1>
+                    <p class="text-xs font-bold uppercase text-slate-700">Executive Academic Performance & Result Summary Report</p>
+                </div>
+
                 <!-- 1. Top 5 KPI Summary Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
                     <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-4 rounded-2xl shadow-lg">
@@ -450,51 +543,9 @@
 
                 </div>
             </div>
-
-            <!-- PRINTABLE CONSOLIDATIVE GAZETTE -->
-            <div class="print-paper bg-white text-slate-900 rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-200">
-                <div class="border-b-2 border-slate-900 pb-5 mb-5 flex items-center justify-between gap-4">
-                    <div class="w-20 h-20 flex-shrink-0 flex items-center justify-center">
-                        <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
-                    </div>
-                    <div class="text-center flex-1">
-                        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-950">Chenab College Shorkot</h1>
-                        <p class="text-sm font-black text-slate-800 uppercase tracking-widest mt-1" id="cr_docTitle">CONSOLIDATIVE RESULT SHEET & GAZETTE</p>
-                        <div class="flex justify-center items-center gap-6 text-xs font-semibold text-slate-700 mt-2">
-                            <span>Exam: <b id="cr_printExamTitle" class="text-slate-950 font-bold">Annual Exam</b></span>
-                            <span>Class: <b id="cr_printClassTitle" class="text-slate-950 font-bold underline">Class 10</b></span>
-                            <span>Session: <b>2025-2026</b></span>
-                            <span>Date: <b id="cr_printDate">-</b></span>
-                        </div>
-                    </div>
-                    <div class="w-20 flex-shrink-0"></div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="print-table w-full text-left text-xs">
-                        <thead id="consolidatedTableHead" class="bg-slate-100 text-slate-900 font-bold uppercase border-b-2 border-slate-800"></thead>
-                        <tbody id="consolidatedTableBody" class="divide-y divide-slate-300 text-slate-800"></tbody>
-                    </table>
-                </div>
-
-                <!-- Footer Signatures -->
-                <div class="mt-8 pt-4 border-t-2 border-slate-800">
-                    <div class="flex justify-between items-center text-xs font-bold text-slate-800 mb-10">
-                        <span>Total Candidates: <b id="cr_footTotal" class="text-slate-950 font-black">0</b></span>
-                        <span>Passed: <b id="cr_footPassed" class="text-emerald-700">0</b> | Failed: <b id="cr_footFailed" class="text-rose-700">0</b></span>
-                        <span>Class Pass: <b id="cr_footPct" class="text-indigo-950 font-black">0%</b></span>
-                    </div>
-
-                    <div class="flex justify-between items-end text-xs text-slate-800 font-bold px-4">
-                        <div class="text-center"><div class="w-44 border-b-2 border-slate-900 mb-2"></div><span>Class Incharge</span></div>
-                        <div class="text-center"><div class="w-44 border-b-2 border-slate-900 mb-2"></div><span>Section Head</span></div>
-                        <div class="text-center"><div class="w-44 border-b-2 border-slate-900 mb-2"></div><span>Principal Signature</span></div>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- ================= TAB 6: SINGLE EXAM RESULT CARD / DMC ================= -->
+        <!-- ================= TAB 7: SINGLE EXAM RESULT CARD / DMC ================= -->
         <div id="dmcSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -503,7 +554,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="button" onclick="window.printAllClassDMCs()" class="px-5 py-2.5 bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Bulk Print All DMCs</button>
-                    <button type="button" onclick="window.print()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print This DMC</button>
+                    <button type="button" onclick="window.printPortraitView()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print This DMC</button>
                 </div>
             </div>
 
@@ -516,7 +567,7 @@
             <div id="dmcCardsContainer" class="space-y-10"></div>
         </div>
 
-        <!-- ================= TAB 7: COMBINED RESULT (MULTI-TERM) ================= -->
+        <!-- ================= TAB 8: COMBINED RESULT (MULTI-TERM) ================= -->
         <div id="combinedSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -525,7 +576,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="button" onclick="window.printAllCombinedDMCs()" class="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Bulk Print All Combined DMCs</button>
-                    <button type="button" onclick="window.print()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print Combined DMC</button>
+                    <button type="button" onclick="window.printPortraitView()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print Combined DMC</button>
                 </div>
             </div>
 
@@ -565,6 +616,19 @@
             { name: "Urdu", marks: 100 },
             { name: "Computer Science", marks: 100 }
         ];
+
+        // DYNAMIC ORIENTATION HELPER
+        window.setPrintOrientation = function(orientation) {
+            const styleEl = document.getElementById('dynamicPrintStyle');
+            if (styleEl) {
+                styleEl.innerHTML = `@page { size: A4 ${orientation} !important; margin: ${orientation === 'landscape' ? '6mm' : '8mm'} !important; }`;
+            }
+        };
+
+        window.printPortraitView = function() {
+            window.setPrintOrientation('portrait');
+            setTimeout(() => { window.print(); }, 250);
+        };
 
         function initDataStore() {
             try { studentsList = JSON.parse(localStorage.getItem('ccs_students_list')) || []; } catch (e) { studentsList = []; }
@@ -648,6 +712,7 @@
                     'examSetup': 'examSetupSection',
                     'marksEntry': 'marksEntrySection',
                     'consolidated': 'consolidatedSection',
+                    'resultAnalytics': 'resultAnalyticsSection',
                     'dmc': 'dmcSection',
                     'combined': 'combinedSection'
                 };
@@ -658,6 +723,7 @@
                     'examSetup': 'navExamBtn',
                     'marksEntry': 'navMarksBtn',
                     'consolidated': 'navConsolidatedBtn',
+                    'resultAnalytics': 'navAnalyticsBtn',
                     'dmc': 'navDmcBtn',
                     'combined': 'navCombinedBtn'
                 };
@@ -683,6 +749,7 @@
                 else if (tabName === 'examSetup') { window.renderSubjectRows(); window.renderExamsTable(); }
                 else if (tabName === 'marksEntry') { window.populateExamDropdown(); window.onExamOrClassChange(); }
                 else if (tabName === 'consolidated') { window.populateConsolidatedDropdowns(); window.generateConsolidatedSheet(false); }
+                else if (tabName === 'resultAnalytics') { window.populateAnalyticsDropdowns(); window.loadAnalyticsData(); }
                 else if (tabName === 'dmc') { window.populateDmcDropdowns(); window.onDmcExamOrClassChange(); }
                 else if (tabName === 'combined') { window.onCombinedClassChange(); }
             } catch (err) {
@@ -690,7 +757,7 @@
             }
         };
 
-        // ================= 5. CONSOLIDATIVE RESULT SHEET & WORLD-CLASS ANALYTICS ENGINE =================
+        // ================= 5. CONSOLIDATIVE GAZETTE (A4 LANDSCAPE) =================
         window.populateConsolidatedDropdowns = function() {
             const select = document.getElementById('cr_examSelect');
             if (!select) return;
@@ -768,7 +835,6 @@
 
                 if (classStudents.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="${10 + subjects.length}" class="text-center py-6 text-slate-500 font-medium">No active students enrolled in "${selectedClass}".</td></tr>`;
-                    window.renderAnalyticsVisuals([], [], 33);
                     return;
                 }
 
@@ -879,17 +945,128 @@
                         tbody.appendChild(tr);
                     });
 
-                    // Render World-Class Graphs & Analytics
-                    window.renderAnalyticsVisuals(studentResults, subjects, passCriteria);
+                    // Footer stats
+                    document.getElementById('cr_footTotal').textContent = studentResults.length;
+                    document.getElementById('cr_footPassed').textContent = passedCount;
+                    document.getElementById('cr_footFailed').textContent = failedCount;
+                    document.getElementById('cr_footPct').textContent = studentResults.length > 0 ? `${((passedCount / studentResults.length) * 100).toFixed(0)}%` : '0%';
                 }
             } catch (e) {
                 console.error("Error in generateConsolidatedSheet:", e);
             }
         };
 
-        // RENDER WORLD-CLASS ANALYTICS & MULTI-COLOR GRAPHS
-        window.renderAnalyticsVisuals = function(studentResults, subjects, passCriteria) {
+        // AUTO-LANDSCAPE PRINT HANDLERS FOR GAZETTE
+        window.printBlankMasterSheet = function() {
+            window.showTab('consolidated');
+            window.generateConsolidatedSheet(true);
+            window.setPrintOrientation('landscape');
+            setTimeout(() => { window.print(); }, 350);
+        };
+
+        window.printCalculatedGazette = function() {
+            window.showTab('consolidated');
+            window.generateConsolidatedSheet(false);
+            window.setPrintOrientation('landscape');
+            setTimeout(() => { window.print(); }, 350);
+        };
+
+        window.exportConsolidatedExcel = function() {
+            if (!currentConsolidatedRows || currentConsolidatedRows.length === 0) { alert('No consolidated data to export!'); return; }
+            if (typeof XLSX === 'undefined') { alert('Excel library loading...'); return; }
+
+            const exportData = currentConsolidatedRows.map((s, idx) => {
+                const row = { "Sr #": idx + 1, "Roll No": s.rollNo, "Student Name": s.name, "Father Name": s.father };
+                for (const [sub, val] of Object.entries(s.subMarksMap)) { row[sub] = val; }
+                row["Total Marks"] = s.totalMaxMarks;
+                row["Obtained Marks"] = s.totalObt;
+                row["Percentage (%)"] = s.percentage + '%';
+                row["Grade"] = s.grade;
+                row["Status"] = s.status;
+                row["Position"] = s.position;
+                return row;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Consolidated_Gazette");
+            XLSX.writeFile(wb, "Chenab_College_Consolidated_Result.xlsx");
+        };
+
+        // ================= 6. DEDICATED SEPARATE TAB: RESULT SUMMARY & VISUAL ANALYTICS =================
+        window.populateAnalyticsDropdowns = function() {
+            const select = document.getElementById('ana_examSelect');
+            if (!select) return;
+            select.innerHTML = '';
+            examsSetupList.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.id;
+                opt.textContent = `${ex.name} (${ex.session})`;
+                select.appendChild(opt);
+            });
+        };
+
+        window.loadAnalyticsData = function() {
             try {
+                const examId = document.getElementById('ana_examSelect').value;
+                const cls = document.getElementById('ana_classSelect').value;
+                const exam = examsSetupList.find(e => e.id === examId);
+                if (!exam) return;
+
+                const passCriteria = exam.passPct || 33;
+                const subjects = exam.subjects || [];
+                const classStudents = studentsList.filter(s => s.class === cls && s.status !== 'Left');
+                const totalMaxMarks = subjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
+
+                let studentResults = [];
+
+                classStudents.forEach(s => {
+                    const key = `${examId}_${s.rollNo}`;
+                    const savedMarks = marksDatabase[key] || {};
+
+                    let totalObt = 0;
+                    let isSubjectFail = false;
+                    let hasMarks = false;
+                    let subMarksMap = {};
+
+                    subjects.forEach(sub => {
+                        const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
+                        if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
+                        totalObt += obt;
+                        subMarksMap[sub.name] = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? savedMarks[sub.name] : '-';
+
+                        const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                        if (obt < subPassMin) isSubjectFail = true;
+                    });
+
+                    const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
+
+                    let grade = 'F';
+                    if (percentage >= 80) grade = 'A+';
+                    else if (percentage >= 70) grade = 'A';
+                    else if (percentage >= 60) grade = 'B';
+                    else if (percentage >= 50) grade = 'C';
+                    else if (percentage >= 40) grade = 'D';
+                    else grade = 'E';
+
+                    const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
+                    if (!isPass) grade = 'F';
+
+                    studentResults.push({
+                        rollNo: s.rollNo,
+                        name: s.name,
+                        father: s.father,
+                        gender: s.gender,
+                        subMarksMap,
+                        totalMaxMarks,
+                        totalObt,
+                        percentage,
+                        grade,
+                        status: isPass ? 'PASS' : 'FAIL',
+                        hasMarks
+                    });
+                });
+
                 const totalAppeared = studentResults.length;
                 const passedStudents = studentResults.filter(s => s.status === 'PASS').sort((a, b) => b.totalObt - a.totalObt);
                 const passedCount = passedStudents.length;
@@ -900,7 +1077,7 @@
                 const sumPct = studentResults.reduce((acc, s) => acc + s.percentage, 0);
                 const classAvg = totalAppeared > 0 ? (sumPct / totalAppeared).toFixed(1) : 0;
 
-                // 1. Update KPI Numbers
+                // 1. KPI Numbers
                 document.getElementById('ana_totalStudents').textContent = totalAppeared;
                 document.getElementById('ana_passedCount').textContent = passedCount;
                 document.getElementById('ana_failedCount').textContent = failedCount;
@@ -915,12 +1092,6 @@
                     document.getElementById('ana_highestScore').textContent = "-";
                     document.getElementById('ana_highestStudent').textContent = "-";
                 }
-
-                // Footer stats
-                document.getElementById('cr_footTotal').textContent = totalAppeared;
-                document.getElementById('cr_footPassed').textContent = passedCount;
-                document.getElementById('cr_footFailed').textContent = failedCount;
-                document.getElementById('cr_footPct').textContent = `${passPct}%`;
 
                 // 2. Top 3 Spotlight Podium Cards
                 const podiumContainer = document.getElementById('topHoldersPodiumContainer');
@@ -1051,42 +1222,13 @@
                 }
 
             } catch (err) {
-                console.error("Analytics render error:", err);
+                console.error("Error in loadAnalyticsData:", err);
             }
         };
 
-        window.printBlankMasterSheet = function() {
-            window.showTab('consolidated');
-            window.generateConsolidatedSheet(true);
-            setTimeout(() => { window.print(); }, 350);
-        };
-
-        window.printCalculatedGazette = function() {
-            window.showTab('consolidated');
-            window.generateConsolidatedSheet(false);
-            setTimeout(() => { window.print(); }, 350);
-        };
-
-        window.exportConsolidatedExcel = function() {
-            if (!currentConsolidatedRows || currentConsolidatedRows.length === 0) { alert('No consolidated data to export!'); return; }
-            if (typeof XLSX === 'undefined') { alert('Excel library loading...'); return; }
-
-            const exportData = currentConsolidatedRows.map((s, idx) => {
-                const row = { "Sr #": idx + 1, "Roll No": s.rollNo, "Student Name": s.name, "Father Name": s.father };
-                for (const [sub, val] of Object.entries(s.subMarksMap)) { row[sub] = val; }
-                row["Total Marks"] = s.totalMaxMarks;
-                row["Obtained Marks"] = s.totalObt;
-                row["Percentage (%)"] = s.percentage + '%';
-                row["Grade"] = s.grade;
-                row["Status"] = s.status;
-                row["Position"] = s.position;
-                return row;
-            });
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Consolidated_Gazette");
-            XLSX.writeFile(wb, "Chenab_College_Consolidated_Result.xlsx");
+        window.printAnalyticsReport = function() {
+            window.setPrintOrientation('portrait');
+            setTimeout(() => { window.print(); }, 250);
         };
 
         // 1. ENROLLMENT
@@ -1301,7 +1443,7 @@
             alert('Marks Saved Successfully!');
         };
 
-        // 6. SINGLE DMC
+        // 7. SINGLE DMC
         window.populateDmcDropdowns = function() {
             const sel = document.getElementById('dmc_examSelect');
             if (!sel) return; sel.innerHTML = '';
@@ -1360,9 +1502,13 @@
                 `;
             });
         };
-        window.printAllClassDMCs = function() { document.getElementById('dmc_studentSelect').value = "ALL"; window.renderDmcCards(); setTimeout(() => { window.print(); }, 350); };
+        window.printAllClassDMCs = function() { 
+            document.getElementById('dmc_studentSelect').value = "ALL"; 
+            window.renderDmcCards(); 
+            window.printPortraitView();
+        };
 
-        // 7. COMBINED RESULT
+        // 8. COMBINED RESULT
         window.onCombinedClassChange = function() {
             const cls = document.getElementById('comb_classSelect').value;
             const finalSel = document.getElementById('comb_finalExamSelect');
@@ -1407,7 +1553,10 @@
                 </div>
             `;
         };
-        window.printAllCombinedDMCs = function() { window.renderCombinedDMC(); setTimeout(() => { window.print(); }, 350); };
+        window.printAllCombinedDMCs = function() { 
+            window.renderCombinedDMC(); 
+            window.printPortraitView();
+        };
 
         // INITIAL LOAD
         window.addEventListener('DOMContentLoaded', () => {
