@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-            <!-- ALL NAVIGATION BUTTONS -->
+            <!-- ALL 9 NAVIGATION BUTTONS -->
             <nav class="space-y-1.5" id="mainSidebarNav">
                 <!-- 1. Student Enrollment -->
                 <button type="button" id="navEnrollBtn" onclick="window.showTab('enrollment')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition-all text-left">
@@ -116,10 +116,10 @@
                     <span>Exam Setup</span>
                 </button>
 
-                <!-- 4. NEW: Date Sheet & Roll No Slips -->
-                <button type="button" id="navDateSheetBtn" onclick="window.showTab('dateSheet')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-semibold text-xs transition-all text-left border border-violet-500/20 bg-violet-500/5">
+                <!-- 4. Roll No Slips & Date Sheet -->
+                <button type="button" id="navDateSheetBtn" onclick="window.showTab('dateSheet')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-violet-300 hover:text-white hover:bg-violet-600/30 font-bold text-xs transition-all text-left border border-violet-500/40 bg-violet-950/30 shadow-md">
                     <i class="fa-solid fa-id-card-clip text-xs w-4 text-center text-violet-400"></i>
-                    <span class="text-violet-300">Roll No Slips & Date Sheet</span>
+                    <span>Roll No Slips & Date Sheet</span>
                 </button>
 
                 <!-- 5. Marks Entry -->
@@ -579,7 +579,7 @@
             </div>
         </div>
 
-        <!-- ================= TAB 4: DATE SHEET & ROLL NUMBER SLIPS (NEW DYNAMIC MODULE) ================= -->
+        <!-- ================= TAB 4: DATE SHEET & ROLL NUMBER SLIPS ================= -->
         <div id="dateSheetSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
@@ -921,11 +921,11 @@
             <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Exam for Summary *</label>
-                    <select id="ana_examSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white"></select>
+                    <select id="ana_examSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 font-semibold"></select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Class *</label>
-                    <select id="ana_classSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
+                    <select id="ana_classSelect" onchange="window.loadAnalyticsData()" class="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 font-semibold">
                         <!-- Populated Dynamically -->
                     </select>
                 </div>
@@ -1325,9 +1325,39 @@
             return list;
         };
 
+        // UNIFIED MASTER EXAM DROPDOWNS REFRESH ENGINE (Fixes exam selection everywhere!)
+        window.refreshAllExamDropdowns = function() {
+            const dropdownIds = ['me_examSelect', 'cr_examSelect', 'ana_examSelect', 'dmc_examSelect', 'ds_examSelect', 'comb_finalExamSelect'];
+            
+            dropdownIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                const curVal = el.value;
+                el.innerHTML = '';
+
+                if (!examsSetupList || examsSetupList.length === 0) {
+                    el.innerHTML = '<option value="">No Exams Defined Yet</option>';
+                    return;
+                }
+
+                examsSetupList.forEach((ex, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = ex.id;
+                    opt.textContent = `${ex.name} (${ex.session})`;
+                    if (curVal && ex.id === curVal) opt.selected = true;
+                    else if (!curVal && idx === 0) opt.selected = true;
+                    el.appendChild(opt);
+                });
+            });
+        };
+
         window.refreshAllClassAndSectionDropdowns = function() {
             const classes = window.getUniqueClasses();
             const sections = window.getUniqueSections();
+
+            // Refresh all Exams first
+            window.refreshAllExamDropdowns();
 
             // 1. Enrollment Form Class Select
             const sClassSelect = document.getElementById('s_class');
@@ -1574,16 +1604,19 @@
                 if (targetSec) targetSec.classList.remove('hidden');
                 if (targetBtn) targetBtn.className = activeStyle;
 
+                // Refresh exams everywhere
+                window.refreshAllExamDropdowns();
+
                 // Safe execution of view loaders
                 try {
                     if (tabName === 'enrollment') window.renderStudentsTable();
                     else if (tabName === 'classList') window.renderClassWiseList();
                     else if (tabName === 'examSetup') { window.renderSubjectRows(); window.renderExamsTable(); }
-                    else if (tabName === 'dateSheet') { window.populateDateSheetDropdowns(); window.loadDateSheetConfig(); }
-                    else if (tabName === 'marksEntry') { window.populateExamDropdown(); window.onExamOrClassChange(); }
-                    else if (tabName === 'consolidated') { window.populateConsolidatedDropdowns(); window.generateConsolidatedSheet(false); }
-                    else if (tabName === 'resultAnalytics') { window.populateAnalyticsDropdowns(); window.loadAnalyticsData(); }
-                    else if (tabName === 'dmc') { window.populateDmcDropdowns(); window.onDmcExamOrClassChange(); }
+                    else if (tabName === 'dateSheet') { window.loadDateSheetConfig(); }
+                    else if (tabName === 'marksEntry') { window.onExamOrClassChange(); }
+                    else if (tabName === 'consolidated') { window.generateConsolidatedSheet(false); }
+                    else if (tabName === 'resultAnalytics') { window.loadAnalyticsData(); }
+                    else if (tabName === 'dmc') { window.onDmcExamOrClassChange(); }
                     else if (tabName === 'combined') { window.onCombinedClassChange(); }
                 } catch(renderErr) {
                     console.warn("Render issue on tab: " + tabName, renderErr);
@@ -1593,969 +1626,86 @@
             }
         };
 
-        // ================= TAB 4: DATE SHEET & ROLL NO SLIPS (NEW DYNAMIC MODULE) =================
-        window.populateDateSheetDropdowns = function() {
-            const exSelect = document.getElementById('ds_examSelect');
-            if (!exSelect) return;
-            exSelect.innerHTML = '';
-
-            if (!examsSetupList || examsSetupList.length === 0) {
-                exSelect.innerHTML = '<option value="">No Exams Defined Yet</option>';
-                return;
-            }
-
-            examsSetupList.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.id;
-                opt.textContent = `${ex.name} (${ex.session})`;
-                exSelect.appendChild(opt);
-            });
-        };
-
-        window.loadDateSheetConfig = function() {
+        // ================= DEDICATED TAB: RESULT ANALYTICS & VISUAL GRAPHS =================
+        window.loadAnalyticsData = function() {
             try {
-                const examSelect = document.getElementById('ds_examSelect');
-                const classSelect = document.getElementById('ds_classSelect');
-                const studentSelect = document.getElementById('ds_studentSelect');
-                const tbody = document.getElementById('dateSheetScheduleTableBody');
-                const instructBox = document.getElementById('ds_customInstructions');
+                const examSelect = document.getElementById('ana_examSelect');
+                const classSelect = document.getElementById('ana_classSelect');
 
-                if (!examSelect || !classSelect || !studentSelect || !tbody) return;
+                if (!examSelect || !classSelect) return;
+
+                if (examSelect.options.length === 0) {
+                    window.refreshAllExamDropdowns();
+                }
 
                 const examId = examSelect.value;
-                const cls = classSelect.value;
+                const selectedClass = classSelect.value;
 
-                tbody.innerHTML = '';
-                studentSelect.innerHTML = '';
-
-                const exam = examsSetupList.find(e => e.id === examId);
+                const exam = examsSetupList.find(e => e.id === examId) || examsSetupList[0];
                 if (!exam) return;
-
-                const activeStudents = studentsList.filter(s => s.class === cls && s.status !== 'Left');
-                if (activeStudents.length === 0) {
-                    studentSelect.innerHTML = '<option value="">No active students in this class</option>';
-                } else {
-                    const optAll = document.createElement('option');
-                    optAll.value = "ALL";
-                    optAll.textContent = `⭐ Bulk Print All Class Roll No Slips (${activeStudents.length} Students)`;
-                    studentSelect.appendChild(optAll);
-
-                    activeStudents.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.rollNo;
-                        opt.textContent = `Roll #${s.rollNo} - ${s.name} (${s.group})`;
-                        studentSelect.appendChild(opt);
-                    });
-                }
-
-                const dsKey = `${examId}_${cls}`;
-                const savedConfig = dateSheetsDatabase[dsKey] || {};
-                const subjects = exam.subjects || [];
-
-                const defaultInstructions = "1. Candidates must arrive at the examination center 15 minutes before the paper.\n2. Mobile phones, programmable calculators and electronic devices are strictly prohibited.\n3. Bring original Roll No Slip and personal stationery items. Sharing is not allowed.\n4. Strict disciplinary action will be taken in case of any unfair means (UFM).";
-                if (instructBox) {
-                    instructBox.value = savedConfig.instructions || defaultInstructions;
-                }
-
-                subjects.forEach((sub, idx) => {
-                    const subSched = (savedConfig.schedule && savedConfig.schedule[sub.name]) ? savedConfig.schedule[sub.name] : {};
-                    const defaultDate = subSched.date || "";
-                    const defaultDay = subSched.day || "";
-                    const defaultTime = subSched.time || "08:30 AM - 11:30 AM";
-                    const defaultRoom = subSched.room || "Exam Hall";
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-800/40";
-                    tr.innerHTML = `
-                        <td class="py-2 px-3 text-center font-bold text-slate-500">${idx + 1}</td>
-                        <td class="py-2 px-3 font-bold text-white uppercase text-[11px]">${sub.name}</td>
-                        <td class="py-2 px-3">
-                            <input type="text" placeholder="e.g. 10-03-2026" value="${defaultDate}" 
-                                data-subject="${sub.name}" class="ds-input-date w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white font-mono">
-                        </td>
-                        <td class="py-2 px-3">
-                            <input type="text" placeholder="e.g. Monday" value="${defaultDay}" 
-                                data-subject="${sub.name}" class="ds-input-day w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200">
-                        </td>
-                        <td class="py-2 px-3">
-                            <input type="text" placeholder="e.g. 08:30 AM - 11:30 AM" value="${defaultTime}" 
-                                data-subject="${sub.name}" class="ds-input-time w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200 font-mono">
-                        </td>
-                        <td class="py-2 px-3">
-                            <input type="text" placeholder="e.g. Main Hall" value="${defaultRoom}" 
-                                data-subject="${sub.name}" class="ds-input-room w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-slate-200">
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-                window.renderRollNoSlips();
-            } catch(e) {
-                console.error("Error in loadDateSheetConfig:", e);
-            }
-        };
-
-        window.saveDateSheetConfig = function() {
-            const examSelect = document.getElementById('ds_examSelect');
-            const classSelect = document.getElementById('ds_classSelect');
-            const instructBox = document.getElementById('ds_customInstructions');
-
-            if (!examSelect || !classSelect) return;
-            const examId = examSelect.value;
-            const cls = classSelect.value;
-
-            const dsKey = `${examId}_${cls}`;
-            const scheduleMap = {};
-
-            const dateInputs = document.querySelectorAll('.ds-input-date');
-            const dayInputs = document.querySelectorAll('.ds-input-day');
-            const timeInputs = document.querySelectorAll('.ds-input-time');
-            const roomInputs = document.querySelectorAll('.ds-input-room');
-
-            dateInputs.forEach((inp, i) => {
-                const subName = inp.getAttribute('data-subject');
-                scheduleMap[subName] = {
-                    date: inp.value.trim(),
-                    day: dayInputs[i] ? dayInputs[i].value.trim() : '',
-                    time: timeInputs[i] ? timeInputs[i].value.trim() : '08:30 AM - 11:30 AM',
-                    room: roomInputs[i] ? roomInputs[i].value.trim() : 'Exam Hall'
-                };
-            });
-
-            dateSheetsDatabase[dsKey] = {
-                schedule: scheduleMap,
-                instructions: instructBox ? instructBox.value.trim() : ''
-            };
-
-            localStorage.setItem('ccs_datesheets_db', JSON.stringify(dateSheetsDatabase));
-            window.renderRollNoSlips();
-            alert(`Success: Date Sheet & Instructions for "${cls}" saved successfully!`);
-        };
-
-        window.renderRollNoSlips = function() {
-            try {
-                const examSelect = document.getElementById('ds_examSelect');
-                const classSelect = document.getElementById('ds_classSelect');
-                const studentSelect = document.getElementById('ds_studentSelect');
-                const container = document.getElementById('rollNoSlipsContainer');
-
-                if (!examSelect || !classSelect || !studentSelect || !container) return;
-
-                const examId = examSelect.value;
-                const cls = classSelect.value;
-                const rollVal = studentSelect.value;
-
-                container.innerHTML = '';
-
-                const exam = examsSetupList.find(e => e.id === examId);
-                if (!exam) return;
-
-                const dsKey = `${examId}_${cls}`;
-                const savedConfig = dateSheetsDatabase[dsKey] || {};
-                const subjects = exam.subjects || [];
-
-                const classStudents = studentsList.filter(s => s.class === cls && s.status !== 'Left');
-                if (classStudents.length === 0) {
-                    container.innerHTML = `<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500 font-medium">No active students enrolled in "${cls}".</div>`;
-                    return;
-                }
-
-                let studentsToRender = classStudents;
-                if (rollVal && rollVal !== "ALL") {
-                    studentsToRender = classStudents.filter(s => s.rollNo === rollVal);
-                }
-
-                const customRules = savedConfig.instructions || "1. Candidates must arrive at the examination hall 15 minutes before time.\n2. Mobile phones strictly prohibited.\n3. Bring original Roll No Slip and stationery.";
-                const rulesFormatted = customRules.split('\n').map(r => `<p class="leading-tight mb-0.5">• ${r.trim()}</p>`).join('');
-
-                // Render in pairs of 2 (2 Slips per A4 Page)
-                for (let i = 0; i < studentsToRender.length; i += 2) {
-                    const st1 = studentsToRender[i];
-                    const st2 = studentsToRender[i + 1];
-
-                    const generateSingleCardHtml = (st) => {
-                        if (!st) return '';
-
-                        let scheduleRows = '';
-                        subjects.forEach((sub, sIdx) => {
-                            const subSched = (savedConfig.schedule && savedConfig.schedule[sub.name]) ? savedConfig.schedule[sub.name] : {};
-                            const sDate = subSched.date || '-';
-                            const sDay = subSched.day || '-';
-                            const sTime = subSched.time || '08:30 AM - 11:30 AM';
-                            const sRoom = subSched.room || 'Exam Hall';
-
-                            scheduleRows += `
-                                <tr class="${sIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} border-b border-slate-300 text-slate-900">
-                                    <td class="py-1 px-2 text-center font-bold text-slate-700">${sIdx + 1}</td>
-                                    <td class="py-1 px-2.5 font-bold uppercase tracking-tight text-slate-950">${sub.name}</td>
-                                    <td class="py-1 px-2 text-center font-mono font-bold text-slate-900">${sDate}</td>
-                                    <td class="py-1 px-2 text-center font-semibold text-slate-700">${sDay}</td>
-                                    <td class="py-1 px-2 text-center font-mono text-[9px] text-slate-800">${sTime}</td>
-                                    <td class="py-1 px-2 text-center font-bold text-indigo-950">${sRoom}</td>
-                                    <td class="py-1 px-2 text-center border-l border-slate-300"></td>
-                                </tr>
-                            `;
-                        });
-
-                        return `
-                            <div class="roll-slip-half-card bg-white text-slate-900 rounded-2xl p-4 sm:p-5 shadow-lg border-2 border-slate-900 flex flex-col justify-between relative overflow-hidden">
-                                
-                                <div class="absolute inset-0 flex items-center justify-center opacity-[0.035] pointer-events-none z-0">
-                                    <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="Watermark" class="w-64 h-64 object-contain grayscale">
-                                </div>
-
-                                <div class="relative z-10">
-                                    <!-- Header -->
-                                    <div class="flex items-center justify-between pb-2 border-b-2 border-slate-900 gap-3">
-                                        <div class="w-12 h-12 rounded-xl bg-white p-0.5 border border-slate-800 flex items-center justify-center shadow flex-shrink-0">
-                                            <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
-                                        </div>
-                                        
-                                        <div class="text-center flex-1">
-                                            <h1 class="font-royal-title text-base sm:text-lg font-black text-slate-950 uppercase tracking-wide leading-tight">
-                                                Chenab College Shorkot
-                                            </h1>
-                                            <p class="font-royal-serif text-[9px] font-bold text-slate-700 uppercase tracking-widest">
-                                                OFFICIAL EXAMINATION ROLL NUMBER SLIP & ADMIT CARD
-                                            </p>
-                                            <span class="inline-block mt-0.5 px-3 py-0.5 bg-slate-950 text-white rounded-full text-[8.5px] font-black uppercase tracking-wider">
-                                                ${exam.name} (${exam.session})
-                                            </span>
-                                        </div>
-
-                                        <div class="w-16 flex-shrink-0 text-right">
-                                            <div class="border border-slate-300 rounded-lg p-1 text-center bg-slate-50">
-                                                <span class="text-[7.5px] font-bold text-slate-500 uppercase block">Roll No</span>
-                                                <span class="text-sm font-mono font-black text-indigo-950">${st.rollNo}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Candidate Info -->
-                                    <div class="grid grid-cols-4 gap-2 my-2 p-2 rounded-xl bg-slate-50 border border-slate-300 text-[10px] font-semibold text-slate-800">
-                                        <div>
-                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Candidate Name</span>
-                                            <span class="text-slate-950 font-black truncate block uppercase">${st.name}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Father Name</span>
-                                            <span class="text-slate-950 font-bold truncate block uppercase">${st.father}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Class & Section</span>
-                                            <span class="text-indigo-950 font-bold block uppercase">${st.class} — ${st.group}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[8px] text-slate-500 uppercase font-bold block">Exam Center</span>
-                                            <span class="text-slate-950 font-bold block">College Campus</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Schedule Table -->
-                                    <div class="overflow-x-auto rounded-lg border border-slate-400 mb-2">
-                                        <table class="print-table w-full text-left text-[9px] border-collapse">
-                                            <thead>
-                                                <tr class="bg-slate-900 text-white font-bold uppercase text-[8px] tracking-wider">
-                                                    <th class="py-1 px-2 text-center w-8 border border-slate-700">Sr #</th>
-                                                    <th class="py-1 px-2.5 border border-slate-700">Subject Description</th>
-                                                    <th class="py-1 px-2 text-center w-24 border border-slate-700">Exam Date</th>
-                                                    <th class="py-1 px-2 text-center w-20 border border-slate-700">Day</th>
-                                                    <th class="py-1 px-2 text-center w-28 border border-slate-700">Paper Timing</th>
-                                                    <th class="py-1 px-2 text-center w-20 border border-slate-700">Room / Hall</th>
-                                                    <th class="py-1 px-2 text-center w-24 border border-slate-700">Invigilator Sign</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${scheduleRows}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <!-- Dynamic Candidate Rules & Footer Signatures -->
-                                <div class="relative z-10 pt-1 border-t border-slate-300">
-                                    <div class="p-1.5 bg-slate-50 rounded-lg border border-slate-200 text-[8px] text-slate-700 font-semibold mb-2">
-                                        <span class="font-bold text-slate-900 uppercase block mb-0.5">Examination Instructions & Code of Conduct:</span>
-                                        ${rulesFormatted}
-                                    </div>
-
-                                    <div class="flex justify-between items-end text-[9px] text-slate-900 font-bold px-2">
-                                        <div class="text-center">
-                                            <div class="w-28 border-b border-slate-900 mb-1"></div>
-                                            <span>Candidate Signature</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="w-28 border-b border-slate-900 mb-1"></div>
-                                            <span>Class Incharge</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="w-28 border-b border-slate-900 mb-1"></div>
-                                            <span>Controller of Examinations</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        `;
-                    };
-
-                    const pageWrapper = document.createElement('div');
-                    pageWrapper.className = "roll-slip-page-wrapper max-w-4xl mx-auto space-y-4";
-                    pageWrapper.innerHTML = `
-                        ${generateSingleCardHtml(st1)}
-                        ${st2 ? `
-                            <div class="relative flex items-center justify-center my-1 no-print">
-                                <div class="border-b-2 border-dashed border-slate-400 w-full"></div>
-                                <span class="bg-slate-800 text-slate-400 text-[10px] px-3 py-0.5 rounded-full font-bold absolute flex items-center gap-1">
-                                    <i class="fa-solid fa-scissors"></i> Cut Here (Scissors Line)
-                                </span>
-                            </div>
-                            ${generateSingleCardHtml(st2)}
-                        ` : ''}
-                    `;
-                    container.appendChild(pageWrapper);
-                }
-
-            } catch(e) {
-                console.error("Error in renderRollNoSlips:", e);
-            }
-        };
-
-        window.printAllRollNoSlips = function() {
-            const sel = document.getElementById('ds_studentSelect');
-            if (sel) sel.value = "ALL";
-            window.renderRollNoSlips();
-            window.printPortraitView();
-        };
-
-        window.printDateSheetNotice = function() {
-            window.printPortraitView();
-        };
-
-        // ================= TAB 7: COMBINED RESULT LOGIC =================
-        window.onCombinedClassChange = function() {
-            try {
-                const classSelect = document.getElementById('comb_classSelect');
-                if (!classSelect) return;
-                const selectedClass = classSelect.value;
-                const finalExamSelect = document.getElementById('comb_finalExamSelect');
-                const studentSelect = document.getElementById('comb_studentSelect');
-                const weightageContainer = document.getElementById('termsWeightageContainer');
-
-                if (!finalExamSelect || !studentSelect || !weightageContainer) return;
-
-                finalExamSelect.innerHTML = '';
-                studentSelect.innerHTML = '';
-                weightageContainer.innerHTML = '';
-
-                const activeStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-                if (activeStudents.length === 0) {
-                    studentSelect.innerHTML = '<option value="">No active students in this class</option>';
-                } else {
-                    const optAll = document.createElement('option');
-                    optAll.value = "ALL";
-                    optAll.textContent = `⭐ Bulk Print All Combined DMCs (${activeStudents.length} Students)`;
-                    studentSelect.appendChild(optAll);
-
-                    activeStudents.forEach(s => {
-                        const opt = document.createElement('option');
-                        opt.value = s.rollNo;
-                        opt.textContent = `Roll #${s.rollNo} - ${s.name} (${s.father})`;
-                        studentSelect.appendChild(opt);
-                    });
-                }
-
-                if (!examsSetupList || examsSetupList.length === 0) {
-                    finalExamSelect.innerHTML = '<option value="">No Exams Defined</option>';
-                    weightageContainer.innerHTML = '<p class="text-xs text-slate-500">Please define examinations in Exam Setup first.</p>';
-                    return;
-                }
-
-                examsSetupList.forEach(ex => {
-                    const opt = document.createElement('option');
-                    opt.value = ex.id;
-                    opt.textContent = `${ex.name} (${ex.session})`;
-                    finalExamSelect.appendChild(opt);
-                });
-
-                finalExamSelect.value = examsSetupList[examsSetupList.length - 1].id;
-
-                const count = examsSetupList.length;
-                examsSetupList.forEach((ex, idx) => {
-                    let defaultWeight = 30;
-                    if (count === 1) defaultWeight = 100;
-                    else if (count === 2) defaultWeight = 50;
-                    else if (count === 3) defaultWeight = (idx === 2 ? 40 : 30);
-                    else defaultWeight = Math.round(100 / count);
-
-                    const card = document.createElement('div');
-                    card.className = "flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-2xl";
-                    card.innerHTML = `
-                        <label class="flex items-center space-x-2.5 cursor-pointer flex-1 mr-2">
-                            <input type="checkbox" checked data-exam-id="${ex.id}" onchange="window.recalculateWeightage()" class="comb-exam-cb w-4 h-4 rounded text-cyan-600 focus:ring-0">
-                            <span class="text-xs font-bold text-white truncate" title="${ex.name}">${ex.name}</span>
-                        </label>
-                        <div class="flex items-center space-x-1.5 flex-shrink-0">
-                            <input type="number" min="1" max="100" value="${defaultWeight}" 
-                                data-exam-id="${ex.id}" 
-                                oninput="window.recalculateWeightage()"
-                                class="comb-weight-input w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-xs font-black text-cyan-400 text-center focus:ring-1 focus:ring-cyan-500">
-                            <span class="text-xs font-bold text-slate-400">%</span>
-                        </div>
-                    `;
-                    weightageContainer.appendChild(card);
-                });
-
-                window.recalculateWeightage();
-            } catch (e) {
-                console.error("Error in onCombinedClassChange:", e);
-            }
-        };
-
-        window.recalculateWeightage = function() {
-            let totalWeight = 0;
-            const checkboxes = document.querySelectorAll('.comb-exam-cb');
-            const inputs = document.querySelectorAll('.comb-weight-input');
-
-            checkboxes.forEach((cb, i) => {
-                if (cb.checked) {
-                    totalWeight += parseInt(inputs[i].value) || 0;
-                }
-            });
-
-            const badge = document.getElementById('weightageTotalBadge');
-            if (badge) {
-                if (totalWeight === 100) {
-                    badge.className = "px-3 py-1 rounded-xl text-xs font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-                    badge.innerHTML = `Total Weightage: ${totalWeight}% ✅`;
-                } else {
-                    badge.className = "px-3 py-1 rounded-xl text-xs font-black bg-amber-500/10 text-amber-400 border border-amber-500/30";
-                    badge.innerHTML = `⚠️ Total Weightage: ${totalWeight}% (Must equal 100%)`;
-                }
-            }
-
-            window.renderCombinedDMC();
-        };
-
-        window.renderCombinedDMC = function() {
-            try {
-                const classSelect = document.getElementById('comb_classSelect');
-                const finalExamSelect = document.getElementById('comb_finalExamSelect');
-                const studentSelect = document.getElementById('comb_studentSelect');
-                const container = document.getElementById('combinedCardsContainer');
-
-                if (!classSelect || !finalExamSelect || !studentSelect || !container) return;
-
-                const selectedClass = classSelect.value;
-                const finalExamId = finalExamSelect.value;
-                const selectedRoll = studentSelect.value;
-
-                container.innerHTML = '';
-
-                const finalExam = examsSetupList.find(e => e.id === finalExamId);
-                if (!finalExam) {
-                    container.innerHTML = '<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500">Please select a valid Final Exam.</div>';
-                    return;
-                }
-
-                const activeTerms = [];
-                const checkboxes = document.querySelectorAll('.comb-exam-cb');
-                const inputs = document.querySelectorAll('.comb-weight-input');
-
-                checkboxes.forEach((cb, i) => {
-                    if (cb.checked) {
-                        const exId = cb.getAttribute('data-exam-id');
-                        const examObj = examsSetupList.find(e => e.id === exId);
-                        const weight = parseInt(inputs[i].value) || 0;
-                        if (examObj) {
-                            activeTerms.push({ exam: examObj, weight: weight });
-                        }
-                    }
-                });
-
-                if (activeTerms.length === 0) {
-                    container.innerHTML = '<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500">Please select at least ONE term in the Weightage formula above.</div>';
-                    return;
-                }
-
-                const classStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-                if (classStudents.length === 0) {
-                    container.innerHTML = `<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500 font-medium">No active students enrolled in "${selectedClass}".</div>`;
-                    return;
-                }
-
-                const passCriteria = finalExam.passPct || 33;
-                const finalSubjects = Array.isArray(finalExam.subjects) ? finalExam.subjects : [];
-                const finalExamMaxMarks = finalSubjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
-
-                let evaluatedStudents = classStudents.map(s => {
-                    const finalKey = `${finalExamId}_${s.rollNo}`;
-                    const savedFinalMarks = marksDatabase[finalKey] || {};
-
-                    let finalExamObt = 0;
-                    let isFinalSubFail = false;
-                    let finalSubjectsDetail = [];
-
-                    finalSubjects.forEach(sub => {
-                        const maxM = parseInt(sub.marks) || 100;
-                        const obt = (savedFinalMarks[sub.name] !== undefined && savedFinalMarks[sub.name] !== '') ? parseInt(savedFinalMarks[sub.name]) : 0;
-                        finalExamObt += obt;
-
-                        const subPassMin = Math.ceil((maxM * passCriteria) / 100);
-                        const isPass = obt >= subPassMin;
-                        if (!isPass) isFinalSubFail = true;
-
-                        const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
-
-                        let subGrade = 'F';
-                        if (subPct >= 80) subGrade = 'A+';
-                        else if (subPct >= 70) subGrade = 'A';
-                        else if (subPct >= 60) subGrade = 'B';
-                        else if (subPct >= 50) subGrade = 'C';
-                        else if (subPct >= 40) subGrade = 'D';
-
-                        finalSubjectsDetail.push({
-                            name: sub.name,
-                            maxMarks: maxM,
-                            passMin: subPassMin,
-                            obtained: (savedFinalMarks[sub.name] !== undefined && savedFinalMarks[sub.name] !== '') ? obt : '-',
-                            pct: subPct,
-                            grade: isPass ? subGrade : 'F',
-                            status: isPass ? 'PASS' : 'FAIL'
-                        });
-                    });
-
-                    let termsSummary = [];
-                    let cumulativeWeightedScore = 0;
-                    let hasAnyTermMarks = false;
-
-                    activeTerms.forEach(term => {
-                        const tKey = `${term.exam.id}_${s.rollNo}`;
-                        const tSavedMarks = marksDatabase[tKey] || {};
-                        const tSubs = Array.isArray(term.exam.subjects) ? term.exam.subjects : [];
-                        const tMax = tSubs.reduce((sum, sb) => sum + (parseInt(sb.marks) || 0), 0);
-                        let tObt = 0;
-                        let tHasMarks = false;
-
-                        tSubs.forEach(sb => {
-                            if (tSavedMarks[sb.name] !== undefined && tSavedMarks[sb.name] !== '') {
-                                tObt += parseInt(tSavedMarks[sb.name]);
-                                tHasMarks = true;
-                                hasAnyTermMarks = true;
-                            }
-                        });
-
-                        const tPct = tMax > 0 ? (tObt / tMax) * 100 : 0;
-                        const weightedContribution = parseFloat(((tPct * term.weight) / 100).toFixed(2));
-                        cumulativeWeightedScore += weightedContribution;
-
-                        termsSummary.push({
-                            examName: term.exam.name,
-                            maxMarks: tMax,
-                            obtainedMarks: tHasMarks ? tObt : '-',
-                            percentage: tPct.toFixed(1),
-                            weightagePct: term.weight,
-                            weightedScore: tHasMarks ? weightedContribution.toFixed(2) : '-'
-                        });
-                    });
-
-                    const finalCombinedPct = parseFloat(cumulativeWeightedScore.toFixed(1));
-                    const finalCombinedObtMarks = Math.round((finalExamMaxMarks * finalCombinedPct) / 100);
-
-                    let finalGrade = 'F';
-                    if (finalCombinedPct >= 80) finalGrade = 'A+';
-                    else if (finalCombinedPct >= 70) finalGrade = 'A';
-                    else if (finalCombinedPct >= 60) finalGrade = 'B';
-                    else if (finalCombinedPct >= 50) finalGrade = 'C';
-                    else if (finalCombinedPct >= 40) finalGrade = 'D';
-                    else finalGrade = 'E';
-
-                    const isOverallPass = hasAnyTermMarks && !isFinalSubFail && finalCombinedPct >= passCriteria;
-                    if (!isOverallPass) finalGrade = 'F';
-
-                    return {
-                        rollNo: s.rollNo,
-                        name: s.name,
-                        father: s.father,
-                        group: s.group,
-                        class: s.class,
-                        finalSubjectsDetail,
-                        termsSummary,
-                        finalExamMaxMarks,
-                        finalCombinedObtMarks,
-                        finalCombinedPct,
-                        finalGrade,
-                        status: isOverallPass ? 'PROMOTED TO NEXT CLASS' : 'DETENTION / FAILED',
-                        hasAnyTermMarks
-                    };
-                });
-
-                const passed = evaluatedStudents.filter(s => s.status.includes('PROMOTED')).sort((a, b) => b.finalCombinedPct - a.finalCombinedPct);
-                passed.forEach((s, idx) => {
-                    if (idx === 0) s.position = '1st Position 🥇';
-                    else if (idx === 1) s.position = '2nd Position 🥈';
-                    else if (idx === 2) s.position = '3rd Position 🥉';
-                    else s.position = `${idx + 1}th Position`;
-                });
-                evaluatedStudents.forEach(s => {
-                    if (!s.status.includes('PROMOTED')) s.position = '---';
-                });
-
-                let studentsToRender = evaluatedStudents;
-                if (selectedRoll && selectedRoll !== "ALL") {
-                    studentsToRender = evaluatedStudents.filter(s => s.rollNo === selectedRoll);
-                }
-
-                studentsToRender.forEach(st => {
-                    let remarks = "Outstanding academic brilliance! Promoted with highest distinction and honors.";
-                    if (st.finalGrade === 'A') remarks = "Very Good achievement and consistent performance throughout all terms.";
-                    else if (st.finalGrade === 'B') remarks = "Good effort across terms. Has strong potential for top positions.";
-                    else if (st.finalGrade === 'C') remarks = "Satisfactory progress. Regular studies and revision recommended.";
-                    else if (st.finalGrade === 'D' || st.finalGrade === 'E') remarks = "Weak aggregate score. Strict parent guidance and attention needed.";
-                    else if (st.finalGrade === 'F') remarks = "Failed in annual aggregate. Remedial classes strictly required.";
-
-                    let subRowsHtml = '';
-                    st.finalSubjectsDetail.forEach((sub, sIdx) => {
-                        const isSubPass = sub.status === 'PASS';
-                        subRowsHtml += `
-                            <tr class="${sIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'} text-slate-900 border-b border-slate-200">
-                                <td class="py-1.5 px-3 text-center font-bold text-slate-700">${sIdx + 1}</td>
-                                <td class="py-1.5 px-4 font-bold text-slate-950 uppercase tracking-tight">${sub.name}</td>
-                                <td class="py-1.5 px-3 text-center font-semibold text-slate-700">${sub.maxMarks}</td>
-                                <td class="py-1.5 px-3 text-center font-semibold text-slate-600">${sub.passMin}</td>
-                                <td class="py-1.5 px-3 text-center font-black text-slate-950 font-mono text-xs ${isSubPass ? '' : 'text-rose-700'}">${sub.obtained}</td>
-                                <td class="py-1.5 px-3 text-center font-bold ${isSubPass ? 'text-indigo-950' : 'text-rose-600'}">${sub.obtained !== '-' ? sub.pct + '%' : '-'}</td>
-                                <td class="py-1.5 px-3 text-center font-black ${sub.grade === 'A+' || sub.grade === 'A' ? 'text-emerald-700' : (sub.grade === 'F' ? 'text-rose-700' : 'text-indigo-900')}">${sub.grade}</td>
-                                <td class="py-1.5 px-3 text-center font-black text-[9.5px] ${isSubPass ? 'text-emerald-700' : 'text-rose-700'}">
-                                    ${sub.status}
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    let termRowsHtml = '';
-                    st.termsSummary.forEach((tm, tIdx) => {
-                        termRowsHtml += `
-                            <tr class="${tIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} border-b border-slate-200 text-slate-900 font-semibold">
-                                <td class="py-1.5 px-3 font-bold uppercase text-slate-950">${tm.examName}</td>
-                                <td class="py-1.5 px-3 text-center text-slate-700">${tm.maxMarks}</td>
-                                <td class="py-1.5 px-3 text-center font-mono font-bold text-slate-950">${tm.obtainedMarks}</td>
-                                <td class="py-1.5 px-3 text-center font-bold text-indigo-950">${tm.percentage}%</td>
-                                <td class="py-1.5 px-3 text-center font-bold text-cyan-800">${tm.weightagePct}%</td>
-                                <td class="py-1.5 px-3 text-center font-mono font-black text-slate-950 bg-cyan-50/50">${tm.weightedScore}</td>
-                            </tr>
-                        `;
-                    });
-
-                    const dmcHtml = `
-                        <div class="dmc-card-page bg-white text-slate-900 rounded-3xl p-7 sm:p-10 shadow-2xl border-4 border-double border-slate-900 max-w-4xl mx-auto relative overflow-hidden">
-                            
-                            <div class="absolute inset-0 flex items-center justify-center opacity-[0.035] pointer-events-none z-0">
-                                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="Watermark" class="w-96 h-96 object-contain grayscale">
-                            </div>
-
-                            <div class="relative z-10 flex flex-col justify-between h-full">
-                                <div>
-                                    <div class="flex items-center justify-between pb-3.5 border-b-2 border-slate-900 gap-4">
-                                        <div class="w-18 h-18 rounded-2xl bg-white p-1 border-2 border-slate-800 flex items-center justify-center shadow-md flex-shrink-0">
-                                            <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
-                                        </div>
-                                        
-                                        <div class="text-center flex-1">
-                                            <h1 class="font-royal-title text-2xl sm:text-3xl font-black text-slate-950 uppercase tracking-wide leading-none">
-                                                Chenab College Shorkot
-                                            </h1>
-                                            <p class="font-royal-serif text-[10.5px] font-bold text-slate-700 uppercase tracking-widest mt-1">
-                                                ANNUAL ACADEMIC PROGRESS REPORT & DETAILED MARKS CERTIFICATE
-                                            </p>
-                                            <div class="inline-block mt-1.5 px-4 py-0.5 bg-slate-950 text-white rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm">
-                                                Combined Multi-Term Assessment (D.M.C)
-                                            </div>
-                                        </div>
-
-                                        <div class="w-20 flex-shrink-0 text-right">
-                                            <div class="border border-slate-300 rounded-xl p-1 text-center bg-slate-50">
-                                                <span class="text-[8.5px] font-bold text-slate-500 uppercase block">Reg Serial</span>
-                                                <span class="text-xs font-mono font-black text-slate-900">CCS-${st.rollNo}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3 p-3 rounded-2xl bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-800">
-                                        <div>
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider">Candidate Name</span>
-                                            <span class="text-slate-950 font-black text-xs uppercase">${st.name}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider">Father Name</span>
-                                            <span class="text-slate-950 font-bold uppercase">${st.father}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider">Roll Number</span>
-                                            <span class="text-indigo-950 font-black text-xs font-mono">${st.rollNo}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold tracking-wider">Class & Section</span>
-                                            <span class="text-slate-950 font-bold uppercase">${st.class} — ${st.group}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="flex justify-between items-center mb-1 px-1">
-                                            <h4 class="text-[11px] font-black text-slate-950 uppercase tracking-wide flex items-center gap-1.5">
-                                                <i class="fa-solid fa-book-bookmark text-indigo-700"></i> ${finalExam.name} — Detailed Subject Performance
-                                            </h4>
-                                            <span class="text-[10px] text-slate-500 font-semibold">Max Exam Marks: ${finalExamMaxMarks}</span>
-                                        </div>
-                                        <div class="overflow-x-auto rounded-xl border border-slate-400">
-                                            <table class="print-table w-full text-left text-xs border-collapse">
-                                                <thead>
-                                                    <tr class="bg-slate-900 text-white font-bold uppercase text-[9.5px] tracking-wider">
-                                                        <th class="py-1.5 px-3 text-center w-10 border border-slate-700">Sr #</th>
-                                                        <th class="py-1.5 px-4 border border-slate-700">Subject Description</th>
-                                                        <th class="py-1.5 px-3 text-center w-20 border border-slate-700">Max Marks</th>
-                                                        <th class="py-1.5 px-3 text-center w-20 border border-slate-700">Min Pass</th>
-                                                        <th class="py-1.5 px-3 text-center w-24 border border-slate-700 bg-indigo-900/60">Marks Obt</th>
-                                                        <th class="py-1.5 px-3 text-center w-16 border border-slate-700">%</th>
-                                                        <th class="py-1.5 px-3 text-center w-16 border border-slate-700">Grade</th>
-                                                        <th class="py-1.5 px-3 text-center w-16 border border-slate-700">Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    ${subRowsHtml}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="flex justify-between items-center mb-1 px-1">
-                                            <h4 class="text-[11px] font-black text-slate-950 uppercase tracking-wide flex items-center gap-1.5">
-                                                <i class="fa-solid fa-chart-pie text-cyan-700"></i> Multi-Term Cumulative Weighted Assessment
-                                            </h4>
-                                            <span class="text-[10px] text-cyan-900 font-bold">Annual Weighted Score Engine</span>
-                                        </div>
-                                        <div class="overflow-x-auto rounded-xl border border-slate-400">
-                                            <table class="print-table w-full text-left text-xs border-collapse">
-                                                <thead>
-                                                    <tr class="bg-slate-800 text-white font-bold uppercase text-[9.5px] tracking-wider">
-                                                        <th class="py-1.5 px-3 border border-slate-600">Evaluation Term</th>
-                                                        <th class="py-1.5 px-3 text-center w-24 border border-slate-600">Max Marks</th>
-                                                        <th class="py-1.5 px-3 text-center w-24 border border-slate-600">Obt Marks</th>
-                                                        <th class="py-1.5 px-3 text-center w-20 border border-slate-600">Term %</th>
-                                                        <th class="py-1.5 px-3 text-center w-24 border border-slate-600 bg-cyan-950">Weightage %</th>
-                                                        <th class="py-1.5 px-3 text-center w-28 border border-slate-600 bg-cyan-900">Weighted Score</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    ${termRowsHtml}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="bg-slate-950 text-white rounded-2xl p-3.5 mb-3 grid grid-cols-2 sm:grid-cols-5 gap-2 text-center border-2 border-slate-800 shadow-md">
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[8.5px] text-slate-400 block uppercase font-bold tracking-widest">Annual Max</span>
-                                            <span class="text-base font-black text-slate-200 font-mono">${st.finalExamMaxMarks}</span>
-                                        </div>
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[8.5px] text-slate-400 block uppercase font-bold tracking-widest">Combined Obt</span>
-                                            <span class="text-lg font-black text-emerald-400 font-mono">${st.finalCombinedObtMarks}</span>
-                                        </div>
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[8.5px] text-slate-400 block uppercase font-bold tracking-widest">Final Weighted %</span>
-                                            <span class="text-lg font-black text-cyan-400 font-mono">${st.finalCombinedPct}%</span>
-                                        </div>
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[8.5px] text-slate-400 block uppercase font-bold tracking-widest">Final Grade</span>
-                                            <span class="text-lg font-black text-amber-400">${st.finalGrade}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[8.5px] text-amber-400 block uppercase font-bold tracking-widest">Annual Position</span>
-                                            <span class="text-xs font-black text-yellow-300 mt-0.5 block">${st.position}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 text-xs font-semibold">
-                                        <div class="p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold">Annual Promotion Outcome</span>
-                                            <span class="text-xs font-black ${st.status.includes('PROMOTED') ? 'text-emerald-700' : 'text-rose-700'}">${st.status}</span>
-                                        </div>
-                                        <div class="sm:col-span-2 p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
-                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold">Faculty Assessment & Remarks</span>
-                                            <span class="text-slate-900 italic font-semibold text-[11px]">"${remarks}"</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between items-center px-3 py-1 bg-slate-100 border border-slate-300 rounded-xl text-[8.5px] font-bold text-slate-700 mb-4">
-                                        <span><b>GRADING KEY:</b></span>
-                                        <span>A+ (80% & Above)</span>
-                                        <span>A (70-79%)</span>
-                                        <span>B (60-69%)</span>
-                                        <span>C (50-59%)</span>
-                                        <span>D (40-49%)</span>
-                                        <span class="text-rose-700">F (Below ${passCriteria}%: Fail)</span>
-                                    </div>
-
-                                    <div class="pt-4 border-t-2 border-slate-900 flex justify-between items-end text-xs text-slate-950 font-bold px-2">
-                                        <div class="text-center">
-                                            <div class="w-36 border-b-2 border-slate-900 mb-1"></div>
-                                            <span class="text-[11px]">Class Incharge</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="w-16 h-16 rounded-full border-2 border-dashed border-slate-400 mx-auto -mt-8 mb-1 flex items-center justify-center text-[7.5px] text-slate-400 uppercase font-black tracking-widest text-center leading-tight">
-                                                Official<br>College<br>Seal
-                                            </div>
-                                            <span class="text-[11px]">Controller of Exams</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="w-36 border-b-2 border-slate-900 mb-1"></div>
-                                            <span class="text-[11px]">Principal Signature</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    `;
-                    container.innerHTML += dmcHtml;
-                });
-            } catch (e) {
-                console.error("Error in renderCombinedDMC:", e);
-            }
-        };
-
-        window.printAllCombinedDMCs = function() {
-            const sel = document.getElementById('comb_studentSelect');
-            if (sel) sel.value = "ALL";
-            window.renderCombinedDMC();
-            window.printPortraitView();
-        };
-
-        // ================= SINGLE EXAM RESULT CARD / DMC LOGIC =================
-        window.populateDmcDropdowns = function() {
-            const select = document.getElementById('dmc_examSelect');
-            if (!select) return;
-            select.innerHTML = '';
-
-            if (!examsSetupList || examsSetupList.length === 0) {
-                select.innerHTML = '<option value="">No Exams Defined Yet</option>';
-                return;
-            }
-
-            examsSetupList.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.id;
-                opt.textContent = `${ex.name} (${ex.session})`;
-                select.appendChild(opt);
-            });
-        };
-
-        window.onDmcExamOrClassChange = function() {
-            const classSelect = document.getElementById('dmc_classSelect');
-            const studentSelect = document.getElementById('dmc_studentSelect');
-            if (!classSelect || !studentSelect) return;
-
-            const selectedClass = classSelect.value;
-            studentSelect.innerHTML = '';
-
-            const activeStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-
-            if (activeStudents.length === 0) {
-                studentSelect.innerHTML = '<option value="">No students in this class</option>';
-                window.renderDmcCards();
-                return;
-            }
-
-            const optAll = document.createElement('option');
-            optAll.value = "ALL";
-            optAll.textContent = `⭐ Bulk Print All Class DMCs (${activeStudents.length} Students)`;
-            studentSelect.appendChild(optAll);
-
-            activeStudents.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.rollNo;
-                opt.textContent = `Roll #${s.rollNo} - ${s.name} (${s.father})`;
-                studentSelect.appendChild(opt);
-            });
-
-            window.renderDmcCards();
-        };
-
-        window.renderDmcCards = function() {
-            try {
-                const examSelect = document.getElementById('dmc_examSelect');
-                const classSelect = document.getElementById('dmc_classSelect');
-                const studentSelect = document.getElementById('dmc_studentSelect');
-                const container = document.getElementById('dmcCardsContainer');
-
-                if (!examSelect || !classSelect || !studentSelect || !container) return;
-
-                const examId = examSelect.value;
-                const selectedClass = classSelect.value;
-                const selectedRoll = studentSelect.value;
-
-                container.innerHTML = '';
-
-                const exam = examsSetupList.find(e => e.id === examId);
-                if (!exam) {
-                    container.innerHTML = '<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500">Please define an examination first in Exam Setup.</div>';
-                    return;
-                }
-
-                const classStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-                if (classStudents.length === 0) {
-                    container.innerHTML = `<div class="bg-slate-900 p-8 rounded-3xl text-center text-slate-500 font-medium">No active students enrolled in "${selectedClass}".</div>`;
-                    return;
-                }
 
                 const passCriteria = exam.passPct || 33;
                 const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
                 const totalMaxMarks = subjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
 
-                let evaluatedStudents = classStudents.map(s => {
-                    const key = `${examId}_${s.rollNo}`;
+                const classStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
+                const totalStudents = classStudents.length;
+
+                const totalEl = document.getElementById('ana_totalStudents');
+                const passEl = document.getElementById('ana_passedCount');
+                const failEl = document.getElementById('ana_failedCount');
+                const passBadge = document.getElementById('ana_passPctBadge');
+                const failBadge = document.getElementById('ana_failPctBadge');
+                const avgEl = document.getElementById('ana_classAvgScore');
+                const highEl = document.getElementById('ana_highestScore');
+                const highStudentEl = document.getElementById('ana_highestStudent');
+                const podiumContainer = document.getElementById('topHoldersPodiumContainer');
+                const gradeBarsContainer = document.getElementById('gradeDistributionBarsContainer');
+                const subjectTableBody = document.getElementById('subjectAnalyticsTableBody');
+
+                if (totalEl) totalEl.textContent = totalStudents;
+
+                if (totalStudents === 0) {
+                    if (passEl) passEl.textContent = '0';
+                    if (failEl) failEl.textContent = '0';
+                    if (passBadge) passBadge.textContent = '0% Pass Ratio';
+                    if (failBadge) failBadge.textContent = '0% Detained';
+                    if (avgEl) avgEl.textContent = '0%';
+                    if (highEl) highEl.textContent = '-';
+                    if (highStudentEl) highStudentEl.textContent = 'No Students Enrolled';
+                    if (podiumContainer) podiumContainer.innerHTML = '<div class="col-span-3 text-center py-6 text-slate-500 font-medium">No students enrolled in this class.</div>';
+                    if (gradeBarsContainer) gradeBarsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">No data available.</p>';
+                    if (subjectTableBody) subjectTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500">No subject records.</td></tr>';
+                    return;
+                }
+
+                let studentResults = [];
+                let grandScoreSum = 0;
+                let gradeCounts = { 'A+': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
+                let boysPassed = 0, boysTotal = 0;
+                let girlsPassed = 0, girlsTotal = 0;
+
+                classStudents.forEach(s => {
+                    const key = `${exam.id}_${s.rollNo}`;
                     const savedMarks = marksDatabase[key] || {};
 
                     let totalObt = 0;
                     let isSubjectFail = false;
                     let hasMarks = false;
-                    let subjectsDetail = [];
+
+                    if (s.gender === 'Male') boysTotal++; else girlsTotal++;
 
                     subjects.forEach(sub => {
-                        const maxM = parseInt(sub.marks) || 100;
                         const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
                         if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
-
                         totalObt += obt;
-                        const subPassMin = Math.ceil((maxM * passCriteria) / 100);
-                        const isPass = obt >= subPassMin;
-                        if (!isPass) isSubjectFail = true;
 
-                        const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
-
-                        let subGrade = 'F';
-                        if (subPct >= 80) subGrade = 'A+';
-                        else if (subPct >= 70) subGrade = 'A';
-                        else if (subPct >= 60) subGrade = 'B';
-                        else if (subPct >= 50) subGrade = 'C';
-                        else if (subPct >= 40) subGrade = 'D';
-
-                        subjectsDetail.push({
-                            name: sub.name,
-                            maxMarks: maxM,
-                            passMin: subPassMin,
-                            obtained: (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? obt : '-',
-                            pct: subPct,
-                            grade: isPass ? subGrade : 'F',
-                            status: isPass ? 'PASS' : 'FAIL'
-                        });
+                        const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                        if (obt < subPassMin) isSubjectFail = true;
                     });
 
                     const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
+                    grandScoreSum += percentage;
 
                     let grade = 'F';
                     if (percentage >= 80) grade = 'A+';
@@ -2563,1218 +1713,193 @@
                     else if (percentage >= 60) grade = 'B';
                     else if (percentage >= 50) grade = 'C';
                     else if (percentage >= 40) grade = 'D';
-                    else grade = 'E';
 
-                    const isOverallPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
-                    if (!isOverallPass) grade = 'F';
+                    const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
+                    if (!isPass) grade = 'F';
 
-                    return {
+                    gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
+
+                    if (isPass) {
+                        if (s.gender === 'Male') boysPassed++; else girlsPassed++;
+                    }
+
+                    studentResults.push({
                         rollNo: s.rollNo,
                         name: s.name,
                         father: s.father,
                         gender: s.gender,
-                        group: s.group,
-                        class: s.class,
-                        subjectsDetail,
-                        totalMaxMarks,
                         totalObt,
                         percentage,
                         grade,
-                        status: isOverallPass ? 'PROMOTED / PASSED' : 'DETENTION / FAILED',
-                        hasMarks
-                    };
-                });
-
-                const passed = evaluatedStudents.filter(s => s.status.includes('PASS')).sort((a, b) => b.totalObt - a.totalObt);
-                passed.forEach((s, idx) => {
-                    if (idx === 0) s.position = '1st Position 🥇';
-                    else if (idx === 1) s.position = '2nd Position 🥈';
-                    else if (idx === 2) s.position = '3rd Position 🥉';
-                    else s.position = `${idx + 1}th Position`;
-                });
-                evaluatedStudents.forEach(s => {
-                    if (!s.status.includes('PASS')) s.position = '---';
-                });
-
-                let studentsToRender = evaluatedStudents;
-                if (selectedRoll && selectedRoll !== "ALL") {
-                    studentsToRender = evaluatedStudents.filter(s => s.rollNo === selectedRoll);
-                }
-
-                studentsToRender.forEach(st => {
-                    let remarks = "Exemplary academic brilliance! Promoted with highest distinction.";
-                    if (st.grade === 'A') remarks = "Outstanding academic effort and consistent high performance.";
-                    else if (st.grade === 'B') remarks = "Very Good achievement. Has strong potential for top honors.";
-                    else if (st.grade === 'C') remarks = "Good effort. Regular revision and focus recommended.";
-                    else if (st.grade === 'D' || st.grade === 'E') remarks = "Satisfactory progress. Needs dedicated attention in weak subjects.";
-                    else if (st.grade === 'F') remarks = "Failed in examination. Strictly requires remedial coaching.";
-
-                    let rowsHtml = '';
-                    st.subjectsDetail.forEach((sub, sIdx) => {
-                        const isSubPass = sub.status === 'PASS';
-                        rowsHtml += `
-                            <tr class="${sIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'} text-slate-900 border-b border-slate-200">
-                                <td class="py-2.5 px-3 text-center font-bold text-slate-700">${sIdx + 1}</td>
-                                <td class="py-2.5 px-4 font-bold text-slate-950 uppercase tracking-tight">${sub.name}</td>
-                                <td class="py-2.5 px-3 text-center font-semibold text-slate-700">${sub.maxMarks}</td>
-                                <td class="py-2.5 px-3 text-center font-semibold text-slate-600">${sub.passMin}</td>
-                                <td class="py-2.5 px-3 text-center font-black text-slate-950 font-mono text-sm ${isSubPass ? '' : 'text-rose-700'}">${sub.obtained}</td>
-                                <td class="py-2.5 px-3 text-center font-bold ${isSubPass ? 'text-indigo-950' : 'text-rose-600'}">${sub.obtained !== '-' ? sub.pct + '%' : '-'}</td>
-                                <td class="py-2.5 px-3 text-center font-black ${sub.grade === 'A+' || sub.grade === 'A' ? 'text-emerald-700' : (sub.grade === 'F' ? 'text-rose-700' : 'text-indigo-900')}">${sub.grade}</td>
-                                <td class="py-2.5 px-3 text-center font-black text-[10px] ${isSubPass ? 'text-emerald-700' : 'text-rose-700'}">
-                                    ${sub.status}
-                                </td>
-                            </tr>
-                        `;
+                        isPass
                     });
-
-                    const dmcHtml = `
-                        <div class="dmc-card-page bg-white text-slate-900 rounded-3xl p-8 sm:p-11 shadow-2xl border-4 border-double border-slate-900 max-w-4xl mx-auto relative overflow-hidden">
-                            
-                            <div class="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
-                                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="Watermark" class="w-96 h-96 object-contain grayscale">
-                            </div>
-
-                            <div class="relative z-10 flex flex-col justify-between h-full">
-                                <div>
-                                    <div class="flex items-center justify-between pb-4 border-b-2 border-slate-900 gap-4">
-                                        <div class="w-20 h-20 rounded-2xl bg-white p-1 border-2 border-slate-800 flex items-center justify-center shadow-md flex-shrink-0">
-                                            <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
-                                        </div>
-                                        
-                                        <div class="text-center flex-1">
-                                            <h1 class="font-royal-title text-2xl sm:text-3.5xl font-black text-slate-950 uppercase tracking-wide leading-none">
-                                                Chenab College Shorkot
-                                            </h1>
-                                            <p class="font-royal-serif text-[11px] font-bold text-slate-700 uppercase tracking-widest mt-1.5">
-                                                ESTABLISHED UNDER THE AEGIS OF CHENAB COLLEGE EDUCATIONAL TRUST
-                                            </p>
-                                            <div class="inline-block mt-2 px-5 py-1 bg-slate-950 text-white rounded-full text-xs font-black uppercase tracking-widest shadow-sm">
-                                                Detailed Marks Certificate (D.M.C)
-                                            </div>
-                                        </div>
-
-                                        <div class="w-20 flex-shrink-0 text-right">
-                                            <div class="border border-slate-300 rounded-xl p-1.5 text-center bg-slate-50">
-                                                <span class="text-[9px] font-bold text-slate-500 uppercase block">Reg Serial</span>
-                                                <span class="text-xs font-mono font-black text-slate-900">CCS-${st.rollNo}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between items-center py-2 px-2 text-xs font-bold text-slate-800 border-b border-slate-300 bg-slate-50/50">
-                                        <span>Examination: <b class="text-slate-950 font-black uppercase">${exam.name}</b></span>
-                                        <span>Academic Session: <b class="text-slate-950 font-black">${exam.session}</b></span>
-                                        <span>Date of Issue: <b class="text-slate-950 font-mono">${new Date().toLocaleDateString('en-GB')}</b></span>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-4 rounded-2xl bg-slate-50 border border-slate-300 text-xs font-semibold text-slate-800">
-                                        <div>
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Candidate Name</span>
-                                            <span class="text-slate-950 font-black text-sm uppercase">${st.name}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Father Name</span>
-                                            <span class="text-slate-950 font-bold uppercase">${st.father}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Roll Number</span>
-                                            <span class="text-indigo-950 font-black text-sm font-mono">${st.rollNo}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold tracking-wider">Class & Section</span>
-                                            <span class="text-slate-950 font-bold uppercase">${st.class} — ${st.group}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="overflow-x-auto rounded-xl border border-slate-400 mb-4">
-                                        <table class="print-table w-full text-left text-xs border-collapse">
-                                            <thead>
-                                                <tr class="bg-slate-900 text-white font-bold uppercase text-[10px] tracking-wider">
-                                                    <th class="py-2 px-3 text-center w-10 border border-slate-700">Sr #</th>
-                                                    <th class="py-2 px-4 border border-slate-700">Subject Description</th>
-                                                    <th class="py-2 px-3 text-center w-24 border border-slate-700">Max Marks</th>
-                                                    <th class="py-2 px-3 text-center w-24 border border-slate-700">Min Pass</th>
-                                                    <th class="py-2 px-3 text-center w-28 border border-slate-700 bg-indigo-900/60">Marks Obt</th>
-                                                    <th class="py-2 px-3 text-center w-20 border border-slate-700">%</th>
-                                                    <th class="py-2 px-3 text-center w-20 border border-slate-700">Grade</th>
-                                                    <th class="py-2 px-3 text-center w-20 border border-slate-700">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${rowsHtml}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="bg-slate-950 text-white rounded-2xl p-4 mb-4 grid grid-cols-2 sm:grid-cols-5 gap-2 text-center border-2 border-slate-800 shadow-md">
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-widest">Grand Total</span>
-                                            <span class="text-lg font-black text-slate-200 font-mono">${st.totalMaxMarks}</span>
-                                        </div>
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-widest">Obtained</span>
-                                            <span class="text-xl font-black text-emerald-400 font-mono">${st.totalObt}</span>
-                                        </div>
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-widest">Percentage</span>
-                                            <span class="text-xl font-black text-indigo-400 font-mono">${st.percentage}%</span>
-                                        </div>
-                                        <div class="border-r border-slate-800 pr-2">
-                                            <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-widest">Overall Grade</span>
-                                            <span class="text-xl font-black text-amber-400">${st.grade}</span>
-                                        </div>
-                                        <div>
-                                            <span class="text-[9px] text-amber-400 block uppercase font-bold tracking-widest">Class Position</span>
-                                            <span class="text-xs font-black text-yellow-300 mt-1 block">${st.position}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-xs font-semibold">
-                                        <div class="p-3 bg-slate-50 border border-slate-300 rounded-xl">
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold">Official Final Result</span>
-                                            <span class="text-sm font-black ${st.status.includes('PASS') ? 'text-emerald-700' : 'text-rose-700'}">${st.status}</span>
-                                        </div>
-                                        <div class="sm:col-span-2 p-3 bg-slate-50 border border-slate-300 rounded-xl">
-                                            <span class="text-[10px] text-slate-500 block uppercase font-bold">Faculty Assessment & Remarks</span>
-                                            <span class="text-slate-900 italic font-semibold">"${remarks}"</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex justify-between items-center px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-xl text-[9px] font-bold text-slate-700 mb-6">
-                                        <span><b>GRADING KEY:</b></span>
-                                        <span>A+ (80% & Above)</span>
-                                        <span>A (70-79%)</span>
-                                        <span>B (60-69%)</span>
-                                        <span>C (50-59%)</span>
-                                        <span>D (40-49%)</span>
-                                        <span class="text-rose-700">F (Below ${passCriteria}%: Fail)</span>
-                                    </div>
-
-                                    <div class="pt-5 border-t-2 border-slate-900 flex justify-between items-end text-xs text-slate-950 font-bold px-2">
-                                        <div class="text-center">
-                                            <div class="w-40 border-b-2 border-slate-900 mb-1.5"></div>
-                                            <span>Class Incharge</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="w-20 h-20 rounded-full border-2 border-dashed border-slate-400 mx-auto -mt-10 mb-1 flex items-center justify-center text-[8px] text-slate-400 uppercase font-black tracking-widest text-center leading-tight">
-                                                Official<br>College<br>Seal
-                                            </div>
-                                            <span>Controller of Exams</span>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="w-40 border-b-2 border-slate-900 mb-1.5"></div>
-                                            <span>Principal Signature</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    `;
-                    container.innerHTML += dmcHtml;
-                });
-            } catch (e) {
-                console.error("Error in renderDmcCards:", e);
-            }
-        };
-
-        window.printAllClassDMCs = function() {
-            const sel = document.getElementById('dmc_studentSelect');
-            if (sel) sel.value = "ALL";
-            window.renderDmcCards();
-            window.printPortraitView();
-        };
-
-        // ================= CONSOLIDATIVE RESULT SHEET LOGIC =================
-        window.populateConsolidatedDropdowns = function() {
-            const select = document.getElementById('cr_examSelect');
-            if (!select) return;
-            select.innerHTML = '';
-
-            if (!examsSetupList || examsSetupList.length === 0) {
-                select.innerHTML = '<option value="">No Exams Defined Yet</option>';
-                return;
-            }
-
-            examsSetupList.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.id;
-                opt.textContent = `${ex.name} (${ex.session})`;
-                select.appendChild(opt);
-            });
-        };
-
-        window.generateConsolidatedSheet = function(blankMode = false) {
-            try {
-                window.isBlankMode = blankMode;
-                const examSelect = document.getElementById('cr_examSelect');
-                const classSelect = document.getElementById('cr_classSelect');
-                const passSelect = document.getElementById('cr_passPct');
-
-                if (!examSelect || !classSelect || !passSelect) return;
-
-                const examId = examSelect.value;
-                const selectedClass = classSelect.value;
-                const passCriteria = parseInt(passSelect.value) || 33;
-
-                const thead = document.getElementById('consolidatedTableHead');
-                const tbody = document.getElementById('consolidatedTableBody');
-                const docTitle = document.getElementById('cr_docTitle');
-
-                if (!thead || !tbody) return;
-                thead.innerHTML = '';
-                tbody.innerHTML = '';
-
-                const exam = examsSetupList.find(e => e.id === examId);
-                if (!exam) {
-                    tbody.innerHTML = '<tr><td colspan="12" class="text-center py-6 text-slate-500">Please define an Exam first in Exam Setup tab.</td></tr>';
-                    return;
-                }
-
-                document.getElementById('cr_printExamTitle').textContent = exam.name;
-                document.getElementById('cr_printClassTitle').textContent = selectedClass;
-                document.getElementById('cr_printDate').textContent = new Date().toLocaleDateString('en-GB');
-
-                if (blankMode) {
-                    docTitle.textContent = "BLANK MASTER MARKS AWARD LIST (TEACHER EVALUATION SHEET)";
-                } else {
-                    docTitle.textContent = "CONSOLIDATIVE RESULT SHEET";
-                }
-
-                const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
-
-                let headHtml = `
-                    <tr>
-                        <th class="py-2.5 px-2 text-center w-10">Sr #</th>
-                        <th class="py-2.5 px-2 w-16">Roll No</th>
-                        <th class="py-2.5 px-3">Student Name</th>
-                        <th class="py-2.5 px-3">Father Name</th>
-                `;
-                subjects.forEach(sub => {
-                    headHtml += `<th class="py-2.5 px-2 text-center min-w-[70px]">${sub.name} <span class="block text-[9px] text-slate-500">(${sub.marks})</span></th>`;
                 });
 
-                if (blankMode) {
-                    headHtml += `
-                        <th class="py-2.5 px-2 text-center min-w-[80px]">Total Obt</th>
-                        <th class="py-2.5 px-2 text-center min-w-[80px]">Teacher Sign</th>
-                    </tr>`;
+                const passedCount = studentResults.filter(s => s.isPass).length;
+                const failedCount = totalStudents - passedCount;
+                const passPct = ((passedCount / totalStudents) * 100).toFixed(1);
+                const failPct = ((failedCount / totalStudents) * 100).toFixed(1);
+                const classAverage = (grandScoreSum / totalStudents).toFixed(1);
+
+                if (passEl) passEl.textContent = passedCount;
+                if (failEl) failEl.textContent = failedCount;
+                if (passBadge) passBadge.textContent = `${passPct}% Pass Ratio`;
+                if (failBadge) failBadge.textContent = `${failPct}% Detained`;
+                if (avgEl) avgEl.textContent = `${classAverage}%`;
+
+                const sortedPassed = studentResults.filter(s => s.isPass).sort((a, b) => b.totalObt - a.totalObt);
+                if (sortedPassed.length > 0) {
+                    if (highEl) highEl.textContent = `${sortedPassed[0].totalObt} / ${totalMaxMarks}`;
+                    if (highStudentEl) highStudentEl.textContent = `🥇 ${sortedPassed[0].name} (${sortedPassed[0].percentage}%)`;
                 } else {
-                    headHtml += `
-                        <th class="py-2.5 px-2 text-center">Total</th>
-                        <th class="py-2.5 px-2 text-center">Obt</th>
-                        <th class="py-2.5 px-2 text-center">%</th>
-                        <th class="py-2.5 px-2 text-center">Grade</th>
-                        <th class="py-2.5 px-2 text-center">Status</th>
-                        <th class="py-2.5 px-2 text-center">Position</th>
-                    </tr>`;
-                }
-                thead.innerHTML = headHtml;
-
-                const classStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-
-                if (classStudents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${10 + subjects.length}" class="text-center py-6 text-slate-500 font-medium">No active students enrolled in "${selectedClass}".</td></tr>`;
-                    window.updateConsolidatedStats(0, 0, 0, 0, "-");
-                    return;
+                    if (highEl) highEl.textContent = '-';
+                    if (highStudentEl) highStudentEl.textContent = 'No Passed Students';
                 }
 
-                const totalMaxMarks = subjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
-                let studentResults = [];
+                // Render Top 3 Podium
+                if (podiumContainer) {
+                    podiumContainer.innerHTML = '';
+                    const ranks = [
+                        { label: '1st Position (Gold Medalist)', icon: '🥇', bg: 'from-amber-500/20 via-slate-900 to-slate-950', border: 'border-amber-500/50', text: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
+                        { label: '2nd Position (Silver Medalist)', icon: '🥈', bg: 'from-slate-400/20 via-slate-900 to-slate-950', border: 'border-slate-400/50', text: 'text-slate-300', badge: 'bg-slate-500/20 text-slate-200' },
+                        { label: '3rd Position (Bronze Medalist)', icon: '🥉', bg: 'from-amber-700/20 via-slate-900 to-slate-950', border: 'border-amber-700/50', text: 'text-amber-500', badge: 'bg-amber-700/20 text-amber-400' }
+                    ];
 
-                classStudents.forEach((s, idx) => {
-                    if (blankMode) {
-                        const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50 h-8";
+                    for (let i = 0; i < 3; i++) {
+                        const st = sortedPassed[i];
+                        const r = ranks[i];
+                        const col = document.createElement('div');
+                        col.className = `bg-gradient-to-b ${r.bg} border ${r.border} rounded-2xl p-4 shadow-lg flex flex-col justify-between`;
 
-                        let rowHtml = `
-                            <td class="py-2 px-2 text-center font-bold">${idx + 1}</td>
-                            <td class="py-2 px-2 font-mono font-bold text-slate-900">${s.rollNo}</td>
-                            <td class="py-2 px-3 font-bold text-slate-900">${s.name}</td>
-                            <td class="py-2 px-3 text-slate-700">${s.father}</td>
+                        if (st) {
+                            col.innerHTML = `
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xl">${r.icon}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${r.badge}">
+                                        ${r.label.split(' ')[0]}
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-black text-white truncate">${st.name}</h4>
+                                    <p class="text-[11px] text-slate-400 truncate">S/O: ${st.father} (Roll #${st.rollNo})</p>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between">
+                                    <span class="text-xs font-bold font-mono text-emerald-400">${st.totalObt} Marks</span>
+                                    <span class="text-xs font-black ${r.text} font-mono">${st.percentage}%</span>
+                                </div>
+                            `;
+                        } else {
+                            col.innerHTML = `
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xl opacity-40">${r.icon}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-500">Vacant</span>
+                                </div>
+                                <div class="py-4 text-center">
+                                    <p class="text-xs text-slate-500 font-medium">Position Pending</p>
+                                </div>
+                            `;
+                        }
+                        podiumContainer.appendChild(col);
+                    }
+                }
+
+                // Render Multi-Color Grade Distribution Progress Bars
+                if (gradeBarsContainer) {
+                    gradeBarsContainer.innerHTML = '';
+                    const gradeColors = {
+                        'A+': { bar: 'bg-emerald-500', text: 'text-emerald-400', label: 'A+ (80% & Above)' },
+                        'A':  { bar: 'bg-blue-500', text: 'text-blue-400', label: 'A (70% - 79%)' },
+                        'B':  { bar: 'bg-indigo-500', text: 'text-indigo-400', label: 'B (60% - 69%)' },
+                        'C':  { bar: 'bg-amber-500', text: 'text-amber-400', label: 'C (50% - 59%)' },
+                        'D':  { bar: 'bg-orange-500', text: 'text-orange-400', label: 'D (40% - 49%)' },
+                        'F':  { bar: 'bg-rose-500', text: 'text-rose-400', label: 'F (Below Pass Criteria)' }
+                    };
+
+                    for (const [gr, info] of Object.entries(gradeColors)) {
+                        const count = gradeCounts[gr] || 0;
+                        const pct = totalStudents > 0 ? ((count / totalStudents) * 100).toFixed(0) : 0;
+
+                        const barRow = document.createElement('div');
+                        barRow.className = "space-y-1";
+                        barRow.innerHTML = `
+                            <div class="flex justify-between text-xs font-semibold">
+                                <span class="text-slate-300 font-bold flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full ${info.bar}"></span>
+                                    <span>${info.label}</span>
+                                </span>
+                                <span class="${info.text} font-mono font-bold">${count} Students (${pct}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-800">
+                                <div class="${info.bar} h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                            </div>
                         `;
+                        gradeBarsContainer.appendChild(barRow);
+                    }
+                }
 
-                        subjects.forEach(() => {
-                            rowHtml += `<td class="py-2 px-2 text-center border-slate-300"></td>`;
-                        });
+                // Gender Pass Ratio
+                const boysPct = boysTotal > 0 ? ((boysPassed / boysTotal) * 100).toFixed(0) : 0;
+                const girlsPct = girlsTotal > 0 ? ((girlsPassed / girlsTotal) * 100).toFixed(0) : 0;
+                const bEl = document.getElementById('ana_boysPass');
+                const gEl = document.getElementById('ana_girlsPass');
+                if (bEl) bEl.textContent = `${boysPct}% (${boysPassed}/${boysTotal})`;
+                if (gEl) gEl.textContent = `${girlsPct}% (${girlsPassed}/${girlsTotal})`;
 
-                        rowHtml += `
-                            <td class="py-2 px-2 text-center border-slate-300"></td>
-                            <td class="py-2 px-2 text-center border-slate-300"></td>
-                        `;
-                        tr.innerHTML = rowHtml;
-                        tbody.appendChild(tr);
-                    } else {
-                        const key = `${examId}_${s.rollNo}`;
-                        const savedMarks = marksDatabase[key] || {};
+                // Subject-Wise Quality Breakdown Matrix
+                if (subjectTableBody) {
+                    subjectTableBody.innerHTML = '';
+                    subjects.forEach(sub => {
+                        let subPassed = 0;
+                        let subFailed = 0;
+                        let highestMarks = -1;
+                        let topperName = '-';
 
-                        let totalObt = 0;
-                        let isSubjectFail = false;
-                        let hasMarks = false;
-                        let subMarksMap = {};
+                        classStudents.forEach(s => {
+                            const key = `${exam.id}_${s.rollNo}`;
+                            const marks = (marksDatabase[key] && marksDatabase[key][sub.name] !== undefined) ? parseInt(marksDatabase[key][sub.name]) : 0;
+                            const passMin = (parseInt(sub.marks) * passCriteria) / 100;
 
-                        subjects.forEach(sub => {
-                            const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
-                            if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
-                            totalObt += obt;
-                            subMarksMap[sub.name] = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? savedMarks[sub.name] : '-';
+                            if (marks >= passMin) subPassed++; else subFailed++;
 
-                            const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                            if (obt < subPassMin) {
-                                isSubjectFail = true;
+                            if (marks > highestMarks) {
+                                highestMarks = marks;
+                                topperName = `${s.name} (${marks})`;
                             }
                         });
 
-                        const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
-
-                        let grade = 'F';
-                        if (percentage >= 80) grade = 'A+';
-                        else if (percentage >= 70) grade = 'A';
-                        else if (percentage >= 60) grade = 'B';
-                        else if (percentage >= 50) grade = 'C';
-                        else if (percentage >= 40) grade = 'D';
-                        else grade = 'E';
-
-                        const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
-                        if (!isPass) grade = 'F';
-
-                        studentResults.push({
-                            rollNo: s.rollNo,
-                            name: s.name,
-                            father: s.father,
-                            subMarksMap,
-                            totalMaxMarks,
-                            totalObt,
-                            percentage,
-                            grade,
-                            status: isPass ? 'PASS' : 'FAIL',
-                            hasMarks
-                        });
-                    }
-                });
-
-                if (!blankMode) {
-                    const passedStudents = studentResults.filter(s => s.status === 'PASS').sort((a, b) => b.totalObt - a.totalObt);
-
-                    passedStudents.forEach((s, idx) => {
-                        if (idx === 0) s.position = '1st 🥇';
-                        else if (idx === 1) s.position = '2nd 🥈';
-                        else if (idx === 2) s.position = '3rd 🥉';
-                        else s.position = `${idx + 1}th`;
-                    });
-
-                    studentResults.forEach(s => {
-                        if (s.status !== 'PASS') s.position = '-';
-                    });
-
-                    currentConsolidatedRows = studentResults;
-
-                    let passedCount = 0;
-                    let failedCount = 0;
-
-                    studentResults.forEach((s, idx) => {
-                        if (s.status === 'PASS') passedCount++; else failedCount++;
+                        const subPassRatio = totalStudents > 0 ? ((subPassed / totalStudents) * 100).toFixed(0) : 0;
 
                         const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50";
-
-                        let rowHtml = `
-                            <td class="py-2 px-2 text-center font-bold">${idx + 1}</td>
-                            <td class="py-2 px-2 font-mono font-bold text-slate-900">${s.rollNo}</td>
-                            <td class="py-2 px-3 font-bold text-slate-900">${s.name}</td>
-                            <td class="py-2 px-3 text-slate-700">${s.father}</td>
-                        `;
-
-                        subjects.forEach(sub => {
-                            const val = s.subMarksMap[sub.name];
-                            const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                            const isSubPass = parseInt(val) >= subPassMin;
-                            const markColor = val === '-' ? 'text-slate-400' : (isSubPass ? 'text-slate-900 font-semibold' : 'text-rose-600 font-bold');
-                            rowHtml += `<td class="py-2 px-2 text-center ${markColor}">${val}</td>`;
-                        });
-
-                        rowHtml += `
-                            <td class="py-2 px-2 text-center font-bold text-slate-700">${s.totalMaxMarks}</td>
-                            <td class="py-2 px-2 text-center font-bold text-slate-950 font-mono">${s.totalObt}</td>
-                            <td class="py-2 px-2 text-center font-bold ${s.status === 'PASS' ? 'text-indigo-600' : 'text-rose-600'}">${s.percentage}%</td>
-                            <td class="py-2 px-2 text-center font-black ${s.grade === 'A+' || s.grade === 'A' ? 'text-emerald-600' : (s.grade === 'F' ? 'text-rose-600' : 'text-indigo-600')}">${s.grade}</td>
-                            <td class="py-2 px-2 text-center">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${s.status === 'PASS' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                                    ${s.status}
-                                </span>
+                        tr.className = "hover:bg-slate-800/40 text-xs";
+                        tr.innerHTML = `
+                            <td class="py-2.5 px-2.5 font-bold text-white uppercase">${sub.name} <span class="text-slate-500 text-[10px]">(${sub.marks}M)</span></td>
+                            <td class="py-2.5 px-2 text-center">
+                                <span class="text-emerald-400 font-bold">${subPassed}P</span> / 
+                                <span class="text-rose-400 font-bold">${subFailed}F</span>
                             </td>
-                            <td class="py-2 px-2 text-center font-black text-amber-600">${s.position}</td>
+                            <td class="py-2.5 px-2 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <div class="w-14 bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-indigo-500 h-full" style="width: ${subPassRatio}%"></div>
+                                    </div>
+                                    <span class="font-bold text-indigo-300 font-mono text-[11px]">${subPassRatio}%</span>
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-2 text-center font-semibold text-amber-300 truncate max-w-[130px]">${topperName}</td>
                         `;
-
-                        tr.innerHTML = rowHtml;
-                        tbody.appendChild(tr);
+                        subjectTableBody.appendChild(tr);
                     });
-
-                    const totalAppeared = studentResults.length;
-                    const overallPassPct = totalAppeared > 0 ? ((passedCount / totalAppeared) * 100).toFixed(1) : 0;
-                    const topStudent = passedStudents.length > 0 ? `${passedStudents[0].name} (${passedStudents[0].totalObt})` : "-";
-
-                    window.updateConsolidatedStats(totalAppeared, passedCount, failedCount, overallPassPct, topStudent);
-                } else {
-                    window.updateConsolidatedStats(classStudents.length, "-", "-", "-", "-");
                 }
+
             } catch (e) {
-                console.error("Error in generateConsolidatedSheet:", e);
+                console.error("Error in loadAnalyticsData:", e);
             }
         };
 
-        // AUTO-LANDSCAPE PRINT FOR GAZETTE
-        window.printBlankMasterSheet = function() {
-            window.showTab('consolidated');
-            window.generateConsolidatedSheet(true);
+        window.printAnalyticsReport = function() {
+            window.showTab('resultAnalytics');
             window.setPrintOrientation('landscape');
             setTimeout(() => { window.print(); }, 350);
-        };
-
-        window.printCalculatedGazette = function() {
-            window.showTab('consolidated');
-            window.generateConsolidatedSheet(false);
-            window.setPrintOrientation('landscape');
-            setTimeout(() => { window.print(); }, 350);
-        };
-
-        window.updateConsolidatedStats = function(total, pass, fail, pct, top) {
-            const elApp = document.getElementById('cr_statAppeared');
-            const elPass = document.getElementById('cr_statPassed');
-            const elFail = document.getElementById('cr_statFailed');
-            const elPct = document.getElementById('cr_statPassPct');
-            const elTop = document.getElementById('cr_statTop');
-
-            if (elApp) elApp.textContent = total;
-            if (elPass) elPass.textContent = pass;
-            if (elFail) elFail.textContent = fail;
-            if (elPct) elPct.textContent = isNaN(pct) ? pct : `${pct}%`;
-            if (elTop) elTop.textContent = top;
-
-            const footTot = document.getElementById('cr_footTotal');
-            const footPass = document.getElementById('cr_footPassed');
-            const footFail = document.getElementById('cr_footFailed');
-            const footPct = document.getElementById('cr_footPct');
-
-            if (footTot) footTot.textContent = total;
-            if (footPass) footPass.textContent = pass;
-            if (footFail) footFail.textContent = fail;
-            if (footPct) footPct.textContent = isNaN(pct) ? pct : `${pct}%`;
-        };
-
-        window.exportConsolidatedExcel = function() {
-            if (!currentConsolidatedRows || currentConsolidatedRows.length === 0) {
-                alert('No consolidated data to export!');
-                return;
-            }
-            if (typeof XLSX === 'undefined') { alert('Excel library loading...'); return; }
-
-            const exportData = currentConsolidatedRows.map((s, idx) => {
-                const row = {
-                    "Sr #": idx + 1,
-                    "Roll No": s.rollNo,
-                    "Student Name": s.name,
-                    "Father Name": s.father
-                };
-                for (const [sub, val] of Object.entries(s.subMarksMap)) {
-                    row[sub] = val;
-                }
-                row["Total Marks"] = s.totalMaxMarks;
-                row["Obtained Marks"] = s.totalObt;
-                row["Percentage (%)"] = s.percentage + '%';
-                row["Grade"] = s.grade;
-                row["Status"] = s.status;
-                row["Position"] = s.position;
-                return row;
-            });
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Consolidated_Gazette");
-            XLSX.writeFile(wb, "Chenab_College_Consolidated_Result.xlsx");
-        };
-
-        // ================= SUBJECT-WISE MARKS ENTRY LOGIC =================
-        window.populateExamDropdown = function() {
-            const select = document.getElementById('me_examSelect');
-            if (!select) return;
-            select.innerHTML = '';
-
-            if (!examsSetupList || examsSetupList.length === 0) {
-                select.innerHTML = '<option value="">No Exams Defined Yet (Create in Exam Setup)</option>';
-                return;
-            }
-
-            examsSetupList.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.id;
-                opt.textContent = `${ex.name} (${ex.session})`;
-                select.appendChild(opt);
-            });
-        };
-
-        window.onExamOrClassChange = function() {
-            const examSelect = document.getElementById('me_examSelect');
-            const subSelect = document.getElementById('me_subjectSelect');
-            if (!examSelect || !subSelect) return;
-
-            const examId = examSelect.value;
-            subSelect.innerHTML = '';
-
-            const exam = examsSetupList.find(e => e.id === examId);
-            if (!exam || !exam.subjects || exam.subjects.length === 0) {
-                subSelect.innerHTML = '<option value="">No subjects found for this exam</option>';
-                window.loadSubjectMarksTable();
-                return;
-            }
-
-            exam.subjects.forEach(sub => {
-                const opt = document.createElement('option');
-                opt.value = sub.name;
-                opt.textContent = `${sub.name} (Max: ${sub.marks} Marks)`;
-                subSelect.appendChild(opt);
-            });
-
-            window.renderSubjectProgressTracker();
-            window.loadSubjectMarksTable();
-        };
-
-        window.renderSubjectProgressTracker = function() {
-            const examSelect = document.getElementById('me_examSelect');
-            const classSelect = document.getElementById('me_classSelect');
-            const container = document.getElementById('subjectProgressContainer');
-
-            if (!examSelect || !classSelect || !container) return;
-
-            const examId = examSelect.value;
-            const selectedClass = classSelect.value;
-            container.innerHTML = '';
-
-            const exam = examsSetupList.find(e => e.id === examId);
-            if (!exam) return;
-
-            const classStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-            const totalStudents = classStudents.length;
-            const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
-
-            subjects.forEach(sub => {
-                let enteredCount = 0;
-                classStudents.forEach(s => {
-                    const key = `${examId}_${s.rollNo}`;
-                    if (marksDatabase[key] && marksDatabase[key][sub.name] !== undefined && marksDatabase[key][sub.name] !== '') {
-                        enteredCount++;
-                    }
-                });
-
-                const isComplete = totalStudents > 0 && enteredCount === totalStudents;
-                const isPending = enteredCount === 0;
-
-                let colorStyle = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-                let icon = '<i class="fa-solid fa-clock mr-1"></i>';
-                if (isComplete) {
-                    colorStyle = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-                    icon = '<i class="fa-solid fa-circle-check mr-1"></i>';
-                } else if (isPending) {
-                    colorStyle = 'bg-slate-800 text-slate-400 border-slate-700';
-                    icon = '<i class="fa-solid fa-circle mr-1"></i>';
-                }
-
-                const badge = document.createElement('div');
-                badge.className = `px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 ${colorStyle}`;
-                badge.innerHTML = `
-                    <span>${icon} <b>${sub.name}</b>:</span>
-                    <span>${enteredCount}/${totalStudents}</span>
-                    <span class="text-[10px] opacity-75">${totalStudents > 0 ? ((enteredCount/totalStudents)*100).toFixed(0) : 0}%</span>
-                `;
-                container.appendChild(badge);
-            });
-        };
-
-        window.loadSubjectMarksTable = function() {
-            const examSelect = document.getElementById('me_examSelect');
-            const classSelect = document.getElementById('me_classSelect');
-            const subSelect = document.getElementById('me_subjectSelect');
-            const tbody = document.getElementById('subjectMarksTableBody');
-            
-            if (!examSelect || !classSelect || !subSelect || !tbody) return;
-
-            const examId = examSelect.value;
-            const selectedClass = classSelect.value;
-            const selectedSubject = subSelect.value;
-            tbody.innerHTML = '';
-
-            const exam = examsSetupList.find(e => e.id === examId);
-            if (!exam) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-500">Please define an Exam first in Exam Setup tab.</td></tr>';
-                return;
-            }
-
-            const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
-            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
-            
-            const badgeEl = document.getElementById('activeSubjectBadge');
-            const thMaxEl = document.getElementById('thMaxMarks');
-            if (badgeEl) badgeEl.textContent = `${subObj.name} (Max: ${subObj.marks} Marks)`;
-            if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks})`;
-
-            const classStudents = studentsList.filter(s => s.class === selectedClass && s.status !== 'Left');
-
-            if (classStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}". Please add students in Student Enrollment first!</td></tr>`;
-                return;
-            }
-
-            classStudents.forEach((s, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/40 transition-colors";
-
-                const key = `${examId}_${s.rollNo}`;
-                const savedVal = (marksDatabase[key] && marksDatabase[key][selectedSubject] !== undefined) ? marksDatabase[key][selectedSubject] : '';
-
-                tr.innerHTML = `
-                    <td class="py-2.5 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
-                    <td class="py-2.5 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
-                    <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
-                    <td class="py-2.5 px-4 text-slate-400">${s.father}</td>
-                    <td class="py-2 px-4 text-center">
-                        <input type="number" min="0" max="${subObj.marks}" placeholder="0-${subObj.marks}"
-                            value="${savedVal}"
-                            data-roll="${s.rollNo}" 
-                            data-index="${idx}"
-                            onkeydown="window.handleMarksEnterKey(event, ${idx})"
-                            class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        };
-
-        window.handleMarksEnterKey = function(event, currentIndex) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const inputs = document.querySelectorAll('.marks-input-single');
-                if (currentIndex + 1 < inputs.length) {
-                    inputs[currentIndex + 1].focus();
-                    inputs[currentIndex + 1].select();
-                } else {
-                    window.saveCurrentSubjectMarks();
-                }
-            }
-        };
-
-        window.saveCurrentSubjectMarks = function() {
-            const examSelect = document.getElementById('me_examSelect');
-            const subSelect = document.getElementById('me_subjectSelect');
-
-            if (!examSelect || !subSelect) return;
-
-            const examId = examSelect.value;
-            const selectedSubject = subSelect.value;
-
-            if (!examId || !selectedSubject) {
-                alert('Please select an examination and subject!');
-                return;
-            }
-
-            const inputs = document.querySelectorAll('.marks-input-single');
-            if (inputs.length === 0) {
-                alert('No student marks to save!');
-                return;
-            }
-
-            inputs.forEach(input => {
-                const rollNo = input.getAttribute('data-roll');
-                const val = input.value.trim();
-
-                const key = `${examId}_${rollNo}`;
-                if (!marksDatabase[key]) {
-                    marksDatabase[key] = {};
-                }
-
-                if (val !== '') {
-                    marksDatabase[key][selectedSubject] = parseInt(val) || 0;
-                } else {
-                    delete marksDatabase[key][selectedSubject];
-                }
-            });
-
-            localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
-            window.renderSubjectProgressTracker();
-            alert(`Success: Marks for "${selectedSubject}" saved successfully!`);
-        };
-
-        // ================= EXAM SETUP LOGIC =================
-        window.renderSubjectRows = function() {
-            const container = document.getElementById('subjectsContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            let grandTotal = 0;
-
-            currentFormSubjects.forEach((sub, idx) => {
-                const m = parseInt(sub.marks) || 0;
-                grandTotal += m;
-
-                const row = document.createElement('div');
-                row.className = "flex items-center gap-3 bg-slate-900 p-2.5 rounded-xl border border-slate-800";
-                row.innerHTML = `
-                    <span class="text-slate-500 font-bold text-xs w-6 text-center">${idx + 1}</span>
-                    <input type="text" value="${sub.name}" oninput="window.updateSubjectName(${idx}, this.value)" placeholder="Subject Name" 
-                        class="flex-1 px-3 py-1.5 bg-slate-950 border border-slate-700/80 rounded-lg text-xs text-white focus:ring-1 focus:ring-indigo-500">
-                    <div class="flex items-center gap-1.5">
-                        <input type="number" min="10" max="200" value="${sub.marks}" oninput="window.updateSubjectMarks(${idx}, this.value)" 
-                            class="w-24 px-3 py-1.5 bg-slate-950 border border-slate-700/80 rounded-lg text-xs text-white font-mono text-center focus:ring-1 focus:ring-indigo-500">
-                        <span class="text-[11px] text-slate-500">Marks</span>
-                    </div>
-                    <button type="button" onclick="window.removeSubjectRow(${idx})" class="text-slate-500 hover:text-rose-400 p-1.5 transition-colors" title="Remove Subject">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                `;
-                container.appendChild(row);
-            });
-
-            const totalEl = document.getElementById('grandTotalDisplay');
-            if (totalEl) totalEl.textContent = `${grandTotal} Marks`;
-        };
-
-        window.addNewSubjectRow = function() {
-            currentFormSubjects.push({ name: "", marks: 100 });
-            window.renderSubjectRows();
-        };
-
-        window.removeSubjectRow = function(idx) {
-            if (currentFormSubjects.length <= 1) {
-                alert('At least 1 subject is required for an exam!');
-                return;
-            }
-            currentFormSubjects.splice(idx, 1);
-            window.renderSubjectRows();
-        };
-
-        window.updateSubjectName = function(idx, val) {
-            currentFormSubjects[idx].name = val;
-        };
-
-        window.updateSubjectMarks = function(idx, val) {
-            currentFormSubjects[idx].marks = parseInt(val) || 0;
-            const totalEl = document.getElementById('grandTotalDisplay');
-            let grandTotal = currentFormSubjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
-            if (totalEl) totalEl.textContent = `${grandTotal} Marks`;
-        };
-
-        window.toggleAllClasses = function(masterCheckbox) {
-            const boxes = document.querySelectorAll('.class-checkbox');
-            boxes.forEach(cb => cb.checked = masterCheckbox.checked);
-        };
-
-        window.saveExamDefinition = function(e) {
-            e.preventDefault();
-            const name = document.getElementById('ex_name').value.trim();
-            const session = document.getElementById('ex_session').value.trim();
-            const passPct = parseInt(document.getElementById('ex_passPct').value) || 33;
-
-            const selectedClasses = [];
-            document.querySelectorAll('.class-checkbox:checked').forEach(cb => selectedClasses.push(cb.value));
-
-            if (selectedClasses.length === 0) {
-                alert('Please select at least ONE target class for this examination!');
-                return;
-            }
-
-            const validSubjects = currentFormSubjects.filter(s => s.name.trim() !== '' && s.marks > 0);
-            if (validSubjects.length === 0) {
-                alert('Please enter at least ONE valid subject with marks!');
-                return;
-            }
-
-            const newExam = {
-                id: 'exam_' + Date.now(),
-                name,
-                session,
-                passPct,
-                classes: selectedClasses,
-                subjects: validSubjects
-            };
-
-            examsSetupList.unshift(newExam);
-            localStorage.setItem('ccs_exams_setup', JSON.stringify(examsSetupList));
-            window.renderExamsTable();
-            alert(`Exam "${name}" defined successfully for selected classes!`);
-            document.getElementById('ex_name').value = '';
-        };
-
-        window.renderExamsTable = function() {
-            const tbody = document.getElementById('definedExamsTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            const countEl = document.getElementById('definedExamsCount');
-            if (countEl) countEl.textContent = examsSetupList.length;
-
-            if (!examsSetupList || examsSetupList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500 font-medium">No examinations defined yet. Create your first exam above!</td></tr>`;
-                return;
-            }
-
-            examsSetupList.forEach((ex) => {
-                const classesList = Array.isArray(ex.classes) ? ex.classes : [];
-                const subjectsList = Array.isArray(ex.subjects) ? ex.subjects : [];
-                const totalMarks = subjectsList.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
-
-                const classBadges = classesList.length > 5 
-                    ? `<span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-lg text-[10px] font-bold">${classesList.length} Classes Selected</span>`
-                    : classesList.map(c => `<span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-lg text-[10px] mr-1">${c}</span>`).join('');
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/40 transition-colors";
-                tr.innerHTML = `
-                    <td class="py-3 px-4 font-bold text-white">${ex.name}</td>
-                    <td class="py-3 px-4 text-slate-400 font-mono text-[11px]">${ex.session}</td>
-                    <td class="py-3 px-4">${classBadges || '-'}</td>
-                    <td class="py-3 px-4 text-center font-semibold text-slate-300">${subjectsList.length}</td>
-                    <td class="py-3 px-4 text-center font-bold text-emerald-400 font-mono">${totalMarks}</td>
-                    <td class="py-3 px-4 text-center font-bold text-indigo-400">${ex.passPct}%</td>
-                    <td class="py-3 px-4 text-center">
-                        <button type="button" onclick="window.deleteExam('${ex.id}')" class="text-slate-500 hover:text-rose-400 p-1.5 transition-colors" title="Delete Exam">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        };
-
-        window.deleteExam = function(id) {
-            if (confirm('Are you sure you want to delete this examination setup?')) {
-                examsSetupList = examsSetupList.filter(e => e.id !== id);
-                localStorage.setItem('ccs_exams_setup', JSON.stringify(examsSetupList));
-                window.renderExamsTable();
-            }
-        };
-
-        // ================= CLASS WISE LIST =================
-        window.renderClassWiseList = function() {
-            const classSelect = document.getElementById('filterClass');
-            const groupSelect = document.getElementById('filterGroup');
-            const tbody = document.getElementById('classListTableBody');
-            if (!classSelect || !groupSelect || !tbody) return;
-
-            const selectedClass = classSelect.value;
-            const selectedGroup = groupSelect.value;
-            tbody.innerHTML = '';
-
-            let filtered = studentsList.filter(s => s.status !== 'Left');
-            if (selectedClass !== 'All') filtered = filtered.filter(s => s.class === selectedClass);
-            if (selectedGroup !== 'All') filtered = filtered.filter(s => s.group === selectedGroup);
-
-            document.getElementById('printClassTitle').textContent = selectedClass === 'All' ? 'All Classes' : selectedClass;
-            document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
-
-            let boysCount = 0;
-            let girlsCount = 0;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-medium">No active students found in this class/section.</td></tr>`;
-            } else {
-                filtered.forEach((s, idx) => {
-                    if (s.gender === 'Male') boysCount++; else girlsCount++;
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50";
-                    tr.innerHTML = `
-                        <td class="py-2 px-3 text-center font-bold text-slate-900">${idx + 1}</td>
-                        <td class="py-2 px-3 font-mono font-bold text-slate-900">${s.rollNo}</td>
-                        <td class="py-2 px-4 font-bold text-slate-900">${s.name}</td>
-                        <td class="py-2 px-4 text-slate-700">${s.father}</td>
-                        <td class="py-2 px-3 font-mono text-slate-700">${s.phone || '-'}</td>
-                        <td class="py-2 px-3 text-slate-700 font-semibold">${s.group}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            document.getElementById('cw_total').textContent = filtered.length;
-            document.getElementById('cw_boys').textContent = boysCount;
-            document.getElementById('cw_girls').textContent = girlsCount;
-            document.getElementById('printTotalBottom').textContent = filtered.length;
-            document.getElementById('printBoysBottom').textContent = boysCount;
-            document.getElementById('printGirlsBottom').textContent = girlsCount;
-        };
-
-        // ================= STUDENT DIRECTORY =================
-        window.setDirectoryStatusFilter = function(filter) {
-            directoryStatusFilter = filter;
-            const btnAll = document.getElementById('btnFilterAll');
-            const btnAct = document.getElementById('btnFilterActive');
-            const btnLft = document.getElementById('btnFilterLeft');
-
-            const inactive = "px-3 py-1 rounded-lg font-semibold text-slate-400 hover:text-white";
-            const active = "px-3 py-1 rounded-lg font-bold bg-indigo-600 text-white";
-
-            if (btnAll) btnAll.className = filter === 'All' ? active : inactive;
-            if (btnAct) btnAct.className = filter === 'Active' ? active : inactive;
-            if (btnLft) btnLft.className = filter === 'Left' ? active : inactive;
-
-            window.filterStudents();
-        };
-
-        window.updateGraphsAndStats = function() {
-            const totalActive = studentsList.filter(s => s.status === 'Active').length;
-            const totalLeft = studentsList.filter(s => s.status === 'Left').length;
-            const boys = studentsList.filter(s => s.status === 'Active' && s.gender === 'Male').length;
-            const girls = studentsList.filter(s => s.status === 'Active' && s.gender === 'Female').length;
-
-            const statTotal = document.getElementById('statTotal');
-            const statBoys = document.getElementById('statBoys');
-            const statGirls = document.getElementById('statGirls');
-            const statLeft = document.getElementById('statLeft');
-
-            if (statTotal) statTotal.textContent = totalActive;
-            if (statBoys) statBoys.textContent = boys;
-            if (statGirls) statGirls.textContent = girls;
-            if (statLeft) statLeft.textContent = totalLeft;
-        };
-
-        window.renderStudentsTable = function(data) {
-            const tbody = document.getElementById('studentTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            let filtered = data || studentsList;
-            if (directoryStatusFilter === 'Active') {
-                filtered = filtered.filter(s => s.status === 'Active');
-            } else if (directoryStatusFilter === 'Left') {
-                filtered = filtered.filter(s => s.status === 'Left');
-            }
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No students match your search or filter.</td></tr>`;
-                window.updateGraphsAndStats();
-                return;
-            }
-
-            filtered.forEach((s) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/40 transition-colors";
-
-                const isLeft = s.status === 'Left';
-                const statusBadge = isLeft 
-                    ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center w-max gap-1"><i class="fa-solid fa-circle-xmark"></i> Left (SLC)</span>`
-                    : `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center w-max gap-1"><i class="fa-solid fa-circle-check"></i> Active</span>`;
-
-                tr.innerHTML = `
-                    <td class="py-3 px-3 font-mono font-bold text-indigo-400">${s.rollNo}</td>
-                    <td class="py-3 px-4 font-semibold text-white">${s.name}</td>
-                    <td class="py-3 px-4 text-slate-400">${s.father}</td>
-                    <td class="py-3 px-3 text-slate-300 font-mono text-[11px]">${s.phone || '-'}</td>
-                    <td class="py-3 px-3">
-                        <span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-lg">${s.class}</span>
-                        <span class="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-2 py-0.5 rounded-lg text-[10px] ml-1 font-semibold">${s.group}</span>
-                    </td>
-                    <td class="py-3 px-3">${statusBadge}</td>
-                    <td class="py-3 px-4 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button type="button" onclick="window.toggleStudentStatus('${s.rollNo}')" title="${isLeft ? 'Make Active' : 'Mark as Left / SLC'}" class="p-1.5 rounded-lg ${isLeft ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-amber-400 hover:bg-amber-500/10'} transition-colors">
-                                <i class="fa-solid ${isLeft ? 'fa-user-check' : 'fa-user-slash'}"></i>
-                            </button>
-                            <button type="button" onclick="window.editStudent('${s.rollNo}')" title="Edit Student Details" class="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-colors">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button type="button" onclick="window.deleteStudent('${s.rollNo}')" title="Delete Student" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            window.updateGraphsAndStats();
-            localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
-        };
-
-        window.filterStudents = function() {
-            const query = document.getElementById('tableSearch').value.toLowerCase().trim();
-            const filtered = studentsList.filter(s => 
-                s.name.toLowerCase().includes(query) || 
-                s.rollNo.toLowerCase().includes(query) || 
-                s.father.toLowerCase().includes(query) || 
-                s.class.toLowerCase().includes(query) || 
-                (s.group && s.group.toLowerCase().includes(query)) ||
-                (s.phone && s.phone.toLowerCase().includes(query))
-            );
-            window.renderStudentsTable(filtered);
-        };
-
-        window.toggleStudentStatus = function(rollNo) {
-            const student = studentsList.find(s => s.rollNo === rollNo);
-            if (!student) return;
-
-            const newStatus = student.status === 'Left' ? 'Active' : 'Left';
-            const actionText = newStatus === 'Left' ? `mark Roll No: ${rollNo} (${student.name}) as LEFT / STRUCK-OFF (SLC)` : `re-activate Roll No: ${rollNo} (${student.name})`;
-
-            if (confirm(`Are you sure you want to ${actionText}?`)) {
-                student.status = newStatus;
-                window.renderStudentsTable();
-                alert(`Success: Student ${student.name} is now marked as ${newStatus}!`);
-            }
-        };
-
-        window.editStudent = function(rollNo) {
-            const student = studentsList.find(s => s.rollNo === rollNo);
-            if (!student) return;
-
-            document.getElementById('editOriginalRoll').value = student.rollNo;
-            document.getElementById('s_rollNo').value = student.rollNo;
-            document.getElementById('s_name').value = student.name;
-            document.getElementById('s_fatherName').value = student.father;
-            document.getElementById('s_gender').value = student.gender;
-            document.getElementById('s_class').value = student.class;
-            document.getElementById('s_group').value = student.group;
-            document.getElementById('s_phone').value = student.phone || '';
-            document.getElementById('s_status').value = student.status || 'Active';
-
-            document.getElementById('formTitle').textContent = `Editing Student: ${student.name} (Roll #${student.rollNo})`;
-            document.getElementById('submitBtnText').textContent = "Update Student Details";
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-
-            document.getElementById('studentFormContainer').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        window.cancelEditMode = function() {
-            document.getElementById('editOriginalRoll').value = '';
-            document.getElementById('s_rollNo').value = '';
-            document.getElementById('s_name').value = '';
-            document.getElementById('s_fatherName').value = '';
-            document.getElementById('s_phone').value = '';
-            document.getElementById('s_status').value = 'Active';
-
-            document.getElementById('formTitle').textContent = "Single Student Manual Entry";
-            document.getElementById('submitBtnText').textContent = "Save & Enroll Student";
-            document.getElementById('cancelEditBtn').classList.add('hidden');
-        };
-
-        window.saveStudentForm = function(e) {
-            e.preventDefault();
-            const editRoll = document.getElementById('editOriginalRoll').value;
-            const rollNo = document.getElementById('s_rollNo').value.trim();
-            const name = document.getElementById('s_name').value.trim();
-            const father = document.getElementById('s_fatherName').value.trim();
-            const gender = document.getElementById('s_gender').value;
-            const cls = document.getElementById('s_class').value;
-            const group = document.getElementById('s_group').value.trim() || "General";
-            const phone = document.getElementById('s_phone').value.trim();
-            const status = document.getElementById('s_status').value;
-
-            // Auto-harvest new class or section dynamically
-            if (!masterClassesList.includes(cls)) {
-                masterClassesList.push(cls);
-                localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
-            }
-            if (!masterSectionsList.includes(group)) {
-                masterSectionsList.push(group);
-                localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
-            }
-
-            if (editRoll) {
-                const idx = studentsList.findIndex(s => s.rollNo === editRoll);
-                if (idx >= 0) {
-                    studentsList[idx] = { rollNo, name, father, gender, class: cls, group, phone, status };
-                    alert(`Success: Student ${name} details updated!`);
-                }
-                window.cancelEditMode();
-            } else {
-                const exists = studentsList.some(s => s.rollNo === rollNo);
-                if (exists) {
-                    alert(`Error: Roll Number "${rollNo}" is already registered!`);
-                    return;
-                }
-                studentsList.unshift({ rollNo, name, father, gender, class: cls, group, phone, status });
-                alert(`Success: Student ${name} enrolled successfully!`);
-                e.target.reset();
-            }
-
-            window.refreshAllClassAndSectionDropdowns();
-            window.renderStudentsTable();
-        };
-
-        window.deleteStudent = function(rollNo) {
-            if (confirm(`Are you sure you want to permanently delete Roll No: ${rollNo}? (Tip: You can use "Left" status instead to keep historical archives!)`)) {
-                studentsList = studentsList.filter(s => s.rollNo !== rollNo);
-                window.renderStudentsTable();
-            }
-        };
-
-        window.downloadSampleExcel = function() {
-            if (typeof XLSX === 'undefined') { alert('Excel library loading, please try again.'); return; }
-            const sampleData = [
-                { "Roll No": "105", "Student Name": "Zain Ali", "Father Name": "Ghulam Ali", "Phone": "0300-1234567", "Gender": "Male", "Class": "Class 10", "Section / House": "Jinnah", "Status": "Active" },
-                { "Roll No": "106", "Student Name": "Sana Khan", "Father Name": "Imran Khan", "Phone": "0321-7654321", "Gender": "Female", "Class": "Class 9", "Section / House": "Blue", "Status": "Active" }
-            ];
-            const ws = XLSX.utils.json_to_sheet(sampleData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "CCS_Template");
-            XLSX.writeFile(wb, "Chenab_College_Students_Template.xlsx");
-        };
-
-        window.handleExcelUpload = function(e) {
-            if (typeof XLSX === 'undefined') { alert('Excel library loading, please try again.'); return; }
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-                let addedCount = 0;
-                jsonData.forEach(row => {
-                    const rollNo = String(row["Roll No"] || row["RollNo"] || "").trim();
-                    const name = String(row["Student Name"] || row["Name"] || "").trim();
-                    const father = String(row["Father Name"] || row["Father"] || "").trim();
-                    const phone = String(row["Phone"] || row["Contact"] || "").trim();
-                    let gender = String(row["Gender"] || "Male").trim();
-                    if (gender.toLowerCase().startsWith('f')) gender = 'Female'; else gender = 'Male';
-                    const cls = String(row["Class"] || "Class 10").trim();
-                    const group = String(row["Section / House"] || row["Section"] || row["Group"] || "General").trim();
-                    const status = String(row["Status"] || "Active").trim();
-
-                    if (rollNo && name) {
-                        if (!masterClassesList.includes(cls)) masterClassesList.push(cls);
-                        if (!masterSectionsList.includes(group)) masterSectionsList.push(group);
-
-                        const idx = studentsList.findIndex(s => s.rollNo === rollNo);
-                        if (idx >= 0) studentsList[idx] = { rollNo, name, father, gender, class: cls, group, phone, status };
-                        else studentsList.unshift({ rollNo, name, father, gender, class: cls, group, phone, status });
-                        addedCount++;
-                    }
-                });
-
-                localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
-                localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
-                window.refreshAllClassAndSectionDropdowns();
-                window.renderStudentsTable();
-                alert(`Success: ${addedCount} Students imported from Excel into Chenab College Database!`);
-                e.target.value = '';
-            };
-            reader.readAsArrayBuffer(file);
-        };
-
-        window.exportToExcel = function() {
-            if (studentsList.length === 0) { alert('No students to export!'); return; }
-            if (typeof XLSX === 'undefined') { alert('Excel library loading, please try again.'); return; }
-            const exportData = studentsList.map(s => ({
-                "Roll No": s.rollNo, "Student Name": s.name, "Father Name": s.father, "Phone": s.phone, "Gender": s.gender, "Class": s.class, "Section / House": s.group, "Status": s.status || "Active"
-            }));
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Chenab_College_Students");
-            XLSX.writeFile(wb, "Chenab_College_Shorkot_Students.xlsx");
         };
 
         // Initialize Everything Safely on Load
