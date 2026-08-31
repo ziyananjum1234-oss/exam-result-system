@@ -690,30 +690,23 @@
             </div>
         </div>
 
-        <!-- ================= TAB 5: SUBJECT-WISE FAST MARKS ENTRY (WITH EXCEL IMPORT & ABSENT SUPPORT) ================= -->
+        <!-- ================= TAB 5: SUBJECT-WISE FAST MARKS ENTRY ================= -->
         <div id="marksEntrySection" class="hidden">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-slate-800">
                 <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight">Subject-Wise Marks Entry & Bulk Import</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Fast marks input with auto-jump Enter key, Excel Bulk Upload & Absent (ABS) support</p>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Subject-Wise Marks Entry</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Fast marks input with auto-jump Enter key & live subject progress</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" onclick="window.downloadSubjectMarksTemplate()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-1.5 transition-all">
-                        <i class="fa-solid fa-file-excel text-emerald-400"></i>
-                        <span>Download Marks Excel Template</span>
-                    </button>
-
-                    <label class="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all">
-                        <i class="fa-solid fa-file-import"></i>
-                        <span>Upload Marks Excel</span>
-                        <input type="file" accept=".xlsx, .xls, .csv" onchange="window.handleMarksExcelUpload(event)" class="hidden">
-                    </label>
-
                     <button type="button" onclick="window.printBlankMasterSheet()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-600/30 flex items-center gap-2 transition-all active:scale-95">
                         <i class="fa-solid fa-file-signature text-sm"></i>
-                        <span>Print Blank Master Sheet</span>
+                        <span>Print Blank Master Sheet for Teachers</span>
                     </button>
+                    <div class="bg-indigo-500/10 border border-indigo-500/30 px-3 py-2 rounded-xl text-xs text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-yellow-400"></i>
+                        <span>Enter Key: Jump Down</span>
+                    </div>
                 </div>
             </div>
 
@@ -753,9 +746,7 @@
                             <span id="activeSubjectBadge" class="bg-indigo-600 text-white px-3 py-1 rounded-xl text-xs font-bold">English</span>
                             <span class="text-slate-400 text-xs font-normal">Fast Entry Sheet</span>
                         </h3>
-                        <p class="text-[11px] text-slate-400 mt-1">
-                            Type marks or type <b class="text-rose-400 font-mono">ABS</b> / <b class="text-rose-400 font-mono">A</b> for Absent, then hit <b>Enter</b> to jump to the next student.
-                        </p>
+                        <p class="text-[11px] text-slate-400 mt-1">Type marks and hit <b>Enter</b> to automatically go to the next student</p>
                     </div>
 
                     <button type="button" onclick="window.saveCurrentSubjectMarks()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all active:scale-95">
@@ -772,7 +763,7 @@
                                 <th class="py-3 px-4 w-28">Roll No</th>
                                 <th class="py-3 px-4">Student Full Name</th>
                                 <th class="py-3 px-4">Father Name</th>
-                                <th class="py-3 px-4 text-center w-52">Obtained Marks <span id="thMaxMarks" class="text-indigo-400 font-bold block text-[10px]">(Max: 100 or ABS)</span></th>
+                                <th class="py-3 px-4 text-center w-48">Obtained Marks <span id="thMaxMarks" class="text-indigo-400 font-bold block text-[10px]">(Max: 100)</span></th>
                             </tr>
                         </thead>
                         <tbody id="subjectMarksTableBody" class="divide-y divide-slate-800/60 text-slate-300"></tbody>
@@ -851,7 +842,7 @@
                     <h4 id="cr_statPassed" class="text-xl font-bold text-emerald-400 mt-0.5">0</h4>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl text-center">
-                    <p class="text-[11px] text-slate-400 font-medium">Failed / ABS</p>
+                    <p class="text-[11px] text-slate-400 font-medium">Failed</p>
                     <h4 id="cr_statFailed" class="text-xl font-bold text-rose-400 mt-0.5">0</h4>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl text-center">
@@ -1080,12 +1071,12 @@
             </div>
         </div>
 
-        <!-- ================= TAB 8: SINGLE EXAM RESULT CARD / DMC (WITH ATTENDANCE & CONDUCT) ================= -->
+        <!-- ================= TAB 8: SINGLE EXAM RESULT CARD / DMC ================= -->
         <div id="dmcSection" class="hidden">
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
                     <h2 class="text-xl font-bold text-white tracking-tight">Single Exam Result Card (DMC)</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Individual Single-Term Progress Report with Attendance & Character Evaluation</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Individual Single-Term Progress Report — Chenab College Shorkot</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
@@ -1100,49 +1091,23 @@
                 </div>
             </div>
 
-            <!-- Controls & Quick Attendance Config -->
-            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Select Examination *</label>
-                        <select id="dmc_examSelect" onchange="window.onDmcExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500"></select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Select Class *</label>
-                        <select id="dmc_classSelect" onchange="window.onDmcExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                            <!-- Populated Dynamically -->
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-amber-400 mb-1.5">3. Select Candidate *</label>
-                        <select id="dmc_studentSelect" onchange="window.renderDmcCards()" class="w-full px-3.5 py-2.5 bg-indigo-950/50 border border-amber-500/40 rounded-xl text-xs text-white font-bold focus:ring-2 focus:ring-amber-500"></select>
-                    </div>
+            <!-- Controls -->
+            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Select Examination *</label>
+                    <select id="dmc_examSelect" onchange="window.onDmcExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500"></select>
                 </div>
 
-                <!-- Global / Quick Attendance & Conduct Defaults for Class -->
-                <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <span class="text-slate-400 font-semibold flex items-center gap-1.5"><i class="fa-solid fa-clipboard-user text-indigo-400"></i> Attendance Defaults:</span>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-slate-500 text-[11px]">Total Days:</span>
-                            <input type="number" id="dmc_defaultTotalDays" value="200" min="1" oninput="window.renderDmcCards()" class="w-16 px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white text-center font-mono">
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-slate-500 text-[11px]">Present Days:</span>
-                            <input type="number" id="dmc_defaultPresentDays" value="186" min="0" oninput="window.renderDmcCards()" class="w-16 px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white text-center font-mono">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-slate-400 font-semibold">Conduct / Discipline:</span>
-                        <select id="dmc_defaultConduct" onchange="window.renderDmcCards()" class="px-3 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs text-amber-300 font-semibold">
-                            <option value="Exemplary & Outstanding">⭐ Exemplary & Outstanding</option>
-                            <option value="Very Good & Responsible" selected>🟢 Very Good & Responsible</option>
-                            <option value="Good & Cooperative">🔵 Good & Cooperative</option>
-                            <option value="Satisfactory - Needs Focus">🟡 Satisfactory - Needs Focus</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">2. Select Class *</label>
+                    <select id="dmc_classSelect" onchange="window.onDmcExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
+                        <!-- Populated Dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-amber-400 mb-1.5">3. Select Candidate *</label>
+                    <select id="dmc_studentSelect" onchange="window.renderDmcCards()" class="w-full px-3.5 py-2.5 bg-indigo-950/50 border border-amber-500/40 rounded-xl text-xs text-white font-bold focus:ring-2 focus:ring-amber-500"></select>
                 </div>
             </div>
 
@@ -1296,7 +1261,7 @@
 
             try {
                 const rawSecs = localStorage.getItem('ccs_master_sections') || localStorage.getItem('masterSectionsList');
-                const savedSections = rawSecs ? JSON.parse(rawSections) : null;
+                const savedSections = rawSecs ? JSON.parse(rawSecs) : null;
                 if (Array.isArray(savedSections) && savedSections.length > 0) masterSectionsList = savedSections;
             } catch(e) {}
 
@@ -1388,13 +1353,6 @@
         }
 
         initDataStore();
-
-        // Helper to check if a mark value is Absent / Leave / Medical
-        window.isAbsentMark = function(val) {
-            if (val === undefined || val === null) return false;
-            const str = String(val).trim().toUpperCase();
-            return str === 'A' || str === 'ABS' || str === 'ABSENT' || str === 'L' || str === 'LEAVE' || str === 'M';
-        };
 
         // ================= DYNAMIC CLASSES & SECTIONS POPULATION ENGINE =================
         window.getUniqueClasses = function() {
@@ -2588,7 +2546,7 @@
             window.printPortraitView();
         };
 
-        // ================= TAB 5: MARKS ENTRY LOGIC (WITH EXCEL BULK & ABSENT) =================
+        // ================= TAB 5: MARKS ENTRY LOGIC =================
         window.onExamOrClassChange = function() {
             const examSelect = document.getElementById('me_examSelect');
             const subSelect = document.getElementById('me_subjectSelect');
@@ -2691,7 +2649,7 @@
             const badgeEl = document.getElementById('activeSubjectBadge');
             const thMaxEl = document.getElementById('thMaxMarks');
             if (badgeEl) badgeEl.textContent = `${subObj.name} (Max: ${subObj.marks} Marks)`;
-            if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks} or ABS)`;
+            if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks})`;
 
             const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
 
@@ -2713,12 +2671,12 @@
                     <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
                     <td class="py-2.5 px-4 text-slate-400">${s.father}</td>
                     <td class="py-2 px-4 text-center">
-                        <input type="text" placeholder="0-${subObj.marks} / ABS"
+                        <input type="number" min="0" max="${subObj.marks}" placeholder="0-${subObj.marks}"
                             value="${savedVal}"
                             data-roll="${s.rollNo}" 
                             data-index="${idx}"
                             onkeydown="window.handleMarksEnterKey(event, ${idx})"
-                            class="marks-input-single w-36 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all uppercase">
+                            class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -2760,7 +2718,7 @@
 
             inputs.forEach(input => {
                 const rollNo = input.getAttribute('data-roll');
-                let val = input.value.trim();
+                const val = input.value.trim();
 
                 const key = `${examId}_${rollNo}`;
                 if (!marksDatabase[key]) {
@@ -2768,11 +2726,7 @@
                 }
 
                 if (val !== '') {
-                    if (window.isAbsentMark(val)) {
-                        marksDatabase[key][selectedSubject] = 'ABS';
-                    } else {
-                        marksDatabase[key][selectedSubject] = parseInt(val) || 0;
-                    }
+                    marksDatabase[key][selectedSubject] = parseInt(val) || 0;
                 } else {
                     delete marksDatabase[key][selectedSubject];
                 }
@@ -2781,94 +2735,6 @@
             localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
             window.renderSubjectProgressTracker();
             alert(`Success: Marks for "${selectedSubject}" saved successfully!`);
-        };
-
-        // Excel Template & Bulk Upload for Subject Marks
-        window.downloadSubjectMarksTemplate = function() {
-            const examSelect = document.getElementById('me_examSelect');
-            const classSelect = document.getElementById('me_classSelect');
-            const subSelect = document.getElementById('me_subjectSelect');
-
-            if (!examSelect || !classSelect || !subSelect) return;
-            const cls = classSelect.value;
-            const sub = subSelect.value;
-
-            const classStudents = studentsList.filter(s => s.class === cls && (s.status || 'Active') !== 'Left');
-            if (classStudents.length === 0) {
-                alert('No active students in this class to generate template!');
-                return;
-            }
-
-            if (typeof XLSX === 'undefined') { alert('Excel library loading...'); return; }
-
-            const exportData = classStudents.map((s, idx) => ({
-                "Sr #": idx + 1,
-                "Roll No": s.rollNo,
-                "Student Name": s.name,
-                "Father Name": s.father,
-                "Obtained Marks (Number or ABS)": ""
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Marks_Template");
-            XLSX.writeFile(wb, `${cls}_${sub}_Marks_Template.xlsx`);
-        };
-
-        window.handleMarksExcelUpload = function(e) {
-            const examSelect = document.getElementById('me_examSelect');
-            const subSelect = document.getElementById('me_subjectSelect');
-            if (!examSelect || !subSelect) return;
-
-            const examId = examSelect.value;
-            const selectedSubject = subSelect.value;
-
-            if (!examId || !selectedSubject) {
-                alert('Please select an Exam and Subject first!');
-                return;
-            }
-
-            if (typeof XLSX === 'undefined') { alert('Excel library loading...'); return; }
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-                    let count = 0;
-                    jsonData.forEach(row => {
-                        const rollNo = String(row["Roll No"] || row["RollNo"] || "").trim();
-                        let rawMark = row["Obtained Marks (Number or ABS)"] !== undefined ? row["Obtained Marks (Number or ABS)"] : row["Marks"];
-                        
-                        if (rollNo && rawMark !== undefined && String(rawMark).trim() !== '') {
-                            const strMark = String(rawMark).trim();
-                            const key = `${examId}_${rollNo}`;
-                            if (!marksDatabase[key]) marksDatabase[key] = {};
-
-                            if (window.isAbsentMark(strMark)) {
-                                marksDatabase[key][selectedSubject] = 'ABS';
-                            } else {
-                                marksDatabase[key][selectedSubject] = parseInt(strMark) || 0;
-                            }
-                            count++;
-                        }
-                    });
-
-                    localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
-                    window.loadSubjectMarksTable();
-                    window.renderSubjectProgressTracker();
-                    alert(`🎉 Success: ${count} student marks imported from Excel for "${selectedSubject}"!`);
-                    e.target.value = '';
-                } catch(err) {
-                    alert('Error reading Excel: ' + err.message);
-                }
-            };
-            reader.readAsArrayBuffer(file);
         };
 
         // ================= TAB 6: CONSOLIDATIVE RESULT SHEET LOGIC =================
@@ -2978,28 +2844,18 @@
 
                         let totalObt = 0;
                         let isSubjectFail = false;
-                        let isAbsentAny = false;
                         let hasMarks = false;
                         let subMarksMap = {};
 
                         subjects.forEach(sub => {
-                            const raw = savedMarks[sub.name];
-                            if (raw !== undefined && raw !== '') {
-                                hasMarks = true;
-                                if (window.isAbsentMark(raw)) {
-                                    isAbsentAny = true;
-                                    isSubjectFail = true;
-                                    subMarksMap[sub.name] = 'ABS';
-                                } else {
-                                    const obt = parseInt(raw) || 0;
-                                    totalObt += obt;
-                                    subMarksMap[sub.name] = obt;
+                            const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
+                            if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
+                            totalObt += obt;
+                            subMarksMap[sub.name] = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? savedMarks[sub.name] : '-';
 
-                                    const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                                    if (obt < subPassMin) isSubjectFail = true;
-                                }
-                            } else {
-                                subMarksMap[sub.name] = '-';
+                            const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                            if (obt < subPassMin) {
+                                isSubjectFail = true;
                             }
                         });
 
@@ -3013,7 +2869,7 @@
                         else if (percentage >= 40) grade = 'D';
                         else grade = 'E';
 
-                        const isPass = hasMarks && !isSubjectFail && !isAbsentAny && percentage >= passCriteria;
+                        const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
                         if (!isPass) grade = 'F';
 
                         studentResults.push({
@@ -3025,7 +2881,7 @@
                             totalObt,
                             percentage,
                             grade,
-                            status: isPass ? 'PASS' : (isAbsentAny ? 'ABSENT / FAIL' : 'FAIL'),
+                            status: isPass ? 'PASS' : 'FAIL',
                             hasMarks
                         });
                     }
@@ -3065,14 +2921,9 @@
 
                         subjects.forEach(sub => {
                             const val = s.subMarksMap[sub.name];
-                            let markColor = 'text-slate-400';
-                            if (val === 'ABS') {
-                                markColor = 'text-rose-600 font-black';
-                            } else if (val !== '-') {
-                                const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                                const isSubPass = parseInt(val) >= subPassMin;
-                                markColor = isSubPass ? 'text-slate-900 font-semibold' : 'text-rose-600 font-bold';
-                            }
+                            const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                            const isSubPass = parseInt(val) >= subPassMin;
+                            const markColor = val === '-' ? 'text-slate-400' : (isSubPass ? 'text-slate-900 font-semibold' : 'text-rose-600 font-bold');
                             rowHtml += `<td class="py-2 px-2 text-center ${markColor}">${val}</td>`;
                         });
 
@@ -3241,25 +3092,17 @@
 
                     let totalObt = 0;
                     let isSubjectFail = false;
-                    let isAbsentAny = false;
                     let hasMarks = false;
 
                     if (s.gender === 'Male') boysTotal++; else girlsTotal++;
 
                     subjects.forEach(sub => {
-                        const raw = savedMarks[sub.name];
-                        if (raw !== undefined && raw !== '') {
-                            hasMarks = true;
-                            if (window.isAbsentMark(raw)) {
-                                isAbsentAny = true;
-                                isSubjectFail = true;
-                            } else {
-                                const obt = parseInt(raw) || 0;
-                                totalObt += obt;
-                                const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                                if (obt < subPassMin) isSubjectFail = true;
-                            }
-                        }
+                        const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
+                        if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
+                        totalObt += obt;
+
+                        const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                        if (obt < subPassMin) isSubjectFail = true;
                     });
 
                     const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
@@ -3272,7 +3115,7 @@
                     else if (percentage >= 50) grade = 'C';
                     else if (percentage >= 40) grade = 'D';
 
-                    const isPass = hasMarks && !isSubjectFail && !isAbsentAny && percentage >= passCriteria;
+                    const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
                     if (!isPass) grade = 'F';
 
                     gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
@@ -3414,19 +3257,14 @@
 
                         classStudents.forEach(s => {
                             const key = `${exam.id}_${s.rollNo}`;
-                            const raw = (marksDatabase[key] && marksDatabase[key][sub.name] !== undefined) ? marksDatabase[key][sub.name] : 0;
+                            const marks = (marksDatabase[key] && marksDatabase[key][sub.name] !== undefined) ? parseInt(marksDatabase[key][sub.name]) : 0;
                             const passMin = (parseInt(sub.marks) * passCriteria) / 100;
 
-                            if (window.isAbsentMark(raw)) {
-                                subFailed++;
-                            } else {
-                                const marks = parseInt(raw) || 0;
-                                if (marks >= passMin) subPassed++; else subFailed++;
+                            if (marks >= passMin) subPassed++; else subFailed++;
 
-                                if (marks > highestMarks) {
-                                    highestMarks = marks;
-                                    topperName = `${s.name} (${marks})`;
-                                }
+                            if (marks > highestMarks) {
+                                highestMarks = marks;
+                                topperName = `${s.name} (${marks})`;
                             }
                         });
 
@@ -3465,7 +3303,7 @@
             setTimeout(() => { window.print(); }, 350);
         };
 
-        // ================= TAB 8: SINGLE EXAM DMC LOGIC (WITH ATTENDANCE & CONDUCT) =================
+        // ================= TAB 8: SINGLE EXAM DMC LOGIC =================
         window.onDmcExamOrClassChange = function() {
             const classSelect = document.getElementById('dmc_classSelect');
             const studentSelect = document.getElementById('dmc_studentSelect');
@@ -3510,10 +3348,6 @@
                 const selectedClass = classSelect.value;
                 const selectedRoll = studentSelect.value;
 
-                const defaultTotDays = parseInt(document.getElementById('dmc_defaultTotalDays')?.value) || 200;
-                const defaultPresDays = parseInt(document.getElementById('dmc_defaultPresentDays')?.value) || 186;
-                const defaultConduct = document.getElementById('dmc_defaultConduct')?.value || "Very Good & Responsible";
-
                 container.innerHTML = '';
 
                 const exam = examsSetupList.find(e => e.id === examId);
@@ -3538,65 +3372,37 @@
 
                     let totalObt = 0;
                     let isSubjectFail = false;
-                    let isAbsentAny = false;
                     let hasMarks = false;
                     let subjectsDetail = [];
 
                     subjects.forEach(sub => {
                         const maxM = parseInt(sub.marks) || 100;
-                        const raw = savedMarks[sub.name];
+                        const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
+                        if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
+
+                        totalObt += obt;
                         const subPassMin = Math.ceil((maxM * passCriteria) / 100);
+                        const isPass = obt >= subPassMin;
+                        if (!isPass) isSubjectFail = true;
 
-                        if (raw !== undefined && raw !== '') {
-                            hasMarks = true;
-                            if (window.isAbsentMark(raw)) {
-                                isAbsentAny = true;
-                                isSubjectFail = true;
-                                subjectsDetail.push({
-                                    name: sub.name,
-                                    maxMarks: maxM,
-                                    passMin: subPassMin,
-                                    obtained: 'ABS',
-                                    pct: '0',
-                                    grade: 'F',
-                                    status: 'ABSENT'
-                                });
-                            } else {
-                                const obt = parseInt(raw) || 0;
-                                totalObt += obt;
-                                const isPass = obt >= subPassMin;
-                                if (!isPass) isSubjectFail = true;
+                        const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
 
-                                const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
+                        let subGrade = 'F';
+                        if (subPct >= 80) subGrade = 'A+';
+                        else if (subPct >= 70) subGrade = 'A';
+                        else if (subPct >= 60) subGrade = 'B';
+                        else if (subPct >= 50) subGrade = 'C';
+                        else if (subPct >= 40) subGrade = 'D';
 
-                                let subGrade = 'F';
-                                if (subPct >= 80) subGrade = 'A+';
-                                else if (subPct >= 70) subGrade = 'A';
-                                else if (subPct >= 60) subGrade = 'B';
-                                else if (subPct >= 50) subGrade = 'C';
-                                else if (subPct >= 40) subGrade = 'D';
-
-                                subjectsDetail.push({
-                                    name: sub.name,
-                                    maxMarks: maxM,
-                                    passMin: subPassMin,
-                                    obtained: obt,
-                                    pct: subPct,
-                                    grade: isPass ? subGrade : 'F',
-                                    status: isPass ? 'PASS' : 'FAIL'
-                                });
-                            }
-                        } else {
-                            subjectsDetail.push({
-                                name: sub.name,
-                                maxMarks: maxM,
-                                passMin: subPassMin,
-                                obtained: '-',
-                                pct: '-',
-                                grade: '-',
-                                status: '-'
-                            });
-                        }
+                        subjectsDetail.push({
+                            name: sub.name,
+                            maxMarks: maxM,
+                            passMin: subPassMin,
+                            obtained: (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? obt : '-',
+                            pct: subPct,
+                            grade: isPass ? subGrade : 'F',
+                            status: isPass ? 'PASS' : 'FAIL'
+                        });
                     });
 
                     const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
@@ -3609,7 +3415,7 @@
                     else if (percentage >= 40) grade = 'D';
                     else grade = 'E';
 
-                    const isOverallPass = hasMarks && !isSubjectFail && !isAbsentAny && percentage >= passCriteria;
+                    const isOverallPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
                     if (!isOverallPass) grade = 'F';
 
                     return {
@@ -3624,12 +3430,12 @@
                         totalObt,
                         percentage,
                         grade,
-                        status: isOverallPass ? 'PROMOTED / PASSED' : (isAbsentAny ? 'FAILED (ABSENT)' : 'DETENTION / FAILED'),
+                        status: isOverallPass ? 'PROMOTED / PASSED' : 'DETENTION / FAILED',
                         hasMarks
                     };
                 });
 
-                const passed = evaluatedStudents.filter(s => s.status.includes('PASSED')).sort((a, b) => b.totalObt - a.totalObt);
+                const passed = evaluatedStudents.filter(s => s.status.includes('PASS')).sort((a, b) => b.totalObt - a.totalObt);
                 passed.forEach((s, idx) => {
                     if (idx === 0) s.position = '1st Position 🥇';
                     else if (idx === 1) s.position = '2nd Position 🥈';
@@ -3637,7 +3443,7 @@
                     else s.position = `${idx + 1}th Position`;
                 });
                 evaluatedStudents.forEach(s => {
-                    if (!s.status.includes('PASSED')) s.position = '---';
+                    if (!s.status.includes('PASS')) s.position = '---';
                 });
 
                 let studentsToRender = evaluatedStudents;
@@ -3653,20 +3459,17 @@
                     else if (st.grade === 'D' || st.grade === 'E') remarks = "Satisfactory progress. Needs dedicated attention in weak subjects.";
                     else if (st.grade === 'F') remarks = "Failed in examination. Strictly requires remedial coaching.";
 
-                    const attPct = defaultTotDays > 0 ? ((defaultPresDays / defaultTotDays) * 100).toFixed(1) : "0";
-
                     let rowsHtml = '';
                     st.subjectsDetail.forEach((sub, sIdx) => {
                         const isSubPass = sub.status === 'PASS';
-                        const isAbs = sub.status === 'ABSENT';
                         rowsHtml += `
                             <tr class="${sIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'} text-slate-900 border-b border-slate-200">
                                 <td class="py-2.5 px-3 text-center font-bold text-slate-700">${sIdx + 1}</td>
                                 <td class="py-2.5 px-4 font-bold text-slate-950 uppercase tracking-tight">${sub.name}</td>
                                 <td class="py-2.5 px-3 text-center font-semibold text-slate-700">${sub.maxMarks}</td>
                                 <td class="py-2.5 px-3 text-center font-semibold text-slate-600">${sub.passMin}</td>
-                                <td class="py-2.5 px-3 text-center font-black font-mono text-sm ${isAbs ? 'text-rose-600' : (isSubPass ? 'text-slate-950' : 'text-rose-700')}">${sub.obtained}</td>
-                                <td class="py-2.5 px-3 text-center font-bold ${isSubPass ? 'text-indigo-950' : 'text-rose-600'}">${sub.obtained !== '-' && sub.obtained !== 'ABS' ? sub.pct + '%' : '-'}</td>
+                                <td class="py-2.5 px-3 text-center font-black text-slate-950 font-mono text-sm ${isSubPass ? '' : 'text-rose-700'}">${sub.obtained}</td>
+                                <td class="py-2.5 px-3 text-center font-bold ${isSubPass ? 'text-indigo-950' : 'text-rose-600'}">${sub.obtained !== '-' ? sub.pct + '%' : '-'}</td>
                                 <td class="py-2.5 px-3 text-center font-black ${sub.grade === 'A+' || sub.grade === 'A' ? 'text-emerald-700' : (sub.grade === 'F' ? 'text-rose-700' : 'text-indigo-900')}">${sub.grade}</td>
                                 <td class="py-2.5 px-3 text-center font-black text-[10px] ${isSubPass ? 'text-emerald-700' : 'text-rose-700'}">
                                     ${sub.status}
@@ -3756,7 +3559,7 @@
                                 </div>
 
                                 <div>
-                                    <div class="bg-slate-950 text-white rounded-2xl p-4 mb-3 grid grid-cols-2 sm:grid-cols-5 gap-2 text-center border-2 border-slate-800 shadow-md">
+                                    <div class="bg-slate-950 text-white rounded-2xl p-4 mb-4 grid grid-cols-2 sm:grid-cols-5 gap-2 text-center border-2 border-slate-800 shadow-md">
                                         <div class="border-r border-slate-800 pr-2">
                                             <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-widest">Grand Total</span>
                                             <span class="text-lg font-black text-slate-200 font-mono">${st.totalMaxMarks}</span>
@@ -3779,50 +3582,28 @@
                                         </div>
                                     </div>
 
-                                    <!-- Attendance & Conduct Profile Bar -->
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3 text-xs font-semibold">
-                                        <div class="p-2.5 bg-slate-50 border border-slate-300 rounded-xl flex items-center justify-between">
-                                            <div>
-                                                <span class="text-[9px] text-slate-500 uppercase font-bold block">Attendance Record</span>
-                                                <span class="text-slate-900 font-black text-xs font-mono">${defaultPresDays} / ${defaultTotDays} Days (${attPct}%)</span>
-                                            </div>
-                                            <i class="fa-solid fa-calendar-check text-indigo-700 text-lg"></i>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-xs font-semibold">
+                                        <div class="p-3 bg-slate-50 border border-slate-300 rounded-xl">
+                                            <span class="text-[10px] text-slate-500 block uppercase font-bold">Official Final Result</span>
+                                            <span class="text-sm font-black ${st.status.includes('PASS') ? 'text-emerald-700' : 'text-rose-700'}">${st.status}</span>
                                         </div>
-
-                                        <div class="p-2.5 bg-slate-50 border border-slate-300 rounded-xl flex items-center justify-between">
-                                            <div>
-                                                <span class="text-[9px] text-slate-500 uppercase font-bold block">Conduct & Discipline</span>
-                                                <span class="text-amber-800 font-black text-xs">${defaultConduct}</span>
-                                            </div>
-                                            <i class="fa-solid fa-award text-amber-600 text-lg"></i>
-                                        </div>
-
-                                        <div class="p-2.5 bg-slate-50 border border-slate-300 rounded-xl flex items-center justify-between">
-                                            <div>
-                                                <span class="text-[9px] text-slate-500 uppercase font-bold block">Official Outcome</span>
-                                                <span class="text-xs font-black ${st.status.includes('PASSED') ? 'text-emerald-700' : 'text-rose-700'}">${st.status}</span>
-                                            </div>
-                                            <i class="fa-solid ${st.status.includes('PASSED') ? 'fa-circle-check text-emerald-600' : 'fa-circle-xmark text-rose-600'} text-lg"></i>
+                                        <div class="sm:col-span-2 p-3 bg-slate-50 border border-slate-300 rounded-xl">
+                                            <span class="text-[10px] text-slate-500 block uppercase font-bold">Faculty Assessment & Remarks</span>
+                                            <span class="text-slate-900 italic font-semibold">"${remarks}"</span>
                                         </div>
                                     </div>
 
-                                    <!-- Remarks -->
-                                    <div class="p-2.5 bg-slate-50 border border-slate-300 rounded-xl mb-3 text-xs">
-                                        <span class="text-[9px] text-slate-500 block uppercase font-bold">Faculty Assessment & Principal Remarks:</span>
-                                        <span class="text-slate-900 italic font-semibold text-[11px]">"${remarks}"</span>
-                                    </div>
-
-                                    <div class="flex justify-between items-center px-3 py-1 bg-slate-100 border border-slate-300 rounded-xl text-[8.5px] font-bold text-slate-700 mb-5">
+                                    <div class="flex justify-between items-center px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-xl text-[9px] font-bold text-slate-700 mb-6">
                                         <span><b>GRADING KEY:</b></span>
                                         <span>A+ (80% & Above)</span>
                                         <span>A (70-79%)</span>
                                         <span>B (60-69%)</span>
                                         <span>C (50-59%)</span>
                                         <span>D (40-49%)</span>
-                                        <span class="text-rose-700">F (Below ${passCriteria}%: Fail / ABS)</span>
+                                        <span class="text-rose-700">F (Below ${passCriteria}%: Fail)</span>
                                     </div>
 
-                                    <div class="pt-4 border-t-2 border-slate-900 flex justify-between items-end text-xs text-slate-950 font-bold px-2">
+                                    <div class="pt-5 border-t-2 border-slate-900 flex justify-between items-end text-xs text-slate-950 font-bold px-2">
                                         <div class="text-center">
                                             <div class="w-40 border-b-2 border-slate-900 mb-1.5"></div>
                                             <span>Class Incharge</span>
@@ -4008,63 +3789,35 @@
 
                     let finalExamObt = 0;
                     let isFinalSubFail = false;
-                    let isAbsentAny = false;
                     let finalSubjectsDetail = [];
 
                     finalSubjects.forEach(sub => {
                         const maxM = parseInt(sub.marks) || 100;
-                        const raw = savedFinalMarks[sub.name];
+                        const obt = (savedFinalMarks[sub.name] !== undefined && savedFinalMarks[sub.name] !== '') ? parseInt(savedFinalMarks[sub.name]) : 0;
+                        finalExamObt += obt;
+
                         const subPassMin = Math.ceil((maxM * passCriteria) / 100);
+                        const isPass = obt >= subPassMin;
+                        if (!isPass) isFinalSubFail = true;
 
-                        if (raw !== undefined && raw !== '') {
-                            if (window.isAbsentMark(raw)) {
-                                isAbsentAny = true;
-                                isFinalSubFail = true;
-                                finalSubjectsDetail.push({
-                                    name: sub.name,
-                                    maxMarks: maxM,
-                                    passMin: subPassMin,
-                                    obtained: 'ABS',
-                                    pct: '0',
-                                    grade: 'F',
-                                    status: 'ABSENT'
-                                });
-                            } else {
-                                const obt = parseInt(raw) || 0;
-                                finalExamObt += obt;
-                                const isPass = obt >= subPassMin;
-                                if (!isPass) isFinalSubFail = true;
+                        const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
 
-                                const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
+                        let subGrade = 'F';
+                        if (subPct >= 80) subGrade = 'A+';
+                        else if (subPct >= 70) subGrade = 'A';
+                        else if (subPct >= 60) subGrade = 'B';
+                        else if (subPct >= 50) subGrade = 'C';
+                        else if (subPct >= 40) subGrade = 'D';
 
-                                let subGrade = 'F';
-                                if (subPct >= 80) subGrade = 'A+';
-                                else if (subPct >= 70) subGrade = 'A';
-                                else if (subPct >= 60) subGrade = 'B';
-                                else if (subPct >= 50) subGrade = 'C';
-                                else if (subPct >= 40) subGrade = 'D';
-
-                                finalSubjectsDetail.push({
-                                    name: sub.name,
-                                    maxMarks: maxM,
-                                    passMin: subPassMin,
-                                    obtained: obt,
-                                    pct: subPct,
-                                    grade: isPass ? subGrade : 'F',
-                                    status: isPass ? 'PASS' : 'FAIL'
-                                });
-                            }
-                        } else {
-                            finalSubjectsDetail.push({
-                                name: sub.name,
-                                maxMarks: maxM,
-                                passMin: subPassMin,
-                                obtained: '-',
-                                pct: '-',
-                                grade: '-',
-                                status: '-'
-                            });
-                        }
+                        finalSubjectsDetail.push({
+                            name: sub.name,
+                            maxMarks: maxM,
+                            passMin: subPassMin,
+                            obtained: (savedFinalMarks[sub.name] !== undefined && savedFinalMarks[sub.name] !== '') ? obt : '-',
+                            pct: subPct,
+                            grade: isPass ? subGrade : 'F',
+                            status: isPass ? 'PASS' : 'FAIL'
+                        });
                     });
 
                     let termsSummary = [];
@@ -4080,11 +3833,8 @@
                         let tHasMarks = false;
 
                         tSubs.forEach(sb => {
-                            const val = tSavedMarks[sb.name];
-                            if (val !== undefined && val !== '') {
-                                if (!window.isAbsentMark(val)) {
-                                    tObt += parseInt(val) || 0;
-                                }
+                            if (tSavedMarks[sb.name] !== undefined && tSavedMarks[sb.name] !== '') {
+                                tObt += parseInt(tSavedMarks[sb.name]);
                                 tHasMarks = true;
                                 hasAnyTermMarks = true;
                             }
@@ -4115,7 +3865,7 @@
                     else if (finalCombinedPct >= 40) finalGrade = 'D';
                     else finalGrade = 'E';
 
-                    const isOverallPass = hasAnyTermMarks && !isFinalSubFail && !isAbsentAny && finalCombinedPct >= passCriteria;
+                    const isOverallPass = hasAnyTermMarks && !isFinalSubFail && finalCombinedPct >= passCriteria;
                     if (!isOverallPass) finalGrade = 'F';
 
                     return {
@@ -4130,7 +3880,7 @@
                         finalCombinedObtMarks,
                         finalCombinedPct,
                         finalGrade,
-                        status: isOverallPass ? 'PROMOTED TO NEXT CLASS' : (isAbsentAny ? 'FAILED (ABSENT)' : 'DETENTION / FAILED'),
+                        status: isOverallPass ? 'PROMOTED TO NEXT CLASS' : 'DETENTION / FAILED',
                         hasAnyTermMarks
                     };
                 });
@@ -4162,15 +3912,14 @@
                     let subRowsHtml = '';
                     st.finalSubjectsDetail.forEach((sub, sIdx) => {
                         const isSubPass = sub.status === 'PASS';
-                        const isAbs = sub.status === 'ABSENT';
                         subRowsHtml += `
                             <tr class="${sIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/70'} text-slate-900 border-b border-slate-200">
                                 <td class="py-1.5 px-3 text-center font-bold text-slate-700">${sIdx + 1}</td>
                                 <td class="py-1.5 px-4 font-bold text-slate-950 uppercase tracking-tight">${sub.name}</td>
                                 <td class="py-1.5 px-3 text-center font-semibold text-slate-700">${sub.maxMarks}</td>
                                 <td class="py-1.5 px-3 text-center font-semibold text-slate-600">${sub.passMin}</td>
-                                <td class="py-1.5 px-3 text-center font-black font-mono text-xs ${isAbs ? 'text-rose-600' : (isSubPass ? 'text-slate-950' : 'text-rose-700')}">${sub.obtained}</td>
-                                <td class="py-1.5 px-3 text-center font-bold ${isSubPass ? 'text-indigo-950' : 'text-rose-600'}">${sub.obtained !== '-' && sub.obtained !== 'ABS' ? sub.pct + '%' : '-'}</td>
+                                <td class="py-1.5 px-3 text-center font-black text-slate-950 font-mono text-xs ${isSubPass ? '' : 'text-rose-700'}">${sub.obtained}</td>
+                                <td class="py-1.5 px-3 text-center font-bold ${isSubPass ? 'text-indigo-950' : 'text-rose-600'}">${sub.obtained !== '-' ? sub.pct + '%' : '-'}</td>
                                 <td class="py-1.5 px-3 text-center font-black ${sub.grade === 'A+' || sub.grade === 'A' ? 'text-emerald-700' : (sub.grade === 'F' ? 'text-rose-700' : 'text-indigo-900')}">${sub.grade}</td>
                                 <td class="py-1.5 px-3 text-center font-black text-[9.5px] ${isSubPass ? 'text-emerald-700' : 'text-rose-700'}">
                                     ${sub.status}
@@ -4316,4 +4065,82 @@
                                             <span class="text-lg font-black text-cyan-400 font-mono">${st.finalCombinedPct}%</span>
                                         </div>
                                         <div class="border-r border-slate-800 pr-2">
-                                            <span
+                                            <span class="text-[8.5px] text-slate-400 block uppercase font-bold tracking-widest">Final Grade</span>
+                                            <span class="text-lg font-black text-amber-400">${st.finalGrade}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-[8.5px] text-amber-400 block uppercase font-bold tracking-widest">Annual Position</span>
+                                            <span class="text-xs font-black text-yellow-300 mt-0.5 block">${st.position}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 text-xs font-semibold">
+                                        <div class="p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
+                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold">Annual Promotion Outcome</span>
+                                            <span class="text-xs font-black ${st.status.includes('PROMOTED') ? 'text-emerald-700' : 'text-rose-700'}">${st.status}</span>
+                                        </div>
+                                        <div class="sm:col-span-2 p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
+                                            <span class="text-[9.5px] text-slate-500 block uppercase font-bold">Faculty Assessment & Remarks</span>
+                                            <span class="text-slate-900 italic font-semibold text-[11px]">"${remarks}"</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-between items-center px-3 py-1 bg-slate-100 border border-slate-300 rounded-xl text-[8.5px] font-bold text-slate-700 mb-4">
+                                        <span><b>GRADING KEY:</b></span>
+                                        <span>A+ (80% & Above)</span>
+                                        <span>A (70-79%)</span>
+                                        <span>B (60-69%)</span>
+                                        <span>C (50-59%)</span>
+                                        <span>D (40-49%)</span>
+                                        <span class="text-rose-700">F (Below ${passCriteria}%: Fail)</span>
+                                    </div>
+
+                                    <div class="pt-4 border-t-2 border-slate-900 flex justify-between items-end text-xs text-slate-950 font-bold px-2">
+                                        <div class="text-center">
+                                            <div class="w-36 border-b-2 border-slate-900 mb-1"></div>
+                                            <span class="text-[11px]">Class Incharge</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 rounded-full border-2 border-dashed border-slate-400 mx-auto -mt-8 mb-1 flex items-center justify-center text-[7.5px] text-slate-400 uppercase font-black tracking-widest text-center leading-tight">
+                                                Official<br>College<br>Seal
+                                            </div>
+                                            <span class="text-[11px]">Controller of Exams</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="w-36 border-b-2 border-slate-900 mb-1"></div>
+                                            <span class="text-[11px]">Principal Signature</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+                    container.innerHTML += dmcHtml;
+                });
+            } catch (e) {
+                console.error("Error in renderCombinedDMC:", e);
+            }
+        };
+
+        window.printAllCombinedDMCs = function() {
+            const sel = document.getElementById('comb_studentSelect');
+            if (sel) sel.value = "ALL";
+            window.renderCombinedDMC();
+            window.printPortraitView();
+        };
+
+        // Initialize Everything Safely on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                window.refreshAllClassAndSectionDropdowns();
+                window.renderStudentsTable();
+                window.renderSubjectRows();
+                window.renderExamsTable();
+            } catch (err) {
+                console.error("Initialization error:", err);
+            }
+        });
+    </script>
+</body>
+</html>
