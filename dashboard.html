@@ -82,7 +82,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
 
-    <!-- 1. SIDEBAR MENU (ALL 9 MODULES) -->
+    <!-- 1. SIDEBAR MENU (ALL 9 MODULES + BACKUP & RESTORE) -->
     <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between flex-shrink-0 no-print overflow-y-auto max-h-screen">
         <div>
             <!-- Chenab College Logo & Branding -->
@@ -154,12 +154,28 @@
             </nav>
         </div>
 
-        <!-- Footer Tools -->
+        <!-- Footer Tools: Backup, Restore, Reset & Logout -->
         <div class="pt-3 mt-4 border-t border-slate-800 space-y-2">
+            <!-- 1. Full Backup Tool -->
+            <button type="button" onclick="window.downloadFullSystemBackup()" class="w-full flex items-center space-x-3 px-3 py-1.5 rounded-xl text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 text-[11px] font-semibold transition-all border border-emerald-500/20">
+                <i class="fa-solid fa-cloud-arrow-down text-xs text-emerald-400"></i>
+                <span>Download Full Backup (JSON)</span>
+            </button>
+
+            <!-- 2. Restore Backup Tool -->
+            <label class="w-full flex items-center space-x-3 px-3 py-1.5 rounded-xl text-slate-300 hover:text-indigo-400 hover:bg-indigo-500/10 text-[11px] font-semibold transition-all border border-indigo-500/20 cursor-pointer">
+                <i class="fa-solid fa-cloud-arrow-up text-xs text-indigo-400"></i>
+                <span>Restore Data from Backup</span>
+                <input type="file" accept=".json" onchange="window.restoreFullSystemBackup(event)" class="hidden">
+            </label>
+
+            <!-- 3. Demo Reset Tool -->
             <button type="button" onclick="window.repairAndResetData()" class="w-full flex items-center space-x-3 px-3 py-1.5 rounded-xl text-slate-500 hover:text-amber-400 hover:bg-slate-800/40 text-[11px] transition-all">
                 <i class="fa-solid fa-screwdriver-wrench text-xs"></i>
                 <span>Repair / Reset Demo Data</span>
             </button>
+
+            <!-- 4. Logout -->
             <a href="index.html" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 font-medium text-xs transition-all">
                 <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                 <span>Logout System</span>
@@ -1593,6 +1609,86 @@
                 window.refreshAllClassAndSectionDropdowns();
                 window.showTab('enrollment');
                 alert("Success: Database repaired and sample records restored!");
+            }
+        };
+
+        // ================= SAFE FULL SYSTEM BACKUP & RESTORE ENGINE =================
+        window.downloadFullSystemBackup = function() {
+            try {
+                const backupData = {
+                    version: "1.0",
+                    appName: "Chenab College Shorkot - Exam System",
+                    backupDate: new Date().toISOString(),
+                    formattedDate: new Date().toLocaleString(),
+                    data: {
+                        students: studentsList,
+                        exams: examsSetupList,
+                        marks: marksDatabase,
+                        dateSheets: dateSheetsDatabase,
+                        classes: masterClassesList,
+                        sections: masterSectionsList
+                    }
+                };
+
+                const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+                const downloadAnchor = document.createElement('a');
+                const filename = `Chenab_College_Backup_${new Date().toISOString().slice(0,10)}.json`;
+                
+                downloadAnchor.setAttribute("href", jsonString);
+                downloadAnchor.setAttribute("download", filename);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+
+                alert("✅ Success: Complete System Backup downloaded successfully!\nFile: " + filename);
+            } catch(err) {
+                console.error("Backup error:", err);
+                alert("❌ Backup failed: " + err.message);
+            }
+        };
+
+        window.restoreFullSystemBackup = function(event) {
+            try {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (!parsed || !parsed.data) {
+                            alert("❌ Invalid backup file format!");
+                            return;
+                        }
+
+                        if (!confirm(`Are you sure you want to restore this backup?\nBackup Date: ${parsed.formattedDate || 'Unknown'}\n\n⚠️ Current data will be safely replaced with this backup file.`)) {
+                            event.target.value = '';
+                            return;
+                        }
+
+                        const d = parsed.data;
+                        if (d.students) localStorage.setItem('ccs_students_list', JSON.stringify(d.students));
+                        if (d.exams) localStorage.setItem('ccs_exams_setup', JSON.stringify(d.exams));
+                        if (d.marks) localStorage.setItem('ccs_marks_database', JSON.stringify(d.marks));
+                        if (d.dateSheets) localStorage.setItem('ccs_datesheets_db', JSON.stringify(d.dateSheets));
+                        if (d.classes) localStorage.setItem('ccs_master_classes', JSON.stringify(d.classes));
+                        if (d.sections) localStorage.setItem('ccs_master_sections', JSON.stringify(d.sections));
+
+                        // Reload data store and update views
+                        initDataStore();
+                        window.refreshAllClassAndSectionDropdowns();
+                        window.renderStudentsTable();
+                        
+                        alert("🎉 Success: System restored completely from backup!");
+                        event.target.value = '';
+                    } catch (jsonErr) {
+                        alert("❌ Error parsing JSON file: " + jsonErr.message);
+                    }
+                };
+                reader.readAsText(file);
+            } catch(err) {
+                console.error("Restore error:", err);
+                alert("❌ Restore failed: " + err.message);
             }
         };
 
