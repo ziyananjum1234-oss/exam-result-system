@@ -33,6 +33,42 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
+    <!-- FACULTY AUTHENTICATION OVERLAY -->
+    <div id="authOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 mx-auto flex items-center justify-center text-white text-2xl shadow-xl shadow-emerald-600/30">
+                <i class="fa-solid fa-chalkboard-user"></i>
+            </div>
+
+            <div>
+                <h2 class="text-xs font-black tracking-widest text-slate-300 uppercase font-royal-title">Chenab College Shorkot</h2>
+                <h1 class="text-xl font-extrabold text-white mt-1">Faculty Access Portal</h1>
+                <p class="text-xs text-slate-400 mt-1">Please enter your authorized faculty passcode</p>
+            </div>
+
+            <form onsubmit="window.handleTeacherLogin(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="authPassInput" required placeholder="Enter Faculty Passcode" 
+                        class="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-2xl text-sm text-white text-center tracking-widest focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                </div>
+
+                <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 py-2 rounded-xl">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect passcode. Please try again!
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all">
+                    <i class="fa-solid fa-lock-open mr-1.5"></i> Unlock Faculty Portal
+                </button>
+            </form>
+
+            <div class="pt-2 text-[11px] text-slate-500">
+                <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> Authorized Faculty Access Only
+            </div>
+        </div>
+    </div>
+
     <!-- SIDEBAR NAVIGATION -->
     <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 no-print shadow-2xl z-20">
         <div>
@@ -80,6 +116,12 @@
                 <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>
                 <b>Safe Submission:</b> Marks lock automatically after saving to preserve record integrity.
             </div>
+            
+            <button type="button" onclick="window.logoutPortal()" class="w-full mt-3 py-2 px-3 bg-slate-800 hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 border border-slate-700/60 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Logout Faculty</span>
+            </button>
+            
             <p class="text-[9px] text-slate-600 mt-2 font-mono">CCS Examination Portal v2.0</p>
         </div>
     </aside>
@@ -997,9 +1039,51 @@
             window.renderStudentsTable();
         };
 
+        // ================= AUTHENTICATION & SECURITY ENGINE =================
+        const TEACHER_AUTH_KEY = 'ccs_teacher_auth_session';
+        const TEACHER_PASS = 'teacher@ccs';
+
+        window.checkAuth = function() {
+            const overlay = document.getElementById('authOverlay');
+            if (sessionStorage.getItem(TEACHER_AUTH_KEY) === 'true') {
+                if (overlay) overlay.classList.add('hidden');
+            } else {
+                if (overlay) overlay.classList.remove('hidden');
+                const inp = document.getElementById('authPassInput');
+                if (inp) setTimeout(() => inp.focus(), 150);
+            }
+        };
+
+        window.handleTeacherLogin = function(e) {
+            e.preventDefault();
+            const inp = document.getElementById('authPassInput');
+            const err = document.getElementById('authErrorMsg');
+            const val = inp ? inp.value.trim() : '';
+
+            if (val === TEACHER_PASS) {
+                sessionStorage.setItem(TEACHER_AUTH_KEY, 'true');
+                if (err) err.classList.add('hidden');
+                window.checkAuth();
+            } else {
+                if (err) err.classList.remove('hidden');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+            }
+        };
+
+        window.logoutPortal = function() {
+            if (confirm("Are you sure you want to logout from Faculty Portal?")) {
+                sessionStorage.removeItem(TEACHER_AUTH_KEY);
+                window.checkAuth();
+            }
+        };
+
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
             try {
+                window.checkAuth();
                 window.initCloudSync();
                 window.refreshDropdowns();
                 window.renderStudentsTable();
