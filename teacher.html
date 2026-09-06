@@ -94,6 +94,86 @@
             main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
         }
     </style>
+
+    <script>
+        // IMMEDIATE GLOBAL TEACHER LAMP CONTROLLER
+        window.isTeacherLampOn = false;
+
+        window.toggleTeacherLampRibbon = function() {
+            try {
+                const beam = document.getElementById('lampLightBeam');
+                const bulb = document.getElementById('lampBulbCore');
+                const promptBox = document.getElementById('lampStandbyPrompt');
+                const loginBox = document.getElementById('lampLoginFieldsContainer');
+                const cord = document.getElementById('lampRibbonCord');
+                const tassel = document.getElementById('lampTasselHandle');
+
+                if (cord) {
+                    cord.style.transform = 'scaleY(1.5)';
+                    cord.style.transformOrigin = 'top center';
+                    cord.style.transition = 'transform 0.12s ease-out';
+                    setTimeout(() => { 
+                        cord.style.transform = 'scaleY(1)'; 
+                        cord.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    }, 140);
+                }
+                if (tassel) {
+                    tassel.style.transform = 'translateY(18px) scale(1.1)';
+                    tassel.style.transition = 'transform 0.12s ease-out';
+                    setTimeout(() => { 
+                        tassel.style.transform = 'translateY(0px) scale(1)'; 
+                        tassel.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    }, 140);
+                }
+
+                window.isTeacherLampOn = !window.isTeacherLampOn;
+
+                if (window.isTeacherLampOn) {
+                    if (beam) { beam.style.opacity = '1'; beam.style.display = 'block'; }
+                    if (bulb) { bulb.style.opacity = '1'; bulb.style.backgroundColor = '#ffffff'; bulb.style.boxShadow = '0 0 25px #ffffff, 0 0 45px #10b981'; }
+                    if (promptBox) { promptBox.style.display = 'none'; }
+                    if (loginBox) { 
+                        loginBox.style.display = 'block'; 
+                        loginBox.classList.remove('hidden');
+                    }
+                    setTimeout(() => {
+                        const u = document.getElementById('authUserInput');
+                        if (u) u.focus();
+                    }, 200);
+                } else {
+                    if (beam) { beam.style.opacity = '0.2'; }
+                    if (bulb) { bulb.style.opacity = '0.3'; bulb.style.boxShadow = 'none'; }
+                    if (promptBox) { promptBox.style.display = 'block'; }
+                    if (loginBox) { 
+                        loginBox.style.display = 'none'; 
+                        loginBox.classList.add('hidden');
+                    }
+                }
+            } catch(e) {
+                console.error("toggleTeacherLampRibbon error:", e);
+            }
+        };
+
+        window.autoFillTeacherCredentials = function() {
+            const userInput = document.getElementById('authUserInput');
+            const passInput = document.getElementById('authPassInput');
+            if (userInput) userInput.value = "teacher";
+            if (passInput) passInput.value = "teacher@ccs";
+        };
+
+        window.toggleAuthPassVisibility = function(inputId, btn) {
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            if (el.type === 'password') {
+                el.type = 'text';
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                el.type = 'password';
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        };
+    </script>
+
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
@@ -128,7 +208,7 @@
             <div id="lampRibbonContainer" onclick="window.toggleTeacherLampRibbon()" title="Click or Pull Ribbon to Toggle Lamp & Reveal Credentials"
                 class="cursor-pointer group flex flex-col items-center pt-0 transition-transform duration-300 active:translate-y-4 hover:scale-105">
                 <div id="lampRibbonCord" class="w-1 h-14 bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 group-hover:w-1.5 transition-all shadow-sm"></div>
-                <div class="relative flex flex-col items-center">
+                <div id="lampTasselHandle" class="relative flex flex-col items-center">
                     <div class="w-4 h-4 bg-gradient-to-br from-yellow-300 via-amber-500 to-amber-700 rounded-full shadow-lg border border-yellow-200 group-hover:scale-110 transition-transform"></div>
                     <div class="w-3.5 h-6 bg-gradient-to-b from-amber-500 via-amber-600 to-amber-700 rounded-b-xl shadow-md border-t border-amber-300"></div>
                     <div class="absolute top-12 left-1/2 -translate-x-1/2 whitespace-nowrap px-2.5 py-1 bg-amber-950/90 text-amber-300 text-[10px] font-bold rounded-full border border-amber-500/50 shadow-xl opacity-80 group-hover:opacity-100 transition-opacity">
