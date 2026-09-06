@@ -161,53 +161,71 @@
                 <p class="text-[11px] text-emerald-400 font-semibold tracking-wide mt-0.5">Authorized Faculty Marks Entry</p>
             </div>
 
-            <!-- Credentials Hint Box -->
-            <div id="lampRevealedCredsBox" class="hidden transition-all duration-500 bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-3 text-left animate-pulse">
-                <div class="flex items-center justify-between text-[11px] text-emerald-300 font-bold mb-1">
-                    <span class="flex items-center gap-1.5">
-                        <i class="fa-solid fa-key text-emerald-400"></i> Lamp Lit: Faculty Credentials
-                    </span>
-                    <button type="button" onclick="window.autoFillTeacherCredentials()" class="px-2 py-0.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-black rounded-md transition-all shadow">
-                        1-Click Auto Fill
-                    </button>
+                        <!-- INITIAL STANDBY PROMPT (Before Lamp Ribbon Pull) -->
+            <div id="lampStandbyPrompt" onclick="window.toggleTeacherLampRibbon()" class="cursor-pointer p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center hover:bg-emerald-950/60 transition-all duration-300 group shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                <div class="w-12 h-12 mx-auto rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all shadow-md animate-pulse">
+                    <i class="fa-solid fa-lightbulb"></i>
                 </div>
-                <div class="text-[11px] text-slate-300 font-mono flex items-center justify-between">
-                    <span>User: <b class="text-white">teacher</b></span>
-                    <span>Pass: <b class="text-white">teacher@ccs</b></span>
+                <h3 class="text-xs font-black text-emerald-300 uppercase tracking-widest mt-2">Pull Golden Lamp Cord</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Click or pull the hanging cord above to illuminate the teacher login terminal</p>
+                <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-[10px] font-bold border border-emerald-400/30">
+                    <i class="fa-solid fa-hand-pointer text-emerald-400 animate-bounce"></i>
+                    <span>Click Here or Pull Cord</span>
                 </div>
             </div>
 
-            <form onsubmit="window.handleTeacherLogin(event)" class="space-y-3.5 text-left pt-1">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-user absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-                        <input type="text" id="authUserInput" required placeholder="Enter your username" 
-                            class="w-full pl-9 pr-4 py-2.5 bg-slate-950/90 border border-slate-700/90 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+            <!-- LOGIN TERMINAL CONTAINER (Revealed with Golden Light after Ribbon Pull) -->
+            <div id="lampLoginFieldsContainer" class="hidden transition-all duration-700 space-y-3.5 text-left p-4 rounded-2xl bg-slate-950/90 border-2 border-emerald-400/60 shadow-[0_0_35px_rgba(16,185,129,0.3)]">
+                
+                <!-- Radiant Badge -->
+                <div class="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Faculty Terminal Illuminated</span>
                     </div>
+                    <button type="button" onclick="window.autoFillTeacherCredentials()" class="px-2.5 py-1 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 text-[10px] font-black rounded-lg transition-all shadow-md active:scale-95">
+                        <i class="fa-solid fa-bolt mr-1"></i> 1-Click Auto Fill
+                    </button>
                 </div>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-                        <input type="password" id="authPassInput" required placeholder="••••••••" 
-                            class="w-full pl-9 pr-10 py-2.5 bg-slate-950/90 border border-slate-700/90 rounded-xl text-xs text-white tracking-widest focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
-                        <button type="button" onclick="window.toggleAuthPassVisibility('authPassInput', this)" class="absolute right-3 top-2.5 text-slate-500 hover:text-white text-xs p-1 transition-colors" title="Toggle Password View">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
+                <!-- Credentials hint -->
+                <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl px-3 py-1.5 text-[11px] font-mono text-emerald-200 flex justify-between">
+                    <span>User: <b class="text-white">teacher</b></span>
+                    <span>Pass: <b class="text-white">teacher@ccs</b></span>
+                </div>
+
+                <form onsubmit="window.handleTeacherLogin(event)" class="space-y-3 pt-1">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3.5 top-3 text-emerald-400 text-xs"></i>
+                            <input type="text" id="authUserInput" required placeholder="teacher" value="teacher"
+                                class="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-emerald-500/40 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all font-medium">
+                        </div>
                     </div>
-                </div>
 
-                <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl text-center">
-                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Faculty Credentials. Access Denied!
-                </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-3 text-emerald-400 text-xs"></i>
+                            <input type="password" id="authPassInput" required placeholder="teacher@ccs" value="teacher@ccs"
+                                class="w-full pl-9 pr-10 py-2.5 bg-slate-900 border border-emerald-500/40 rounded-xl text-xs text-white tracking-widest focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all font-medium">
+                            <button type="button" onclick="window.toggleAuthPassVisibility('authPassInput', this)" class="absolute right-3 top-2.5 text-slate-400 hover:text-emerald-300 text-xs p-1 transition-colors" title="Toggle Password View">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/30 active:scale-98 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-to-bracket"></i>
-                    <span>Sign In to Teacher Portal</span>
-                </button>
-            </form>
+                    <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl text-center">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Faculty Credentials. Access Denied!
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/30 active:scale-98 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket text-sm"></i>
+                        <span>Sign In to Teacher Portal</span>
+                    </button>
+                </form>
+            </div>
 
             <div class="pt-3 border-t border-slate-800/80 text-center">
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400">
