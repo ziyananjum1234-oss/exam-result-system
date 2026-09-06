@@ -301,7 +301,7 @@
                                 <span>Section / House / Group *</span>
                                 <span class="text-[10px] text-indigo-400 cursor-pointer hover:underline" onclick="window.promptAddNewClassOrSection('section')">+ Add Section</span>
                             </label>
-                            <input type="text" id="s_group" list="sectionDatalist" required placeholder="e.g. Jinnah, Blue, Green, Pre-Medical" 
+                            <input type="text" id="s_group" list="sectionDatalist" required placeholder="e.g. Ghazali, Rumi, Daisy, Tulip, Arfa Kareem" 
                                 class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs focus:ring-2 focus:ring-indigo-500">
                             <datalist id="sectionDatalist">
                                 <!-- Populated Dynamically with all sections -->
@@ -1195,7 +1195,14 @@
 
         // MASTER DYNAMIC CLASSES & SECTIONS LISTS
         let masterClassesList = ["Nursery", "Prep", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "1st Year", "2nd Year"];
-        let masterSectionsList = ["Jinnah", "Iqbal", "Sir Syed", "Blue", "Green", "Rose", "Section A", "Section B", "Pre-Medical", "Pre-Engineering", "ICS (Computer)", "Commerce", "Arts / General"];
+        let masterSectionsList = [
+            "Ghazali", "Rumi", "Johari", "Liaquat", "Edhi", "Ayubi", "Abdul Qadeer Khan", "M.M Alam", 
+            "Ibn-e-Sina", "Raazi", "Sadi", "Daisy", "Daffodils", "Tulip", "Marigold", "Rose", 
+            "Sunflower", "Jasmine", "Lotus", "Ibn-e-Rushd", "Wasif", "Khayyam", "Khaldoon", "Qasim", 
+            "Al Beruni", "Jabir Bin Hayyan", "Ibn-al-Haithum", "Tariq", "Goldies", "Silver", 
+            "Diamond", "Sapphire", "Rubies", "Pearls", "Jades", "Corals", "Amber", "Opals", 
+            "Arfa Kareem", "Fatima Jinnah"
+        ];
 
         let currentFormSubjects = [
             { name: "English", marks: 100 },
@@ -1233,11 +1240,11 @@
                     studentsList = savedStudents;
                 } else {
                     studentsList = [
-                        { rollNo: "101", name: "Muhammad Ali", father: "Tariq Mehmood", gender: "Male", class: "Class 10", group: "Jinnah", phone: "0300-1234567", status: "Active" },
-                        { rollNo: "102", name: "Fatima Noor", father: "Abdul Rehman", gender: "Female", class: "Class 10", group: "Pre-Medical", phone: "0321-7654321", status: "Active" },
-                        { rollNo: "103", name: "Hamza Ahmed", father: "Ahmed Raza", gender: "Male", class: "Class 9", group: "Blue", phone: "0333-9876543", status: "Active" },
+                        { rollNo: "101", name: "Muhammad Ali", father: "Tariq Mehmood", gender: "Male", class: "Class 10", group: "Ghazali", phone: "0300-1234567", status: "Active" },
+                        { rollNo: "102", name: "Fatima Noor", father: "Abdul Rehman", gender: "Female", class: "Class 10", group: "Daisy", phone: "0321-7654321", status: "Active" },
+                        { rollNo: "103", name: "Hamza Ahmed", father: "Ahmed Raza", gender: "Male", class: "Class 9", group: "Rumi", phone: "0333-9876543", status: "Active" },
                         { rollNo: "104", name: "Ayesha Bibi", father: "Muhammad Saleem", gender: "Female", class: "Class 9", group: "Rose", phone: "0345-1122334", status: "Left" },
-                        { rollNo: "105", name: "Zain Ali", father: "Ghulam Ali", gender: "Male", class: "Class 10", group: "Green", phone: "0302-5566778", status: "Active" }
+                        { rollNo: "105", name: "Zain Ali", father: "Ghulam Ali", gender: "Male", class: "Class 10", group: "Tulip", phone: "0302-5566778", status: "Active" }
                     ];
                 }
             } catch (e) {
@@ -1262,7 +1269,12 @@
             try {
                 const rawSecs = localStorage.getItem('ccs_master_sections') || localStorage.getItem('masterSectionsList');
                 const savedSections = rawSecs ? JSON.parse(rawSecs) : null;
-                if (Array.isArray(savedSections) && savedSections.length > 0) masterSectionsList = savedSections;
+                if (Array.isArray(savedSections) && savedSections.length > 0) {
+                    masterSectionsList.forEach(sec => {
+                        if (!savedSections.includes(sec)) savedSections.push(sec);
+                    });
+                    masterSectionsList = savedSections;
+                }
             } catch(e) {}
 
             // Auto-harvest any custom classes or sections found in students list
@@ -1578,7 +1590,7 @@
                     }
                 }
             } else if (type === 'section') {
-                const newSec = prompt("Enter New Section / House / Group Name (e.g. Jinnah, Iqbal, Blue, Green, Pre-Medical):");
+                const newSec = prompt("Enter New Section / House / Group Name (e.g. Ghazali, Rumi, Daisy, Tulip, Arfa Kareem):");
                 if (newSec && newSec.trim() !== "") {
                     const cleanSec = newSec.trim();
                     if (!masterSectionsList.includes(cleanSec)) {
