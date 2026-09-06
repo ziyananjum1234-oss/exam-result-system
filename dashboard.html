@@ -87,36 +87,60 @@
 
     <!-- ADMIN AUTHENTICATION OVERLAY -->
     <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5 relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 mx-auto flex items-center justify-center text-white text-2xl shadow-xl shadow-indigo-600/30">
-                <i class="fa-solid fa-user-shield"></i>
+            <!-- College Monogram & Logo -->
+            <div class="w-20 h-20 rounded-2xl bg-white p-2 mx-auto flex items-center justify-center shadow-xl shadow-indigo-600/20 border-2 border-indigo-500/30">
+                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
             </div>
 
             <div>
                 <h2 class="text-xs font-black tracking-widest text-slate-300 uppercase font-royal-title">Chenab College Shorkot</h2>
                 <h1 class="text-xl font-extrabold text-white mt-1">Admin Control Portal</h1>
-                <p class="text-xs text-slate-400 mt-1">Master Controller & Examination Administration</p>
+                <p class="text-xs text-indigo-400 font-semibold mt-0.5">Master Controller & Examination Administration</p>
             </div>
 
-            <form onsubmit="window.handleAdminLogin(event)" class="space-y-4">
-                <div class="relative">
-                    <input type="password" id="adminAuthPassInput" required placeholder="Enter Admin Secret Password" 
-                        class="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-2xl text-sm text-white text-center tracking-widest focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <form onsubmit="window.handleAdminLogin(event)" class="space-y-3.5 text-left">
+                <!-- Username -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user-shield absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
+                        <input type="text" id="adminAuthUserInput" required placeholder="Enter Admin Username (admin)" 
+                            class="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    </div>
                 </div>
 
-                <div id="adminAuthErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 py-2 rounded-xl">
-                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect Admin Password. Access Denied!
+                <!-- Password -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
+                        <input type="password" id="adminAuthPassInput" required placeholder="Enter Password (admin@ccs)" 
+                            class="w-full pl-9 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <button type="button" onclick="window.toggleAuthPassVisibility('adminAuthPassInput', this)" class="absolute right-3 top-2.5 text-slate-500 hover:text-white text-xs p-1">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all">
-                    <i class="fa-solid fa-unlock-keyhole mr-1.5"></i> Unlock Master Admin Dashboard
+                <div id="adminAuthErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 py-2 px-3 rounded-xl text-center">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Admin Credentials. Access Denied!
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                    <span>Unlock Master Admin Dashboard</span>
                 </button>
             </form>
 
-            <div class="pt-2 text-[11px] text-slate-500">
-                <i class="fa-solid fa-lock text-indigo-400 mr-1"></i> Highly Protected Admin Area
+            <!-- Developer Credit Watermark -->
+            <div class="pt-3 border-t border-slate-800/80 text-center">
+                <p class="text-[11px] text-slate-400 font-medium">
+                    Designed & Developed by: <b class="text-indigo-400 font-bold">Muhammad Qaiser Abbas</b>
+                </p>
+                <p class="text-[9px] text-slate-600 mt-0.5 font-mono">Chenab College Examination System</p>
             </div>
         </div>
     </div>
@@ -4398,7 +4422,21 @@
 
         // ================= ADMIN AUTHENTICATION & SECURITY ENGINE =================
         const ADMIN_AUTH_KEY = 'ccs_admin_auth_session';
+        const ADMIN_USER = 'admin';
         const ADMIN_PASS = 'admin@ccs';
+
+        window.toggleAuthPassVisibility = function(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            const icon = btn.querySelector('i');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+            } else {
+                inp.type = 'password';
+                if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+            }
+        };
 
         window.checkAdminAuth = function() {
             const overlay = document.getElementById('adminAuthOverlay');
@@ -4406,26 +4444,29 @@
                 if (overlay) overlay.classList.add('hidden');
             } else {
                 if (overlay) overlay.classList.remove('hidden');
-                const inp = document.getElementById('adminAuthPassInput');
-                if (inp) setTimeout(() => inp.focus(), 150);
+                const userInp = document.getElementById('adminAuthUserInput');
+                if (userInp) setTimeout(() => userInp.focus(), 150);
             }
         };
 
         window.handleAdminLogin = function(e) {
             e.preventDefault();
-            const inp = document.getElementById('adminAuthPassInput');
+            const userInp = document.getElementById('adminAuthUserInput');
+            const passInp = document.getElementById('adminAuthPassInput');
             const err = document.getElementById('adminAuthErrorMsg');
-            const val = inp ? inp.value.trim() : '';
+            
+            const userVal = userInp ? userInp.value.trim().toLowerCase() : '';
+            const passVal = passInp ? passInp.value.trim() : '';
 
-            if (val === ADMIN_PASS) {
+            if (userVal === ADMIN_USER && passVal === ADMIN_PASS) {
                 sessionStorage.setItem(ADMIN_AUTH_KEY, 'true');
                 if (err) err.classList.add('hidden');
                 window.checkAdminAuth();
             } else {
                 if (err) err.classList.remove('hidden');
-                if (inp) {
-                    inp.value = '';
-                    inp.focus();
+                if (passInp) {
+                    passInp.value = '';
+                    passInp.focus();
                 }
             }
         };
