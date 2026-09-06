@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- SheetJS (Excel Library) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Google Firebase SDK (Compat Version for Ultra Reliability & Zero Setup) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <!-- Google Fonts: Old English / Royal Classic Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1182,8 +1185,95 @@
 
     </main>
 
-    <!-- JavaScript Logic -->
     <script>
+        // ================= GOOGLE FIREBASE REALTIME CLOUD DATABASE ENGINE =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJcR7DflMPPubepWqrd9SSWKzKX5FA1Gc",
+            authDomain: "chenab-college-shorkot.firebaseapp.com",
+            databaseURL: "https://chenab-college-shorkot-default-rtdb.firebaseio.com",
+            projectId: "chenab-college-shorkot",
+            storageBucket: "chenab-college-shorkot.firebasestorage.app",
+            messagingSenderId: "71154756414",
+            appId: "1:71154756414:web:747deea238891844091a6f",
+            measurementId: "G-L3MBFWZD1Y"
+        };
+
+        let db = null;
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+            }
+        } catch(e) {
+            console.warn("Firebase initialization error:", e);
+        }
+
+        window.syncCloud = function(node, data) {
+            try {
+                if (db) {
+                    db.ref(node).set(data);
+                }
+            } catch(e) {
+                console.warn("Cloud sync error on " + node + ":", e);
+            }
+        };
+
+        window.initCloudSync = function() {
+            if (!db) return;
+            try {
+                db.ref().on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val) {
+                        let hasChange = false;
+                        if (val.students && Array.isArray(val.students)) {
+                            studentsList = val.students;
+                            localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+                            hasChange = true;
+                        }
+                        if (val.exams && Array.isArray(val.exams)) {
+                            examsSetupList = val.exams;
+                            localStorage.setItem('ccs_exams_setup', JSON.stringify(examsSetupList));
+                            hasChange = true;
+                        }
+                        if (val.marks && typeof val.marks === 'object') {
+                            marksDatabase = val.marks;
+                            localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
+                            hasChange = true;
+                        }
+                        if (val.dateSheets && typeof val.dateSheets === 'object') {
+                            dateSheetsDatabase = val.dateSheets;
+                            localStorage.setItem('ccs_datesheets_db', JSON.stringify(dateSheetsDatabase));
+                            hasChange = true;
+                        }
+                        if (val.classes && Array.isArray(val.classes)) {
+                            masterClassesList = val.classes;
+                            localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                            hasChange = true;
+                        }
+                        if (val.sections && Array.isArray(val.sections)) {
+                            masterSectionsList = val.sections;
+                            localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                            hasChange = true;
+                        }
+
+                        if (hasChange) {
+                            window.refreshAllClassAndSectionDropdowns();
+                            window.renderStudentsTable();
+                        }
+                    } else {
+                        if (studentsList && studentsList.length > 0) window.syncCloud('students', studentsList);
+                        if (examsSetupList && examsSetupList.length > 0) window.syncCloud('exams', examsSetupList);
+                        if (marksDatabase && Object.keys(marksDatabase).length > 0) window.syncCloud('marks', marksDatabase);
+                        if (dateSheetsDatabase && Object.keys(dateSheetsDatabase).length > 0) window.syncCloud('dateSheets', dateSheetsDatabase);
+                        if (masterClassesList && masterClassesList.length > 0) window.syncCloud('classes', masterClassesList);
+                        if (masterSectionsList && masterSectionsList.length > 0) window.syncCloud('sections', masterSectionsList);
+                    }
+                });
+            } catch(e) {
+                console.warn("Cloud sync listener error:", e);
+            }
+        };
+
         // ================= DATA STORES WITH SAFE DYNAMIC FALLBACKS =================
         let studentsList = [];
         let examsSetupList = [];
@@ -1583,6 +1673,7 @@
                     if (!masterClassesList.includes(cleanName)) {
                         masterClassesList.push(cleanName);
                         localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                        window.syncCloud('classes', masterClassesList);
                         window.refreshAllClassAndSectionDropdowns();
                         alert(`Success: Class "${cleanName}" added dynamically across the system!`);
                     } else {
@@ -1596,6 +1687,7 @@
                     if (!masterSectionsList.includes(cleanSec)) {
                         masterSectionsList.push(cleanSec);
                         localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                        window.syncCloud('sections', masterSectionsList);
                         window.refreshAllClassAndSectionDropdowns();
                         alert(`Success: Section "${cleanSec}" added to list!`);
                     } else {
@@ -1679,12 +1771,12 @@
                         }
 
                         const d = parsed.data;
-                        if (d.students) localStorage.setItem('ccs_students_list', JSON.stringify(d.students));
-                        if (d.exams) localStorage.setItem('ccs_exams_setup', JSON.stringify(d.exams));
-                        if (d.marks) localStorage.setItem('ccs_marks_database', JSON.stringify(d.marks));
-                        if (d.dateSheets) localStorage.setItem('ccs_datesheets_db', JSON.stringify(d.dateSheets));
-                        if (d.classes) localStorage.setItem('ccs_master_classes', JSON.stringify(d.classes));
-                        if (d.sections) localStorage.setItem('ccs_master_sections', JSON.stringify(d.sections));
+                        if (d.students) { localStorage.setItem('ccs_students_list', JSON.stringify(d.students)); window.syncCloud('students', d.students); }
+                        if (d.exams) { localStorage.setItem('ccs_exams_setup', JSON.stringify(d.exams)); window.syncCloud('exams', d.exams); }
+                        if (d.marks) { localStorage.setItem('ccs_marks_database', JSON.stringify(d.marks)); window.syncCloud('marks', d.marks); }
+                        if (d.dateSheets) { localStorage.setItem('ccs_datesheets_db', JSON.stringify(d.dateSheets)); window.syncCloud('dateSheets', d.dateSheets); }
+                        if (d.classes) { localStorage.setItem('ccs_master_classes', JSON.stringify(d.classes)); window.syncCloud('classes', d.classes); }
+                        if (d.sections) { localStorage.setItem('ccs_master_sections', JSON.stringify(d.sections)); window.syncCloud('sections', d.sections); }
 
                         // Reload data store and update views
                         initDataStore();
@@ -1880,6 +1972,7 @@
             if (confirm(`Are you sure you want to ${actionText}?`)) {
                 student.status = newStatus;
                 localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+                window.syncCloud('students', studentsList);
                 window.renderStudentsTable();
                 alert(`Success: Student ${student.name} is now marked as ${newStatus}!`);
             }
@@ -1934,10 +2027,12 @@
             if (!masterClassesList.includes(cls)) {
                 masterClassesList.push(cls);
                 localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                window.syncCloud('classes', masterClassesList);
             }
             if (!masterSectionsList.includes(group)) {
                 masterSectionsList.push(group);
                 localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                window.syncCloud('sections', masterSectionsList);
             }
 
             if (editRoll) {
@@ -1959,6 +2054,7 @@
             }
 
             localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+            window.syncCloud('students', studentsList);
             window.refreshAllClassAndSectionDropdowns();
             window.renderStudentsTable();
         };
@@ -1967,6 +2063,7 @@
             if (confirm(`Are you sure you want to permanently delete Roll No: ${rollNo}? (Tip: You can use "Left" status instead to keep historical archives!)`)) {
                 studentsList = studentsList.filter(s => s.rollNo !== rollNo);
                 localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+                window.syncCloud('students', studentsList);
                 window.renderStudentsTable();
             }
         };
@@ -2021,6 +2118,9 @@
                 localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
                 localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
                 localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+                window.syncCloud('classes', masterClassesList);
+                window.syncCloud('sections', masterSectionsList);
+                window.syncCloud('students', studentsList);
                 window.refreshAllClassAndSectionDropdowns();
                 window.renderStudentsTable();
                 alert(`Success: ${addedCount} Students imported from Excel into Chenab College Database!`);
@@ -2185,6 +2285,7 @@
 
             examsSetupList.unshift(newExam);
             localStorage.setItem('ccs_exams_setup', JSON.stringify(examsSetupList));
+            window.syncCloud('exams', examsSetupList);
             window.refreshAllExamDropdowns();
             window.renderExamsTable();
             alert(`Exam "${name}" defined successfully for selected classes!`);
@@ -2236,6 +2337,7 @@
             if (confirm('Are you sure you want to delete this examination setup?')) {
                 examsSetupList = examsSetupList.filter(e => e.id !== id);
                 localStorage.setItem('ccs_exams_setup', JSON.stringify(examsSetupList));
+                window.syncCloud('exams', examsSetupList);
                 window.refreshAllExamDropdowns();
                 window.renderExamsTable();
             }
@@ -2358,6 +2460,7 @@
             };
 
             localStorage.setItem('ccs_datesheets_db', JSON.stringify(dateSheetsDatabase));
+            window.syncCloud('dateSheets', dateSheetsDatabase);
             window.renderRollNoSlips();
             alert(`Success: Date Sheet & Instructions for "${cls}" saved successfully!`);
         };
@@ -2753,6 +2856,7 @@
             });
 
             localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
+            window.syncCloud('marks', marksDatabase);
             window.renderSubjectProgressTracker();
             alert(`Success: Marks for "${selectedSubject}" saved successfully!`);
         };
@@ -4208,6 +4312,7 @@
         // Initialize Everything Safely on Load
         window.addEventListener('DOMContentLoaded', () => {
             try {
+                window.initCloudSync();
                 window.refreshAllClassAndSectionDropdowns();
                 window.renderStudentsTable();
                 window.renderSubjectRows();
