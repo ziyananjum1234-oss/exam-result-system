@@ -85,6 +85,42 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
 
+    <!-- ADMIN AUTHENTICATION OVERLAY -->
+    <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-500 mx-auto flex items-center justify-center text-white text-2xl shadow-xl shadow-indigo-600/30">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+
+            <div>
+                <h2 class="text-xs font-black tracking-widest text-slate-300 uppercase font-royal-title">Chenab College Shorkot</h2>
+                <h1 class="text-xl font-extrabold text-white mt-1">Admin Control Portal</h1>
+                <p class="text-xs text-slate-400 mt-1">Master Controller & Examination Administration</p>
+            </div>
+
+            <form onsubmit="window.handleAdminLogin(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="adminAuthPassInput" required placeholder="Enter Admin Secret Password" 
+                        class="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-2xl text-sm text-white text-center tracking-widest focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+
+                <div id="adminAuthErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 py-2 rounded-xl">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect Admin Password. Access Denied!
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all">
+                    <i class="fa-solid fa-unlock-keyhole mr-1.5"></i> Unlock Master Admin Dashboard
+                </button>
+            </form>
+
+            <div class="pt-2 text-[11px] text-slate-500">
+                <i class="fa-solid fa-lock text-indigo-400 mr-1"></i> Highly Protected Admin Area
+            </div>
+        </div>
+    </div>
+
     <!-- 1. SIDEBAR MENU (ALL 9 MODULES + BACKUP & RESTORE) -->
     <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between flex-shrink-0 no-print overflow-y-auto max-h-screen">
         <div>
@@ -138,21 +174,21 @@
                 </button>
 
                 <!-- 7. Result Summary & Graphs -->
-                <button type="button" id="navAnalyticsBtn" onclick="window.showTab('resultAnalytics')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-bold text-xs transition-all text-left border border-amber-500/20 bg-amber-500/5">
-                    <i class="fa-solid fa-chart-pie text-xs w-4 text-center text-amber-400"></i>
-                    <span class="text-amber-300">Result Summary & Graphs</span>
+                <button type="button" id="navAnalyticsBtn" onclick="window.showTab('resultAnalytics')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
+                    <i class="fa-solid fa-chart-pie text-xs w-4 text-center text-sky-400"></i>
+                    <span>Result Analytics</span>
                 </button>
 
-                <!-- 8. Single Exam Result Card / DMC -->
+                <!-- 8. Royal Single DMC Cards -->
                 <button type="button" id="navDmcBtn" onclick="window.showTab('dmc')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
-                    <i class="fa-solid fa-graduation-cap text-xs w-4 text-center text-pink-400"></i>
-                    <span>Result Card / DMC</span>
+                    <i class="fa-solid fa-award text-xs w-4 text-center text-yellow-400"></i>
+                    <span>Single DMC Cards</span>
                 </button>
 
-                <!-- 9. Combined Multi-Term Result -->
+                <!-- 9. Royal Combined DMC (Multi-Term) -->
                 <button type="button" id="navCombinedBtn" onclick="window.showTab('combined')" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
-                    <i class="fa-solid fa-layer-group text-xs w-4 text-center text-cyan-400"></i>
-                    <span class="font-bold">Combined Result</span>
+                    <i class="fa-solid fa-medal text-xs w-4 text-center text-rose-400"></i>
+                    <span>Combined Multi-Term DMC</span>
                 </button>
             </nav>
         </div>
@@ -179,10 +215,10 @@
             </button>
 
             <!-- 4. Logout -->
-            <a href="index.html" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 font-medium text-xs transition-all">
-                <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
-                <span>Logout System</span>
-            </a>
+            <button type="button" onclick="window.logoutAdminPortal()" class="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 font-medium text-xs transition-all text-left">
+                <i class="fa-solid fa-arrow-right-from-bracket text-xs text-rose-400"></i>
+                <span>Logout Admin Portal</span>
+            </button>
         </div>
     </aside>
 
@@ -4360,9 +4396,51 @@
             window.printPortraitView();
         };
 
+        // ================= ADMIN AUTHENTICATION & SECURITY ENGINE =================
+        const ADMIN_AUTH_KEY = 'ccs_admin_auth_session';
+        const ADMIN_PASS = 'admin@ccs';
+
+        window.checkAdminAuth = function() {
+            const overlay = document.getElementById('adminAuthOverlay');
+            if (sessionStorage.getItem(ADMIN_AUTH_KEY) === 'true') {
+                if (overlay) overlay.classList.add('hidden');
+            } else {
+                if (overlay) overlay.classList.remove('hidden');
+                const inp = document.getElementById('adminAuthPassInput');
+                if (inp) setTimeout(() => inp.focus(), 150);
+            }
+        };
+
+        window.handleAdminLogin = function(e) {
+            e.preventDefault();
+            const inp = document.getElementById('adminAuthPassInput');
+            const err = document.getElementById('adminAuthErrorMsg');
+            const val = inp ? inp.value.trim() : '';
+
+            if (val === ADMIN_PASS) {
+                sessionStorage.setItem(ADMIN_AUTH_KEY, 'true');
+                if (err) err.classList.add('hidden');
+                window.checkAdminAuth();
+            } else {
+                if (err) err.classList.remove('hidden');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+            }
+        };
+
+        window.logoutAdminPortal = function() {
+            if (confirm("Are you sure you want to logout from Admin Control Portal?")) {
+                sessionStorage.removeItem(ADMIN_AUTH_KEY);
+                window.checkAdminAuth();
+            }
+        };
+
         // Initialize Everything Safely on Load
         window.addEventListener('DOMContentLoaded', () => {
             try {
+                window.checkAdminAuth();
                 window.initCloudSync();
                 window.refreshAllClassAndSectionDropdowns();
                 window.renderStudentsTable();
