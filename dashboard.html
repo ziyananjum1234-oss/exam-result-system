@@ -146,6 +146,87 @@
             }
         }
     </style>
+
+    <script>
+        // IMMEDIATE GLOBAL LAMP CONTROLLER
+        window.isLampLightOn = false;
+
+        window.toggleLampPullRibbon = function() {
+            try {
+                const beam = document.getElementById('lampLightBeam');
+                const bulb = document.getElementById('lampBulbCore');
+                const promptBox = document.getElementById('lampStandbyPrompt');
+                const loginBox = document.getElementById('lampLoginFieldsContainer');
+                const cord = document.getElementById('lampRibbonCord');
+                const tassel = document.getElementById('lampTasselHandle');
+
+                // Spring pull physics animation
+                if (cord) {
+                    cord.style.transform = 'scaleY(1.5)';
+                    cord.style.transformOrigin = 'top center';
+                    cord.style.transition = 'transform 0.12s ease-out';
+                    setTimeout(() => { 
+                        cord.style.transform = 'scaleY(1)'; 
+                        cord.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    }, 140);
+                }
+                if (tassel) {
+                    tassel.style.transform = 'translateY(18px) scale(1.1)';
+                    tassel.style.transition = 'transform 0.12s ease-out';
+                    setTimeout(() => { 
+                        tassel.style.transform = 'translateY(0px) scale(1)'; 
+                        tassel.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    }, 140);
+                }
+
+                window.isLampLightOn = !window.isLampLightOn;
+
+                if (window.isLampLightOn) {
+                    if (beam) { beam.style.opacity = '1'; beam.style.display = 'block'; }
+                    if (bulb) { bulb.style.opacity = '1'; bulb.style.backgroundColor = '#ffffff'; bulb.style.boxShadow = '0 0 25px #ffffff, 0 0 45px #f59e0b'; }
+                    if (promptBox) { promptBox.style.display = 'none'; }
+                    if (loginBox) { 
+                        loginBox.style.display = 'block'; 
+                        loginBox.classList.remove('hidden');
+                    }
+                    setTimeout(() => {
+                        const u = document.getElementById('adminAuthUserInput');
+                        if (u) u.focus();
+                    }, 200);
+                } else {
+                    if (beam) { beam.style.opacity = '0.2'; }
+                    if (bulb) { bulb.style.opacity = '0.3'; bulb.style.boxShadow = 'none'; }
+                    if (promptBox) { promptBox.style.display = 'block'; }
+                    if (loginBox) { 
+                        loginBox.style.display = 'none'; 
+                        loginBox.classList.add('hidden');
+                    }
+                }
+            } catch(e) {
+                console.error("toggleLampPullRibbon error:", e);
+            }
+        };
+
+        window.autoFillAdminCredentials = function() {
+            const userInput = document.getElementById('adminAuthUserInput');
+            const passInput = document.getElementById('adminAuthPassInput');
+            if (userInput) userInput.value = "admin";
+            if (passInput) passInput.value = "admin@ccs";
+        };
+
+        window.toggleAuthPassVisibility = function(inputId, btn) {
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            if (el.type === 'password') {
+                el.type = 'text';
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+            } else {
+                el.type = 'password';
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+            }
+        };
+    </script>
+
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
