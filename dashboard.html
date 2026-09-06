@@ -2671,10 +2671,11 @@
                     <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
                     <td class="py-2.5 px-4 text-slate-400">${s.father}</td>
                     <td class="py-2 px-4 text-center">
-                        <input type="number" min="0" max="${subObj.marks}" placeholder="0-${subObj.marks}"
+                        <input type="text" placeholder="0-${subObj.marks} / A / L"
                             value="${savedVal}"
                             data-roll="${s.rollNo}" 
                             data-index="${idx}"
+                            oninput="this.value = this.value.toUpperCase()"
                             onkeydown="window.handleMarksEnterKey(event, ${idx})"
                             class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                     </td>
@@ -2718,7 +2719,7 @@
 
             inputs.forEach(input => {
                 const rollNo = input.getAttribute('data-roll');
-                const val = input.value.trim();
+                const val = input.value.trim().toUpperCase();
 
                 const key = `${examId}_${rollNo}`;
                 if (!marksDatabase[key]) {
@@ -2726,7 +2727,14 @@
                 }
 
                 if (val !== '') {
-                    marksDatabase[key][selectedSubject] = parseInt(val) || 0;
+                    if (val === 'A' || val === 'ABSENT') {
+                        marksDatabase[key][selectedSubject] = 'A';
+                    } else if (val === 'L' || val === 'LEAVE') {
+                        marksDatabase[key][selectedSubject] = 'L';
+                    } else {
+                        const parsed = parseInt(val);
+                        marksDatabase[key][selectedSubject] = isNaN(parsed) ? 0 : Math.min(parsed, subObj.marks || 100);
+                    }
                 } else {
                     delete marksDatabase[key][selectedSubject];
                 }
@@ -2848,14 +2856,28 @@
                         let subMarksMap = {};
 
                         subjects.forEach(sub => {
-                            const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
-                            if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
-                            totalObt += obt;
-                            subMarksMap[sub.name] = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? savedMarks[sub.name] : '-';
-
+                            const rawVal = savedMarks[sub.name];
+                            let obt = 0;
                             const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                            if (obt < subPassMin) {
-                                isSubjectFail = true;
+
+                            if (rawVal !== undefined && rawVal !== '') {
+                                hasMarks = true;
+                                if (rawVal === 'A' || rawVal === 'Absent') {
+                                    isSubjectFail = true;
+                                    subMarksMap[sub.name] = 'A';
+                                } else if (rawVal === 'L' || rawVal === 'Leave') {
+                                    isSubjectFail = true;
+                                    subMarksMap[sub.name] = 'L';
+                                } else {
+                                    obt = parseInt(rawVal) || 0;
+                                    totalObt += obt;
+                                    subMarksMap[sub.name] = obt;
+                                    if (obt < subPassMin) {
+                                        isSubjectFail = true;
+                                    }
+                                }
+                            } else {
+                                subMarksMap[sub.name] = '-';
                             }
                         });
 
@@ -2921,10 +2943,18 @@
 
                         subjects.forEach(sub => {
                             const val = s.subMarksMap[sub.name];
-                            const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                            const isSubPass = parseInt(val) >= subPassMin;
-                            const markColor = val === '-' ? 'text-slate-400' : (isSubPass ? 'text-slate-900 font-semibold' : 'text-rose-600 font-bold');
-                            rowHtml += `<td class="py-2 px-2 text-center ${markColor}">${val}</td>`;
+                            let markHtml = `<span class="text-slate-400">-</span>`;
+                            if (val === 'A' || val === 'Absent') {
+                                markHtml = `<span class="text-rose-600 font-black bg-rose-50 px-1.5 py-0.5 rounded text-[10px] border border-rose-200">A</span>`;
+                            } else if (val === 'L' || val === 'Leave') {
+                                markHtml = `<span class="text-amber-600 font-black bg-amber-50 px-1.5 py-0.5 rounded text-[10px] border border-amber-200">L</span>`;
+                            } else if (val !== '-') {
+                                const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                                const isSubPass = parseInt(val) >= subPassMin;
+                                const markColor = isSubPass ? 'text-slate-900 font-semibold' : 'text-rose-600 font-bold';
+                                markHtml = `<span class="${markColor}">${val}</span>`;
+                            }
+                            rowHtml += `<td class="py-2 px-2 text-center">${markHtml}</td>`;
                         });
 
                         rowHtml += `
@@ -3097,12 +3127,18 @@
                     if (s.gender === 'Male') boysTotal++; else girlsTotal++;
 
                     subjects.forEach(sub => {
-                        const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
-                        if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
-                        totalObt += obt;
-
-                        const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
-                        if (obt < subPassMin) isSubjectFail = true;
+                        const rawVal = savedMarks[sub.name];
+                        if (rawVal !== undefined && rawVal !== '') {
+                            hasMarks = true;
+                            if (rawVal === 'A' || rawVal === 'Absent' || rawVal === 'L' || rawVal === 'Leave') {
+                                isSubjectFail = true;
+                            } else {
+                                const obt = parseInt(rawVal) || 0;
+                                totalObt += obt;
+                                const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                                if (obt < subPassMin) isSubjectFail = true;
+                            }
+                        }
                     });
 
                     const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
@@ -3377,31 +3413,55 @@
 
                     subjects.forEach(sub => {
                         const maxM = parseInt(sub.marks) || 100;
-                        const obt = (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? parseInt(savedMarks[sub.name]) : 0;
-                        if (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') hasMarks = true;
-
-                        totalObt += obt;
-                        const subPassMin = Math.ceil((maxM * passCriteria) / 100);
-                        const isPass = obt >= subPassMin;
-                        if (!isPass) isSubjectFail = true;
-
-                        const subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
-
+                        const rawVal = savedMarks[sub.name];
+                        let obt = 0;
+                        let displayObt = '-';
+                        let isPass = false;
                         let subGrade = 'F';
-                        if (subPct >= 80) subGrade = 'A+';
-                        else if (subPct >= 70) subGrade = 'A';
-                        else if (subPct >= 60) subGrade = 'B';
-                        else if (subPct >= 50) subGrade = 'C';
-                        else if (subPct >= 40) subGrade = 'D';
+                        let subPct = 0;
+                        let subStatus = 'FAIL';
+                        const subPassMin = Math.ceil((maxM * passCriteria) / 100);
+
+                        if (rawVal !== undefined && rawVal !== '') {
+                            hasMarks = true;
+                            if (rawVal === 'A' || rawVal === 'Absent') {
+                                displayObt = 'Absent (A)';
+                                isPass = false;
+                                isSubjectFail = true;
+                                subStatus = 'ABSENT';
+                                subGrade = 'A';
+                                subPct = 0;
+                            } else if (rawVal === 'L' || rawVal === 'Leave') {
+                                displayObt = 'Leave (L)';
+                                isPass = false;
+                                isSubjectFail = true;
+                                subStatus = 'LEAVE';
+                                subGrade = 'L';
+                                subPct = 0;
+                            } else {
+                                obt = parseInt(rawVal) || 0;
+                                displayObt = obt;
+                                totalObt += obt;
+                                isPass = obt >= subPassMin;
+                                if (!isPass) isSubjectFail = true;
+                                subPct = maxM > 0 ? ((obt / maxM) * 100).toFixed(0) : 0;
+                                if (subPct >= 80) subGrade = 'A+';
+                                else if (subPct >= 70) subGrade = 'A';
+                                else if (subPct >= 60) subGrade = 'B';
+                                else if (subPct >= 50) subGrade = 'C';
+                                else if (subPct >= 40) subGrade = 'D';
+                                subStatus = isPass ? 'PASS' : 'FAIL';
+                            }
+                        }
 
                         subjectsDetail.push({
                             name: sub.name,
                             maxMarks: maxM,
                             passMin: subPassMin,
-                            obtained: (savedMarks[sub.name] !== undefined && savedMarks[sub.name] !== '') ? obt : '-',
+                            obtained: displayObt,
                             pct: subPct,
-                            grade: isPass ? subGrade : 'F',
-                            status: isPass ? 'PASS' : 'FAIL'
+                            grade: isPass ? subGrade : (rawVal === 'A' || rawVal === 'Absent' ? 'A' : (rawVal === 'L' || rawVal === 'Leave' ? 'L' : 'F')),
+                            status: subStatus
                         });
                     });
 
@@ -3833,8 +3893,11 @@
                         let tHasMarks = false;
 
                         tSubs.forEach(sb => {
-                            if (tSavedMarks[sb.name] !== undefined && tSavedMarks[sb.name] !== '') {
-                                tObt += parseInt(tSavedMarks[sb.name]);
+                            const rawVal = tSavedMarks[sb.name];
+                            if (rawVal !== undefined && rawVal !== '') {
+                                if (rawVal !== 'A' && rawVal !== 'Absent' && rawVal !== 'L' && rawVal !== 'Leave') {
+                                    tObt += parseInt(rawVal) || 0;
+                                }
                                 tHasMarks = true;
                                 hasAnyTermMarks = true;
                             }
