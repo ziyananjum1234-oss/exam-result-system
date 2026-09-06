@@ -31,6 +31,39 @@
         aside::-webkit-scrollbar { width: 4px; }
         aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
+        @keyframes float3DAdmin {
+            0% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+            50% { transform: translateY(-7px) rotateX(2deg) rotateY(-2deg); }
+            100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+        }
+        @keyframes adminOrbFloat1 {
+            0% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(45px, -35px) scale(1.18); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes adminOrbFloat2 {
+            0% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(-35px, 45px) scale(1.22); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes adminCrestPulse {
+            0% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.25); transform: scale(1); }
+            50% { box-shadow: 0 0 35px rgba(99, 102, 241, 0.6); transform: scale(1.04); }
+            100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.25); transform: scale(1); }
+        }
+        .animate-card-3d-admin {
+            animation: float3DAdmin 6s ease-in-out infinite;
+        }
+        .animate-admin-orb-1 {
+            animation: adminOrbFloat1 9s ease-in-out infinite alternate;
+        }
+        .animate-admin-orb-2 {
+            animation: adminOrbFloat2 12s ease-in-out infinite alternate;
+        }
+        .animate-admin-crest {
+            animation: adminCrestPulse 3.5s ease-in-out infinite;
+        }
+
         @media print {
             body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
             aside, .no-print, header, nav, button, .no-print-area { display: none !important; }
@@ -83,43 +116,50 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
-    <!-- ADMIN AUTHENTICATION OVERLAY -->
-    <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5 relative overflow-hidden">
-            <div class="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            
-            <!-- College Monogram & Logo -->
-            <div class="w-20 h-20 rounded-2xl bg-white p-2 mx-auto flex items-center justify-center shadow-xl shadow-indigo-600/20 border-2 border-indigo-500/30">
-                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
+    <!-- ADMIN AUTHENTICATION OVERLAY WITH 3D AMBIENT ANIMATION -->
+    <div id="adminAuthOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-[99999] flex items-center justify-center p-4 overflow-hidden">
+        <!-- 3D Glowing Animated Orbs in Background -->
+        <div class="absolute -top-24 -left-24 w-80 h-80 bg-gradient-to-tr from-indigo-600/30 to-purple-400/20 rounded-full blur-3xl pointer-events-none animate-admin-orb-1"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-gradient-to-br from-purple-600/20 to-indigo-600/30 rounded-full blur-3xl pointer-events-none animate-admin-orb-2"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <!-- 3D Floating Glassmorphic Login Card -->
+        <div class="w-full max-w-md bg-slate-900/90 backdrop-blur-2xl border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.8)] text-center space-y-5 relative overflow-hidden animate-card-3d-admin z-10">
+            <!-- Subtle Top Glow Bar -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-400 to-pink-500"></div>
+
+            <!-- College Monogram with 3D Pulsing Glow -->
+            <div class="w-20 h-20 rounded-2xl bg-white p-2 mx-auto flex items-center justify-center border-2 border-indigo-500/40 animate-admin-crest transition-all">
+                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain drop-shadow">
             </div>
 
             <div>
                 <h2 class="text-xs font-black tracking-widest text-slate-300 uppercase font-royal-title">Chenab College Shorkot</h2>
                 <h1 class="text-xl font-extrabold text-white mt-1">Admin Control Portal</h1>
-                <p class="text-xs text-indigo-400 font-semibold mt-0.5">Master Controller & Examination Administration</p>
+                <p class="text-xs text-indigo-400 font-semibold mt-0.5">Master Controller Sign In</p>
             </div>
 
             <form onsubmit="window.handleAdminLogin(event)" class="space-y-3.5 text-left">
-                <!-- Username -->
+                <!-- Username Input (Clean & Secret) -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
                     <div class="relative">
                         <i class="fa-solid fa-user-shield absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
-                        <input type="text" id="adminAuthUserInput" required placeholder="Enter Admin Username (admin)" 
-                            class="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <input type="text" id="adminAuthUserInput" required placeholder="Enter your username" 
+                            class="w-full pl-9 pr-4 py-2.5 bg-slate-950/90 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                     </div>
                 </div>
 
-                <!-- Password -->
+                <!-- Password Input (Clean & Secret) -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
                     <div class="relative">
                         <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
-                        <input type="password" id="adminAuthPassInput" required placeholder="Enter Password (admin@ccs)" 
-                            class="w-full pl-9 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <button type="button" onclick="window.toggleAuthPassVisibility('adminAuthPassInput', this)" class="absolute right-3 top-2.5 text-slate-500 hover:text-white text-xs p-1">
+                        <input type="password" id="adminAuthPassInput" required placeholder="••••••••" 
+                            class="w-full pl-9 pr-10 py-2.5 bg-slate-950/90 border border-slate-700 rounded-xl text-xs text-white tracking-widest focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <button type="button" onclick="window.toggleAuthPassVisibility('adminAuthPassInput', this)" class="absolute right-3 top-2.5 text-slate-500 hover:text-white text-xs p-1 transition-colors">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -129,7 +169,7 @@
                     <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Admin Credentials. Access Denied!
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-indigo-600/30 active:scale-98 transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-unlock-keyhole"></i>
                     <span>Unlock Master Admin Dashboard</span>
                 </button>
@@ -137,10 +177,10 @@
 
             <!-- Developer Credit Watermark -->
             <div class="pt-3 border-t border-slate-800/80 text-center">
-                <p class="text-[11px] text-slate-400 font-medium">
-                    Designed & Developed by: <b class="text-indigo-400 font-bold">Muhammad Qaiser Abbas</b>
-                </p>
-                <p class="text-[9px] text-slate-600 mt-0.5 font-mono">Chenab College Examination System</p>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400">
+                    <i class="fa-solid fa-code text-indigo-400 text-[10px]"></i>
+                    <span>Designed & Developed by: <b class="text-indigo-400 font-bold">Muhammad Qaiser Abbas</b></span>
+                </div>
             </div>
         </div>
     </div>
