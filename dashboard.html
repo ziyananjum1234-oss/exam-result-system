@@ -1255,6 +1255,11 @@
                             localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
                             hasChange = true;
                         }
+                        if (val.marksLocks && typeof val.marksLocks === 'object') {
+                            marksLocksDatabase = val.marksLocks;
+                            localStorage.setItem('ccs_marks_locks', JSON.stringify(marksLocksDatabase));
+                            hasChange = true;
+                        }
 
                         if (hasChange) {
                             window.refreshAllClassAndSectionDropdowns();
@@ -1278,6 +1283,7 @@
         let studentsList = [];
         let examsSetupList = [];
         let marksDatabase = {};
+        let marksLocksDatabase = {};
         let dateSheetsDatabase = {};
         let directoryStatusFilter = 'All';
         let currentConsolidatedRows = [];
@@ -1452,6 +1458,10 @@
             try {
                 dateSheetsDatabase = JSON.parse(localStorage.getItem('ccs_datesheets_db')) || {};
             } catch(e) { dateSheetsDatabase = {}; }
+
+            try {
+                marksLocksDatabase = JSON.parse(localStorage.getItem('ccs_marks_locks')) || {};
+            } catch(e) { marksLocksDatabase = {}; }
         }
 
         initDataStore();
@@ -2715,12 +2725,17 @@
                     }
                 });
 
+                const lockKey = `${examId}_${selectedClass}_${sub.name}`;
+                const isLocked = Boolean(marksLocksDatabase[lockKey]);
                 const isComplete = totalStudents > 0 && enteredCount === totalStudents;
                 const isPending = enteredCount === 0;
 
                 let colorStyle = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
                 let icon = '<i class="fa-solid fa-clock mr-1"></i>';
-                if (isComplete) {
+                if (isLocked) {
+                    colorStyle = 'bg-rose-500/10 text-rose-300 border-rose-500/30';
+                    icon = '<i class="fa-solid fa-lock mr-1 text-rose-400"></i>';
+                } else if (isComplete) {
                     colorStyle = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
                     icon = '<i class="fa-solid fa-circle-check mr-1"></i>';
                 } else if (isPending) {
@@ -2733,10 +2748,38 @@
                 badge.innerHTML = `
                     <span>${icon} <b>${sub.name}</b>:</span>
                     <span>${enteredCount}/${totalStudents}</span>
-                    <span class="text-[10px] opacity-75">${totalStudents > 0 ? ((enteredCount/totalStudents)*100).toFixed(0) : 0}%</span>
+                    <span class="text-[10px] opacity-75">${isLocked ? '(LOCKED 🔒)' : (totalStudents > 0 ? ((enteredCount/totalStudents)*100).toFixed(0) + '%' : '0%')}</span>
                 `;
                 container.appendChild(badge);
             });
+        };
+
+        window.toggleMarksLock = function() {
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
+            if (!examSelect || !classSelect || !subSelect) return;
+
+            const examId = examSelect.value;
+            const cls = classSelect.value;
+            const sub = subSelect.value;
+            if (!examId || !cls || !sub) return;
+
+            const lockKey = `${examId}_${cls}_${sub}`;
+            const currentlyLocked = Boolean(marksLocksDatabase[lockKey]);
+
+            if (currentlyLocked) {
+                delete marksLocksDatabase[lockKey];
+                alert(`🔓 Unlocked: Marks for "${sub}" (${cls}) are now UNLOCKED for teachers!`);
+            } else {
+                marksLocksDatabase[lockKey] = { locked: true, lockedAt: new Date().toISOString(), lockedBy: 'Admin' };
+                alert(`🔒 Locked: Marks for "${sub}" (${cls}) are now LOCKED for teachers!`);
+            }
+
+            localStorage.setItem('ccs_marks_locks', JSON.stringify(marksLocksDatabase));
+            window.syncCloud('marksLocks', marksLocksDatabase);
+            window.renderSubjectProgressTracker();
+            window.loadSubjectMarksTable();
         };
 
         window.loadSubjectMarksTable = function() {
@@ -2761,9 +2804,17 @@
             const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
             const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
             
+            const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
+            const isLocked = Boolean(marksLocksDatabase[lockKey]);
+
             const badgeEl = document.getElementById('activeSubjectBadge');
             const thMaxEl = document.getElementById('thMaxMarks');
-            if (badgeEl) badgeEl.textContent = `${subObj.name} (Max: ${subObj.marks} Marks)`;
+            if (badgeEl) {
+                const lockHtml = isLocked 
+                    ? ` <span class="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg text-[10px] ml-2 font-bold"><i class="fa-solid fa-lock mr-1"></i>Locked for Teachers</span> <button type="button" onclick="window.toggleMarksLock()" class="ml-2 px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition-all">🔓 Unlock</button>`
+                    : ` <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg text-[10px] ml-2 font-bold"><i class="fa-solid fa-lock-open mr-1"></i>Open</span> <button type="button" onclick="window.toggleMarksLock()" class="ml-2 px-2 py-0.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold transition-all">🔒 Lock</button>`;
+                badgeEl.innerHTML = `${subObj.name} (Max: ${subObj.marks} Marks)${lockHtml}`;
+            }
             if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks})`;
 
             const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
