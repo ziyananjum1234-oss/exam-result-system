@@ -325,43 +325,38 @@
                 </div>
             </div>
 
-            <!-- LOGIN TERMINAL CONTAINER (Revealed with Golden Light after Ribbon Pull) -->
+                        <!-- LOGIN TERMINAL CONTAINER (Revealed with Golden Light after Ribbon Pull) -->
             <div id="lampLoginFieldsContainer" class="hidden transition-all duration-700 space-y-3.5 text-left p-4 rounded-2xl bg-slate-950/90 border-2 border-amber-400/60 shadow-[0_0_35px_rgba(251,191,36,0.3)]">
                 
-                <!-- Radiant Golden Badge -->
+                <!-- Radiant Golden Top Header with Admin Fast Fill -->
                 <div class="flex items-center justify-between pb-2 border-b border-amber-500/30">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                        <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Terminal Illuminated</span>
+                        <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Terminal Ready</span>
                     </div>
-                    <button type="button" onclick="window.autoFillAdminCredentials()" class="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-[10px] font-black rounded-lg transition-all shadow-md active:scale-95">
-                        <i class="fa-solid fa-bolt mr-1"></i> 1-Click Auto Fill
+                    <!-- Admin Fast Auto-Fill (Discreet & Protected) -->
+                    <button type="button" onclick="window.autoFillAdminCredentials()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-400/40 text-[10px] font-bold rounded-lg transition-all shadow-sm active:scale-95" title="Admin Fast Auto Fill">
+                        <i class="fa-solid fa-key mr-1"></i> Fast Auto-Fill
                     </button>
                 </div>
 
-                <!-- Credentials hint -->
-                <div class="bg-amber-950/30 border border-amber-500/30 rounded-xl px-3 py-1.5 text-[11px] font-mono text-amber-200 flex justify-between">
-                    <span>User: <b class="text-white">admin</b></span>
-                    <span>Pass: <b class="text-white">admin@ccs</b></span>
-                </div>
-
                 <form onsubmit="window.handleAdminLogin(event)" class="space-y-3 pt-1">
-                    <!-- Username Input -->
+                    <!-- Username Input (Clean & Secret) -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
                         <div class="relative">
                             <i class="fa-solid fa-user-shield absolute left-3.5 top-3 text-amber-400 text-xs"></i>
-                            <input type="text" id="adminAuthUserInput" required placeholder="admin" value="admin"
+                            <input type="text" id="adminAuthUserInput" required placeholder="Enter username" 
                                 class="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-amber-500/40 rounded-xl text-xs text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all font-medium">
                         </div>
                     </div>
 
-                    <!-- Password Input -->
+                    <!-- Password Input (Clean & Masked) -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
                         <div class="relative">
                             <i class="fa-solid fa-lock absolute left-3.5 top-3 text-amber-400 text-xs"></i>
-                            <input type="password" id="adminAuthPassInput" required placeholder="admin@ccs" value="admin@ccs"
+                            <input type="password" id="adminAuthPassInput" required placeholder="••••••••" 
                                 class="w-full pl-9 pr-10 py-2.5 bg-slate-900 border border-amber-500/40 rounded-xl text-xs text-white tracking-widest focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all font-medium">
                             <button type="button" onclick="window.toggleAuthPassVisibility('adminAuthPassInput', this)" class="absolute right-3 top-2.5 text-slate-400 hover:text-amber-300 text-xs p-1 transition-colors" title="Toggle Password View">
                                 <i class="fa-solid fa-eye"></i>
