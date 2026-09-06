@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Chenab College Shorkot</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Firebase SDK (Compat Version for Ultra Reliability) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-royal-title { font-family: 'Cinzel Decorative', 'Cinzel', serif; }
+        .font-royal-serif { font-family: 'Playfair Display', serif; }
+        
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+        @media print {
+            body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+            aside, .no-print, header, nav, button, .no-print-area { display: none !important; }
+            main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 no-print shadow-2xl z-20">
+        <div>
+            <!-- College Header -->
+            <div class="p-5 border-b border-slate-800 bg-slate-950/60">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xs font-black tracking-widest text-slate-100 uppercase font-royal-title leading-tight">Chenab College</h1>
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Teacher Portal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portal Status Indicator -->
+            <div class="px-5 py-3 bg-emerald-950/30 border-b border-emerald-900/30 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-[11px] font-semibold text-emerald-300">Cloud Sync Active</span>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">Faculty Mode</span>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="p-4 space-y-2">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 pb-1">Faculty Access</p>
+                
+                <button type="button" onclick="window.showTab('marksEntry')" id="navMarksBtn" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition-all text-left">
+                    <i class="fa-solid fa-pen-to-square w-5 text-center text-sm"></i>
+                    <span>1. Marks Entry</span>
+                </button>
+
+                <button type="button" onclick="window.showTab('enrollment')" id="navEnrollBtn" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left">
+                    <i class="fa-solid fa-user-plus w-5 text-center text-sm"></i>
+                    <span>2. Student Enrollment</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer / Safety Notice -->
+        <div class="p-4 border-t border-slate-800 bg-slate-950/40 text-center">
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400 leading-relaxed">
+                <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>
+                <b>Safe Submission:</b> Marks lock automatically after saving to preserve record integrity.
+            </div>
+            <p class="text-[9px] text-slate-600 mt-2 font-mono">CCS Examination Portal v2.0</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto max-h-screen">
+
+        <!-- ================= TAB 1: MARKS ENTRY SECTION ================= -->
+        <div id="marksEntrySection" class="space-y-6">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-indigo-900/40 via-slate-900 to-slate-900 p-6 rounded-3xl border border-indigo-500/20 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-bold uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-pen-fancy"></i>
+                            <span>Marks Submission Engine</span>
+                        </div>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-white font-royal-title">Subject Marks Entry</h2>
+                        <p class="text-xs text-slate-400 mt-1">Select examination, class and subject to enter marks. Use <b>A</b> for Absent and <b>L</b> for Leave.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="window.saveCurrentSubjectMarks()" id="btnSaveMarksMain" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition-all">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="saveBtnLabel">Save & Finalize Marks</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selection Bar -->
+            <div class="bg-slate-900/90 p-5 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Exam Selection -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">1. Select Examination</label>
+                        <select id="me_examSelect" onchange="window.onExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-semibold focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Loading Exams from Cloud...</option>
+                        </select>
+                    </div>
+
+                    <!-- Class Selection -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">2. Select Class</label>
+                        <select id="me_classSelect" onchange="window.onExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-semibold focus:ring-2 focus:ring-indigo-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Subject Selection -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">3. Select Subject</label>
+                        <select id="me_subjectSelect" onchange="window.loadSubjectMarksTable()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-semibold focus:ring-2 focus:ring-indigo-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Subject Progress Badges -->
+                <div class="pt-2 border-t border-slate-800/80">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Class Subjects Completion Status:</p>
+                    <div id="subjectProgressContainer" class="flex flex-wrap gap-2">
+                        <!-- Badges rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lock Notice Banner (Appears when marks are locked) -->
+            <div id="lockNoticeBanner" class="hidden bg-amber-950/40 border-2 border-amber-500/50 p-4 rounded-2xl shadow-xl flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-300 uppercase tracking-wide">Marks Finalized & Locked</h4>
+                        <p class="text-[11px] text-amber-200/80 mt-0.5">These marks have already been submitted to the cloud. Only the Examination Admin can unlock or edit these records.</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-mono font-bold text-xs border border-amber-500/30 shrink-0">READ ONLY</span>
+            </div>
+
+            <!-- Marks Input Table Card -->
+            <div class="bg-slate-900/90 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="p-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Student Award List: <span id="activeSubjectBadge" class="text-indigo-400">-</span></h3>
+                    </div>
+                    <span class="text-[11px] text-slate-400">💡 Press <b>Enter</b> key after typing marks to jump to next student</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="py-3 px-4 text-center w-12">#</th>
+                                <th class="py-3 px-4 w-28">Roll No</th>
+                                <th class="py-3 px-4">Student Name</th>
+                                <th class="py-3 px-4">Father Name</th>
+                                <th class="py-3 px-4 text-center w-40">Obtained Marks <span id="thMaxMarks" class="text-slate-500"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectMarksTableBody" class="divide-y divide-slate-800/60 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 bg-slate-950/60 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-xs text-slate-400">Allowed inputs: Numeric (e.g. <b>85</b>), Absent (<b>A</b>), or Leave (<b>L</b>)</span>
+                    <button type="button" onclick="window.saveCurrentSubjectMarks()" id="btnSaveMarksBottom" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-floppy-disk mr-1.5"></i> Save & Lock Subject Marks
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ================= TAB 2: STUDENT ENROLLMENT SECTION ================= -->
+        <div id="enrollmentSection" class="hidden space-y-6">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-emerald-900/40 via-slate-900 to-slate-900 p-6 rounded-3xl border border-emerald-500/20 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Student Registration Engine</span>
+                        </div>
+                        <h2 class="text-xl md:text-2xl font-extrabold text-white font-royal-title">Student Enrollment & Directory</h2>
+                        <p class="text-xs text-slate-400 mt-1">Enroll new students or mark student status as Left / SLC. All updates instantly sync to Cloud.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Student Manual Entry Card -->
+            <div id="studentFormContainer" class="bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                    <h3 id="formTitle" class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus text-emerald-400"></i>
+                        Single Student Enrollment
+                    </h3>
+                    <button type="button" id="cancelEditBtn" onclick="window.cancelEditMode()" class="hidden text-xs text-rose-400 hover:text-rose-300 font-semibold">
+                        <i class="fa-solid fa-xmark mr-1"></i> Cancel Edit
+                    </button>
+                </div>
+
+                <form onsubmit="window.saveStudentForm(event)" class="space-y-4">
+                    <input type="hidden" id="editOriginalRoll" value="">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Roll Number *</label>
+                            <input type="text" id="s_rollNo" required placeholder="e.g. 101, 102" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Student Full Name *</label>
+                            <input type="text" id="s_name" required placeholder="Student Name" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Father Name *</label>
+                            <input type="text" id="s_fatherName" required placeholder="Father Name" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Gender</label>
+                            <select id="s_gender" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Class *</label>
+                            <select id="s_class" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-semibold focus:ring-2 focus:ring-emerald-500">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Section / House</label>
+                            <input type="text" id="s_group" list="sectionDatalist" placeholder="Section (e.g. Ghazali, Rumi)" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500">
+                            <datalist id="sectionDatalist">
+                                <!-- Populated dynamically -->
+                            </datalist>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phone / Guardian Contact</label>
+                            <input type="text" id="s_phone" placeholder="0300-1234567" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</label>
+                            <select id="s_status" class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500">
+                                <option value="Active">Active Student</option>
+                                <option value="Left">Left / Struck-Off (SLC)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" id="submitBtn" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition-all">
+                            <i class="fa-solid fa-user-check"></i>
+                            <span id="submitBtnText">Save & Enroll Student</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Student Directory Table Card -->
+            <div class="bg-slate-900/90 rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="p-4 bg-slate-950/80 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Enrolled Students Directory</h3>
+                        <span id="activeCountBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold font-mono">0 Active</span>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1 text-xs">
+                            <button type="button" onclick="window.setDirectoryStatusFilter('All')" id="btnFilterAll" class="px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white text-[11px]">All</button>
+                            <button type="button" onclick="window.setDirectoryStatusFilter('Active')" id="btnFilterActive" class="px-2.5 py-1 rounded-lg font-semibold text-slate-400 hover:text-white text-[11px]">Active</button>
+                            <button type="button" onclick="window.setDirectoryStatusFilter('Left')" id="btnFilterLeft" class="px-2.5 py-1 rounded-lg font-semibold text-slate-400 hover:text-white text-[11px]">Left (SLC)</button>
+                        </div>
+
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                            <input type="text" id="tableSearch" oninput="window.filterStudents()" placeholder="Search roll, name, class..." class="pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-1 focus:ring-indigo-500 w-48 sm:w-60">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="py-3 px-4 text-center w-12">#</th>
+                                <th class="py-3 px-4 w-24">Roll No</th>
+                                <th class="py-3 px-4">Student Name</th>
+                                <th class="py-3 px-4">Father Name</th>
+                                <th class="py-3 px-4">Class & Section</th>
+                                <th class="py-3 px-3 w-28">Status</th>
+                                <th class="py-3 px-4 text-center w-28">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody" class="divide-y divide-slate-800/60 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ================= GOOGLE FIREBASE REALTIME CLOUD DATABASE ENGINE =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJcR7DflMPPubepWqrd9SSWKzKX5FA1Gc",
+            authDomain: "chenab-college-shorkot.firebaseapp.com",
+            databaseURL: "https://chenab-college-shorkot-default-rtdb.firebaseio.com",
+            projectId: "chenab-college-shorkot",
+            storageBucket: "chenab-college-shorkot.firebasestorage.app",
+            messagingSenderId: "71154756414",
+            appId: "1:71154756414:web:747deea238891844091a6f",
+            measurementId: "G-L3MBFWZD1Y"
+        };
+
+        let db = null;
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+            }
+        } catch(e) {
+            console.warn("Firebase initialization error:", e);
+        }
+
+        window.syncCloud = function(node, data) {
+            try {
+                if (db) {
+                    db.ref(node).set(data);
+                }
+            } catch(e) {
+                console.warn("Cloud sync error on " + node + ":", e);
+            }
+        };
+
+        window.initCloudSync = function() {
+            if (!db) return;
+            try {
+                db.ref().on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val) {
+                        if (val.students && Array.isArray(val.students)) {
+                            studentsList = val.students;
+                            localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+                        }
+                        if (val.exams && Array.isArray(val.exams)) {
+                            examsSetupList = val.exams;
+                            localStorage.setItem('ccs_exams_setup', JSON.stringify(examsSetupList));
+                        }
+                        if (val.marks && typeof val.marks === 'object') {
+                            marksDatabase = val.marks;
+                            localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
+                        }
+                        if (val.marksLocks && typeof val.marksLocks === 'object') {
+                            marksLocksDatabase = val.marksLocks;
+                            localStorage.setItem('ccs_marks_locks', JSON.stringify(marksLocksDatabase));
+                        }
+                        if (val.classes && Array.isArray(val.classes)) {
+                            masterClassesList = val.classes;
+                            localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                        }
+                        if (val.sections && Array.isArray(val.sections)) {
+                            masterSectionsList = val.sections;
+                            localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                        }
+
+                        window.refreshDropdowns();
+                        window.renderStudentsTable();
+                        if (document.getElementById('marksEntrySection') && !document.getElementById('marksEntrySection').classList.contains('hidden')) {
+                            window.loadSubjectMarksTable();
+                        }
+                    }
+                });
+            } catch(e) {
+                console.warn("Cloud sync listener error:", e);
+            }
+        };
+
+        // ================= DATA STORES =================
+        let studentsList = [];
+        let examsSetupList = [];
+        let marksDatabase = {};
+        let marksLocksDatabase = {};
+        let directoryStatusFilter = 'All';
+
+        let masterClassesList = ["Nursery", "Prep", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "1st Year", "2nd Year"];
+        let masterSectionsList = [
+            "Ghazali", "Rumi", "Johari", "Liaquat", "Edhi", "Ayubi", "Abdul Qadeer Khan", "M.M Alam", 
+            "Ibn-e-Sina", "Raazi", "Sadi", "Daisy", "Daffodils", "Tulip", "Marigold", "Rose", 
+            "Sunflower", "Jasmine", "Lotus", "Ibn-e-Rushd", "Wasif", "Khayyam", "Khaldoon", "Qasim", 
+            "Al Beruni", "Jabir Bin Hayyan", "Ibn-al-Haithum", "Tariq", "Goldies", "Silver", 
+            "Diamond", "Sapphire", "Rubies", "Pearls", "Jades", "Corals", "Amber", "Opals", 
+            "Arfa Kareem", "Fatima Jinnah"
+        ];
+
+        function initLocalData() {
+            try {
+                studentsList = JSON.parse(localStorage.getItem('ccs_students_list')) || [];
+            } catch(e) { studentsList = []; }
+
+            try {
+                examsSetupList = JSON.parse(localStorage.getItem('ccs_exams_setup')) || [];
+            } catch(e) { examsSetupList = []; }
+
+            try {
+                marksDatabase = JSON.parse(localStorage.getItem('ccs_marks_database')) || {};
+            } catch(e) { marksDatabase = {}; }
+
+            try {
+                marksLocksDatabase = JSON.parse(localStorage.getItem('ccs_marks_locks')) || {};
+            } catch(e) { marksLocksDatabase = {}; }
+
+            try {
+                const savedClasses = JSON.parse(localStorage.getItem('ccs_master_classes'));
+                if (Array.isArray(savedClasses) && savedClasses.length > 0) masterClassesList = savedClasses;
+            } catch(e) {}
+
+            try {
+                const savedSections = JSON.parse(localStorage.getItem('ccs_master_sections'));
+                if (Array.isArray(savedSections) && savedSections.length > 0) masterSectionsList = savedSections;
+            } catch(e) {}
+        }
+        initLocalData();
+
+        // ================= TAB SWITCHING =================
+        window.showTab = function(tabName) {
+            const marksSec = document.getElementById('marksEntrySection');
+            const enrollSec = document.getElementById('enrollmentSection');
+            const navMarksBtn = document.getElementById('navMarksBtn');
+            const navEnrollBtn = document.getElementById('navEnrollBtn');
+
+            const inactive = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 font-medium text-xs transition-all text-left";
+            const active = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition-all text-left";
+
+            if (tabName === 'marksEntry') {
+                marksSec.classList.remove('hidden');
+                enrollSec.classList.add('hidden');
+                navMarksBtn.className = active;
+                navEnrollBtn.className = inactive;
+                window.onExamOrClassChange();
+            } else {
+                marksSec.classList.add('hidden');
+                enrollSec.classList.remove('hidden');
+                navMarksBtn.className = inactive;
+                navEnrollBtn.className = active;
+                window.renderStudentsTable();
+            }
+        };
+
+        // ================= DROPDOWNS POPULATION =================
+        window.refreshDropdowns = function() {
+            // 1. Exam dropdown
+            const examSelect = document.getElementById('me_examSelect');
+            if (examSelect) {
+                const curVal = examSelect.value;
+                examSelect.innerHTML = '';
+                if (!examsSetupList || examsSetupList.length === 0) {
+                    examSelect.innerHTML = '<option value="">No Active Exams Found</option>';
+                } else {
+                    examsSetupList.forEach((ex, idx) => {
+                        const opt = document.createElement('option');
+                        opt.value = ex.id;
+                        opt.textContent = `${ex.name} (${ex.session})`;
+                        if (curVal && ex.id === curVal) opt.selected = true;
+                        else if (!curVal && idx === 0) opt.selected = true;
+                        examSelect.appendChild(opt);
+                    });
+                }
+            }
+
+            // 2. Class dropdowns
+            const uniqueClasses = [...masterClassesList];
+            studentsList.forEach(s => { if (s && s.class && !uniqueClasses.includes(s.class)) uniqueClasses.push(s.class); });
+
+            const sClassSelect = document.getElementById('s_class');
+            if (sClassSelect) {
+                const cur = sClassSelect.value || "Class 10";
+                sClassSelect.innerHTML = '';
+                uniqueClasses.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    sClassSelect.appendChild(opt);
+                });
+            }
+
+            const meClassSelect = document.getElementById('me_classSelect');
+            if (meClassSelect) {
+                const cur = meClassSelect.value || "Class 10";
+                meClassSelect.innerHTML = '';
+                uniqueClasses.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    if (c === cur) opt.selected = true;
+                    meClassSelect.appendChild(opt);
+                });
+            }
+
+            // 3. Sections datalist
+            const sDatalist = document.getElementById('sectionDatalist');
+            if (sDatalist) {
+                sDatalist.innerHTML = '';
+                masterSectionsList.forEach(sec => {
+                    const opt = document.createElement('option');
+                    opt.value = sec;
+                    sDatalist.appendChild(opt);
+                });
+            }
+        };
+
+        // ================= TAB 1: MARKS ENTRY LOGIC (WITH AUTO-LOCK) =================
+        window.onExamOrClassChange = function() {
+            const examSelect = document.getElementById('me_examSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
+            if (!examSelect || !subSelect) return;
+
+            const examId = examSelect.value;
+            subSelect.innerHTML = '';
+
+            const exam = examsSetupList.find(e => e.id === examId);
+            if (!exam || !exam.subjects || exam.subjects.length === 0) {
+                subSelect.innerHTML = '<option value="">No subjects found for this exam</option>';
+                window.loadSubjectMarksTable();
+                return;
+            }
+
+            exam.subjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub.name;
+                opt.textContent = `${sub.name} (Max: ${sub.marks} Marks)`;
+                subSelect.appendChild(opt);
+            });
+
+            window.renderSubjectProgressTracker();
+            window.loadSubjectMarksTable();
+        };
+
+        window.renderSubjectProgressTracker = function() {
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const container = document.getElementById('subjectProgressContainer');
+            if (!examSelect || !classSelect || !container) return;
+
+            const examId = examSelect.value;
+            const selectedClass = classSelect.value;
+            container.innerHTML = '';
+
+            const exam = examsSetupList.find(e => e.id === examId);
+            if (!exam) return;
+
+            const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+            const totalStudents = classStudents.length;
+            const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
+
+            subjects.forEach(sub => {
+                let enteredCount = 0;
+                classStudents.forEach(s => {
+                    const key = `${examId}_${s.rollNo}`;
+                    if (marksDatabase[key] && marksDatabase[key][sub.name] !== undefined && marksDatabase[key][sub.name] !== '') {
+                        enteredCount++;
+                    }
+                });
+
+                const lockKey = `${examId}_${selectedClass}_${sub.name}`;
+                const isLocked = Boolean(marksLocksDatabase[lockKey]);
+                const isComplete = totalStudents > 0 && enteredCount === totalStudents;
+
+                let colorStyle = 'bg-slate-800 text-slate-400 border-slate-700';
+                let icon = '<i class="fa-solid fa-circle mr-1"></i>';
+                if (isLocked) {
+                    colorStyle = 'bg-rose-500/10 text-rose-300 border-rose-500/30';
+                    icon = '<i class="fa-solid fa-lock mr-1 text-rose-400"></i>';
+                } else if (isComplete) {
+                    colorStyle = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+                    icon = '<i class="fa-solid fa-circle-check mr-1"></i>';
+                } else if (enteredCount > 0) {
+                    colorStyle = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+                    icon = '<i class="fa-solid fa-clock mr-1"></i>';
+                }
+
+                const badge = document.createElement('div');
+                badge.className = `px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 ${colorStyle}`;
+                badge.innerHTML = `
+                    <span>${icon} <b>${sub.name}</b>:</span>
+                    <span>${enteredCount}/${totalStudents}</span>
+                    <span class="text-[10px] opacity-75">${isLocked ? '(LOCKED)' : (totalStudents > 0 ? ((enteredCount/totalStudents)*100).toFixed(0) + '%' : '0%')}</span>
+                `;
+                container.appendChild(badge);
+            });
+        };
+
+        window.loadSubjectMarksTable = function() {
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
+            const tbody = document.getElementById('subjectMarksTableBody');
+            const lockBanner = document.getElementById('lockNoticeBanner');
+            const saveBtnMain = document.getElementById('btnSaveMarksMain');
+            const saveBtnBottom = document.getElementById('btnSaveMarksBottom');
+            
+            if (!examSelect || !classSelect || !subSelect || !tbody) return;
+
+            const examId = examSelect.value;
+            const selectedClass = classSelect.value;
+            const selectedSubject = subSelect.value;
+            tbody.innerHTML = '';
+
+            const exam = examsSetupList.find(e => e.id === examId);
+            if (!exam) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-500">No examination selected.</td></tr>';
+                return;
+            }
+
+            const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
+            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+            
+            const badgeEl = document.getElementById('activeSubjectBadge');
+            const thMaxEl = document.getElementById('thMaxMarks');
+            if (badgeEl) badgeEl.textContent = `${subObj.name} (Max: ${subObj.marks} Marks)`;
+            if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks})`;
+
+            const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
+            const isLocked = Boolean(marksLocksDatabase[lockKey]);
+
+            // Handle Lock State UI
+            if (isLocked) {
+                lockBanner.classList.remove('hidden');
+                if (saveBtnMain) {
+                    saveBtnMain.disabled = true;
+                    saveBtnMain.className = "px-5 py-2.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed flex items-center space-x-2";
+                    saveBtnMain.innerHTML = '<i class="fa-solid fa-lock"></i><span>Marks Locked</span>';
+                }
+                if (saveBtnBottom) {
+                    saveBtnBottom.disabled = true;
+                    saveBtnBottom.className = "px-6 py-2 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed";
+                    saveBtnBottom.innerHTML = '<i class="fa-solid fa-lock mr-1.5"></i> Marks Locked (Contact Admin)';
+                }
+            } else {
+                lockBanner.classList.add('hidden');
+                if (saveBtnMain) {
+                    saveBtnMain.disabled = false;
+                    saveBtnMain.className = "px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition-all";
+                    saveBtnMain.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>Save & Finalize Marks</span>';
+                }
+                if (saveBtnBottom) {
+                    saveBtnBottom.disabled = false;
+                    saveBtnBottom.className = "px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20";
+                    saveBtnBottom.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i> Save & Lock Subject Marks';
+                }
+            }
+
+            const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+
+            if (classStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}". Please register students in Student Enrollment tab.</td></tr>`;
+                return;
+            }
+
+            classStudents.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+
+                const key = `${examId}_${s.rollNo}`;
+                const savedVal = (marksDatabase[key] && marksDatabase[key][selectedSubject] !== undefined) ? marksDatabase[key][selectedSubject] : '';
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
+                    <td class="py-2.5 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
+                    <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
+                    <td class="py-2.5 px-4 text-slate-400">${s.father}</td>
+                    <td class="py-2 px-4 text-center">
+                        <input type="text" placeholder="0-${subObj.marks} / A / L"
+                            value="${savedVal}"
+                            data-roll="${s.rollNo}" 
+                            data-index="${idx}"
+                            ${isLocked ? 'disabled' : ''}
+                            oninput="this.value = this.value.toUpperCase()"
+                            onkeydown="window.handleMarksEnterKey(event, ${idx})"
+                            class="marks-input-single w-28 px-3 py-2 ${isLocked ? 'bg-slate-900 border-slate-800 text-slate-400 font-bold cursor-not-allowed' : 'bg-slate-950 border-slate-700 text-white font-bold focus:ring-2 focus:ring-indigo-500'} border rounded-xl text-sm font-mono text-center transition-all">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.handleMarksEnterKey = function(event, currentIndex) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const inputs = document.querySelectorAll('.marks-input-single:not([disabled])');
+                if (currentIndex + 1 < inputs.length) {
+                    inputs[currentIndex + 1].focus();
+                    inputs[currentIndex + 1].select();
+                } else {
+                    window.saveCurrentSubjectMarks();
+                }
+            }
+        };
+
+        window.saveCurrentSubjectMarks = function() {
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
+
+            if (!examSelect || !classSelect || !subSelect) return;
+
+            const examId = examSelect.value;
+            const selectedClass = classSelect.value;
+            const selectedSubject = subSelect.value;
+
+            if (!examId || !selectedSubject) {
+                alert('Please select an examination and subject!');
+                return;
+            }
+
+            const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
+            if (marksLocksDatabase[lockKey]) {
+                alert('⚠️ These marks are locked! Only the Admin can unlock them.');
+                return;
+            }
+
+            const exam = examsSetupList.find(e => e.id === examId);
+            const subjects = exam ? (exam.subjects || []) : [];
+            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+
+            const inputs = document.querySelectorAll('.marks-input-single');
+            if (inputs.length === 0) {
+                alert('No students found to save marks for!');
+                return;
+            }
+
+            // Confirm lock submission
+            const confirmMsg = `⚠️ CONFIRMATION & LOCK NOTICE:\n\nAre you sure you want to save marks for "${selectedSubject}" (${selectedClass})?\n\nOnce saved, these marks will be LOCKED for security and sent to the cloud. You will not be able to edit them afterwards without contacting the Admin.`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            inputs.forEach(input => {
+                const rollNo = input.getAttribute('data-roll');
+                const val = input.value.trim().toUpperCase();
+
+                const key = `${examId}_${rollNo}`;
+                if (!marksDatabase[key]) {
+                    marksDatabase[key] = {};
+                }
+
+                if (val !== '') {
+                    if (val === 'A' || val === 'ABSENT') {
+                        marksDatabase[key][selectedSubject] = 'A';
+                    } else if (val === 'L' || val === 'LEAVE') {
+                        marksDatabase[key][selectedSubject] = 'L';
+                    } else {
+                        const parsed = parseInt(val);
+                        marksDatabase[key][selectedSubject] = isNaN(parsed) ? 0 : Math.min(parsed, subObj.marks || 100);
+                    }
+                } else {
+                    delete marksDatabase[key][selectedSubject];
+                }
+            });
+
+            // Mark as locked
+            marksLocksDatabase[lockKey] = {
+                locked: true,
+                lockedAt: new Date().toISOString(),
+                lockedBy: 'Teacher Portal'
+            };
+
+            // Save locally and sync to Firebase Cloud
+            localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
+            localStorage.setItem('ccs_marks_locks', JSON.stringify(marksLocksDatabase));
+            window.syncCloud('marks', marksDatabase);
+            window.syncCloud('marksLocks', marksLocksDatabase);
+
+            window.renderSubjectProgressTracker();
+            window.loadSubjectMarksTable();
+            alert(`🎉 Success: Marks for "${selectedSubject}" have been saved to Cloud and LOCKED successfully!`);
+        };
+
+
+        // ================= TAB 2: STUDENT ENROLLMENT LOGIC =================
+        window.setDirectoryStatusFilter = function(filter) {
+            directoryStatusFilter = filter;
+            const btnAll = document.getElementById('btnFilterAll');
+            const btnAct = document.getElementById('btnFilterActive');
+            const btnLft = document.getElementById('btnFilterLeft');
+
+            const inactive = "px-2.5 py-1 rounded-lg font-semibold text-slate-400 hover:text-white text-[11px]";
+            const active = "px-2.5 py-1 rounded-lg font-bold bg-indigo-600 text-white text-[11px]";
+
+            if (btnAll) btnAll.className = filter === 'All' ? active : inactive;
+            if (btnAct) btnAct.className = filter === 'Active' ? active : inactive;
+            if (btnLft) btnLft.className = filter === 'Left' ? active : inactive;
+
+            window.filterStudents();
+        };
+
+        window.renderStudentsTable = function(customList = null) {
+            const tbody = document.getElementById('studentsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let list = customList || studentsList;
+            if (!Array.isArray(list)) list = [];
+
+            if (directoryStatusFilter !== 'All' && !customList) {
+                list = list.filter(s => (s.status || 'Active') === directoryStatusFilter);
+            }
+
+            const totalActive = studentsList.filter(s => (s.status || 'Active') === 'Active').length;
+            const badge = document.getElementById('activeCountBadge');
+            if (badge) badge.textContent = `${totalActive} Active`;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500 font-medium">No students found.</td></tr>`;
+                return;
+            }
+
+            list.forEach((s, idx) => {
+                const isLeft = (s.status || 'Active') === 'Left';
+                const statusBadge = isLeft 
+                    ? `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-lg text-[10px] font-bold">Left (SLC)</span>`
+                    : `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-lg text-[10px] font-bold">Active</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-slate-800/40 transition-colors ${isLeft ? 'opacity-60 bg-rose-950/10' : ''}`;
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center text-slate-500 font-bold">${idx + 1}</td>
+                    <td class="py-3 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
+                    <td class="py-3 px-4 font-bold text-white">${s.name}</td>
+                    <td class="py-3 px-4 text-slate-400">${s.father}</td>
+                    <td class="py-3 px-4">
+                        <span class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-lg">${s.class}</span>
+                        <span class="bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-2 py-0.5 rounded-lg text-[10px] ml-1 font-semibold">${s.group || 'General'}</span>
+                    </td>
+                    <td class="py-3 px-3">${statusBadge}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button type="button" onclick="window.toggleStudentStatus('${s.rollNo}')" title="${isLeft ? 'Make Active' : 'Mark as Left / SLC'}" class="p-1.5 rounded-lg ${isLeft ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-amber-400 hover:bg-amber-500/10'} transition-colors">
+                                <i class="fa-solid ${isLeft ? 'fa-user-check' : 'fa-user-slash'}"></i>
+                            </button>
+                            <button type="button" onclick="window.editStudent('${s.rollNo}')" title="Edit Student Details" class="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-colors">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.filterStudents = function() {
+            const query = document.getElementById('tableSearch').value.toLowerCase().trim();
+            const filtered = studentsList.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.rollNo.toLowerCase().includes(query) || 
+                s.father.toLowerCase().includes(query) || 
+                s.class.toLowerCase().includes(query) || 
+                (s.group && s.group.toLowerCase().includes(query)) ||
+                (s.phone && s.phone.toLowerCase().includes(query))
+            );
+            window.renderStudentsTable(filtered);
+        };
+
+        window.toggleStudentStatus = function(rollNo) {
+            const student = studentsList.find(s => s.rollNo === rollNo);
+            if (!student) return;
+
+            const newStatus = student.status === 'Left' ? 'Active' : 'Left';
+            const actionText = newStatus === 'Left' ? `mark Roll No: ${rollNo} (${student.name}) as LEFT / STRUCK-OFF (SLC)` : `re-activate Roll No: ${rollNo} (${student.name})`;
+
+            if (confirm(`Are you sure you want to ${actionText}?`)) {
+                student.status = newStatus;
+                localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+                window.syncCloud('students', studentsList);
+                window.renderStudentsTable();
+                alert(`Success: Student ${student.name} is now marked as ${newStatus}!`);
+            }
+        };
+
+        window.editStudent = function(rollNo) {
+            const student = studentsList.find(s => s.rollNo === rollNo);
+            if (!student) return;
+
+            document.getElementById('editOriginalRoll').value = student.rollNo;
+            document.getElementById('s_rollNo').value = student.rollNo;
+            document.getElementById('s_name').value = student.name;
+            document.getElementById('s_fatherName').value = student.father;
+            document.getElementById('s_gender').value = student.gender;
+            document.getElementById('s_class').value = student.class;
+            document.getElementById('s_group').value = student.group;
+            document.getElementById('s_phone').value = student.phone || '';
+            document.getElementById('s_status').value = student.status || 'Active';
+
+            document.getElementById('formTitle').textContent = `Editing Student: ${student.name} (Roll #${student.rollNo})`;
+            document.getElementById('submitBtnText').textContent = "Update Student Details";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            document.getElementById('studentFormContainer').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.cancelEditMode = function() {
+            document.getElementById('editOriginalRoll').value = '';
+            document.getElementById('s_rollNo').value = '';
+            document.getElementById('s_name').value = '';
+            document.getElementById('s_fatherName').value = '';
+            document.getElementById('s_phone').value = '';
+            document.getElementById('s_status').value = 'Active';
+
+            document.getElementById('formTitle').textContent = "Single Student Enrollment";
+            document.getElementById('submitBtnText').textContent = "Save & Enroll Student";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        };
+
+        window.saveStudentForm = function(e) {
+            e.preventDefault();
+            const editRoll = document.getElementById('editOriginalRoll').value;
+            const rollNo = document.getElementById('s_rollNo').value.trim();
+            const name = document.getElementById('s_name').value.trim();
+            const father = document.getElementById('s_fatherName').value.trim();
+            const gender = document.getElementById('s_gender').value;
+            const cls = document.getElementById('s_class').value || "Class 10";
+            const group = document.getElementById('s_group').value.trim() || "General";
+            const phone = document.getElementById('s_phone').value.trim();
+            const status = document.getElementById('s_status').value;
+
+            if (!masterClassesList.includes(cls)) {
+                masterClassesList.push(cls);
+                localStorage.setItem('ccs_master_classes', JSON.stringify(masterClassesList));
+                window.syncCloud('classes', masterClassesList);
+            }
+            if (!masterSectionsList.includes(group)) {
+                masterSectionsList.push(group);
+                localStorage.setItem('ccs_master_sections', JSON.stringify(masterSectionsList));
+                window.syncCloud('sections', masterSectionsList);
+            }
+
+            if (editRoll) {
+                const idx = studentsList.findIndex(s => s.rollNo === editRoll);
+                if (idx >= 0) {
+                    studentsList[idx] = { rollNo, name, father, gender, class: cls, group, phone, status };
+                    alert(`Success: Student ${name} details updated!`);
+                }
+                window.cancelEditMode();
+            } else {
+                const exists = studentsList.some(s => s.rollNo === rollNo);
+                if (exists) {
+                    alert(`Error: Roll Number "${rollNo}" is already registered!`);
+                    return;
+                }
+                studentsList.unshift({ rollNo, name, father, gender, class: cls, group, phone, status });
+                alert(`Success: Student ${name} enrolled successfully!`);
+                e.target.reset();
+            }
+
+            localStorage.setItem('ccs_students_list', JSON.stringify(studentsList));
+            window.syncCloud('students', studentsList);
+            window.refreshDropdowns();
+            window.renderStudentsTable();
+        };
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                window.initCloudSync();
+                window.refreshDropdowns();
+                window.renderStudentsTable();
+                window.onExamOrClassChange();
+            } catch(err) {
+                console.error("Init error:", err);
+            }
+        });
+    </script>
+</body>
+</html>
