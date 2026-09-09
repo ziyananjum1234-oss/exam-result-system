@@ -174,6 +174,66 @@
         };
     </script>
 
+
+<script>
+        // REAL-TIME MARKS INPUT VALIDATION ENGINE (Prevents values > maxMarks)
+        window.validateMarksInput = function(input, maxMarks) {
+            if (!input) return;
+            let val = input.value.trim().toUpperCase();
+            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
+                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.add('border-slate-700');
+                return;
+            }
+
+            const num = parseFloat(val);
+            if (isNaN(num) || num < 0) {
+                input.value = '';
+                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.add('border-slate-700');
+            } else if (num > maxMarks) {
+                // Instantly clamp to maxMarks and highlight alert
+                input.value = maxMarks;
+                input.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.remove('border-slate-700');
+                
+                // Show gentle warning toast
+                alert(`Warning: Marks cannot exceed Total Marks (${maxMarks})! Automatically set to maximum (${maxMarks}).`);
+                setTimeout(() => {
+                    input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                    input.classList.add('border-slate-700');
+                }, 1200);
+            } else {
+                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.add('border-slate-700');
+            }
+        };
+
+        // UNIVERSAL STUDENT MARKS RETRIEVAL ENGINE
+        window.getStudentSubjectMarks = function(examId, st, subName) {
+            if (!st || !examId || !subName) return undefined;
+            const rollNo = st.rollNo;
+            const stId = st.id;
+
+            // Check 1: Key format `examId_rollNo`
+            if (marksDatabase[`${examId}_${rollNo}`] && marksDatabase[`${examId}_${rollNo}`][subName] !== undefined) {
+                return marksDatabase[`${examId}_${rollNo}`][subName];
+            }
+            // Check 2: Key format `examId_stId`
+            if (marksDatabase[`${examId}_${stId}`] && marksDatabase[`${examId}_${stId}`][subName] !== undefined) {
+                return marksDatabase[`${examId}_${stId}`][subName];
+            }
+            // Check 3: Key format `stId` -> `examId` -> `subName`
+            if (marksDatabase[stId] && marksDatabase[stId][examId] && marksDatabase[stId][examId][subName] !== undefined) {
+                return marksDatabase[stId][examId][subName];
+            }
+            // Check 4: Key format `rollNo` -> `examId` -> `subName`
+            if (marksDatabase[rollNo] && marksDatabase[rollNo][examId] && marksDatabase[rollNo][examId][subName] !== undefined) {
+                return marksDatabase[rollNo][examId][subName];
+            }
+            return undefined;
+        };
+</script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
@@ -998,7 +1058,7 @@
                             ${isLocked ? 'disabled' : ''}
                             oninput="this.value = this.value.toUpperCase()"
                             onkeydown="window.handleMarksEnterKey(event, ${idx})"
-                            class="marks-input-single w-28 px-3 py-2 ${isLocked ? 'bg-slate-900 border-slate-800 text-slate-400 font-bold cursor-not-allowed' : 'bg-slate-950 border-slate-700 text-white font-bold focus:ring-2 focus:ring-indigo-500'} border rounded-xl text-sm font-mono text-center transition-all">
+                            class="marks-input-single w-28 px-3 py-2 ${isLocked ? 'bg-slate-900 border-slate-800 text-slate-400 font-bold cursor-not-allowed' : 'bg-slate-950 border-slate-700 text-white font-bold focus:ring-2 focus:ring-indigo-500'} border rounded-xl text-sm font-mono text-center transition-all" oninput="window.validateMarksInput(this, typeof subObj !== \'undefined\' ? (subObj.marks || 100) : 100)">
                     </td>
                 `;
                 tbody.appendChild(tr);
