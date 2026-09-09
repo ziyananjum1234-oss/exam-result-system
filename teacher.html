@@ -395,7 +395,7 @@
 
             <!-- Selection Bar -->
             <div class="bg-slate-900/90 p-5 rounded-3xl border border-slate-800 shadow-xl space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Exam Selection -->
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">1. Select Examination</label>
@@ -412,9 +412,17 @@
                         </select>
                     </div>
 
+                    <!-- Section Selection -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1.5">3. Select Section / House</label>
+                        <select id="me_sectionSelect" onchange="window.loadSubjectMarksTable()" class="w-full px-3.5 py-2.5 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs text-white font-semibold focus:ring-2 focus:ring-emerald-500">
+                            <option value="All">All Sections</option>
+                        </select>
+                    </div>
+
                     <!-- Subject Selection -->
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">3. Select Subject</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">4. Select Subject</label>
                         <select id="me_subjectSelect" onchange="window.loadSubjectMarksTable()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-semibold focus:ring-2 focus:ring-indigo-500">
                             <!-- Populated dynamically -->
                         </select>
@@ -831,11 +839,40 @@
             }
         };
 
+        window.populateSectionDropdown = function() {
+            const classSelect = document.getElementById('me_classSelect');
+            const secSelect = document.getElementById('me_sectionSelect');
+            if (!classSelect || !secSelect) return;
+
+            const selectedClass = classSelect.value;
+            const currentVal = secSelect.value || 'All';
+            secSelect.innerHTML = '<option value="All">All Sections</option>';
+
+            const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+            const sections = [...new Set(classStudents.map(s => (s.group || 'General').trim()).filter(Boolean))];
+
+            sections.sort();
+            sections.forEach(sec => {
+                const opt = document.createElement('option');
+                opt.value = sec;
+                opt.textContent = sec;
+                secSelect.appendChild(opt);
+            });
+
+            if (sections.includes(currentVal)) {
+                secSelect.value = currentVal;
+            } else {
+                secSelect.value = 'All';
+            }
+        };
+
         // ================= TAB 1: MARKS ENTRY LOGIC (WITH AUTO-LOCK) =================
         window.onExamOrClassChange = function() {
             const examSelect = document.getElementById('me_examSelect');
             const subSelect = document.getElementById('me_subjectSelect');
             if (!examSelect || !subSelect) return;
+
+            window.populateSectionDropdown();
 
             const examId = examSelect.value;
             subSelect.innerHTML = '';
@@ -972,7 +1009,16 @@
                 }
             }
 
-            const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+            let classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+
+            const secSelect = document.getElementById('me_sectionSelect');
+            const selectedSec = secSelect ? secSelect.value : 'All';
+            if (selectedSec && selectedSec !== 'All') {
+                classStudents = classStudents.filter(s => (s.group || 'General').trim() === selectedSec);
+            }
+
+            // Sort Students Alphabetically (A to Z by Name)
+            classStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
             if (classStudents.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}". Please register students in Student Enrollment tab.</td></tr>`;
