@@ -174,182 +174,6 @@
         };
     </script>
 
-
-<script>
-        // REAL-TIME MARKS INPUT VALIDATION ENGINE (Prevents values > maxMarks)
-        window.validateMarksInput = function(input, maxMarks) {
-            if (!input) return;
-            let val = input.value.trim().toUpperCase();
-            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-                return;
-            }
-
-            const num = parseFloat(val);
-            if (isNaN(num) || num < 0) {
-                input.value = '';
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            } else if (num > maxMarks) {
-                // Instantly clamp to maxMarks and highlight alert
-                input.value = maxMarks;
-                input.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.remove('border-slate-700');
-                
-                // Show gentle warning toast
-                alert(`Warning: Marks cannot exceed Total Marks (${maxMarks})! Automatically set to maximum (${maxMarks}).`);
-                setTimeout(() => {
-                    input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                    input.classList.add('border-slate-700');
-                }, 1200);
-            } else {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            }
-        };
-
-        // UNIVERSAL STUDENT MARKS RETRIEVAL ENGINE
-        window.getStudentSubjectMarks = function(examId, st, subName) {
-            if (!st || !examId || !subName) return undefined;
-            const rollNo = st.rollNo;
-            const stId = st.id;
-
-            // Check 1: Key format `examId_rollNo`
-            if (marksDatabase[`${examId}_${rollNo}`] && marksDatabase[`${examId}_${rollNo}`][subName] !== undefined) {
-                return marksDatabase[`${examId}_${rollNo}`][subName];
-            }
-            // Check 2: Key format `examId_stId`
-            if (marksDatabase[`${examId}_${stId}`] && marksDatabase[`${examId}_${stId}`][subName] !== undefined) {
-                return marksDatabase[`${examId}_${stId}`][subName];
-            }
-            // Check 3: Key format `stId` -> `examId` -> `subName`
-            if (marksDatabase[stId] && marksDatabase[stId][examId] && marksDatabase[stId][examId][subName] !== undefined) {
-                return marksDatabase[stId][examId][subName];
-            }
-            // Check 4: Key format `rollNo` -> `examId` -> `subName`
-            if (marksDatabase[rollNo] && marksDatabase[rollNo][examId] && marksDatabase[rollNo][examId][subName] !== undefined) {
-                return marksDatabase[rollNo][examId][subName];
-            }
-            return undefined;
-        };
-</script>
-
-<script>
-        window.handleMarksInput = function(input, maxMarks) {
-            if (!input) return;
-            let val = input.value.trim().toUpperCase();
-            input.value = val;
-
-            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-                return;
-            }
-
-            const num = parseFloat(val);
-            if (isNaN(num) || num < 0) {
-                input.value = '';
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            } else if (num > maxMarks) {
-                input.value = maxMarks;
-                input.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.remove('border-slate-700');
-                alert(`Warning: Total marks for this subject is ${maxMarks}. Entered marks cannot exceed ${maxMarks}!`);
-                setTimeout(() => {
-                    input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                    input.classList.add('border-slate-700');
-                }, 1500);
-            } else {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            }
-        };
-</script>
-
-    <script>
-        // GLOBAL TEACHER AUTHENTICATION ENGINE
-        window.TEACHER_AUTH_KEY = 'ccs_teacher_auth_session';
-        window.TEACHER_USER = 'teacher';
-        window.TEACHER_PASS = 'teacher@ccs';
-
-        window.checkTeacherAuth = function() {
-            try {
-                const overlay = document.getElementById('authOverlay');
-                if (!overlay) return;
-                const isAuth = sessionStorage.getItem(window.TEACHER_AUTH_KEY) === 'true';
-                if (isAuth) {
-                    overlay.classList.add('hidden');
-                    overlay.style.display = 'none';
-                } else {
-                    overlay.classList.remove('hidden');
-                    overlay.style.display = 'flex';
-                }
-            } catch(e) {
-                console.error("checkTeacherAuth error:", e);
-            }
-        };
-
-        window.handleTeacherLogin = function(e) {
-            if (e && e.preventDefault) e.preventDefault();
-            try {
-                const userInp = document.getElementById('authUserInput');
-                const passInp = document.getElementById('authPassInput');
-                const err = document.getElementById('authErrorMsg');
-                const overlay = document.getElementById('authOverlay');
-                
-                const userVal = userInp ? userInp.value.trim().toLowerCase() : '';
-                const passVal = passInp ? passInp.value.trim() : '';
-
-                if (userVal === 'teacher' && (passVal === 'teacher@ccs' || passVal === 'teacher')) {
-                    sessionStorage.setItem(window.TEACHER_AUTH_KEY, 'true');
-                    if (err) err.classList.add('hidden');
-                    if (overlay) {
-                        overlay.classList.add('hidden');
-                        overlay.style.display = 'none';
-                    }
-                    if (typeof window.showTab === 'function') {
-                        window.showTab('marksEntry');
-                    }
-                    return false;
-                } else {
-                    if (err) {
-                        err.classList.remove('hidden');
-                        err.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Credentials! (User: <b>teacher</b>, Pass: <b>teacher@ccs</b>)';
-                    }
-                    if (passInp) {
-                        passInp.value = '';
-                        passInp.focus();
-                    }
-                    return false;
-                }
-            } catch(err) {
-                console.error("handleTeacherLogin error:", err);
-                return false;
-            }
-        };
-
-        window.autoFillTeacherCredentials = function() {
-            const userInput = document.getElementById('authUserInput');
-            const passInput = document.getElementById('authPassInput');
-            if (userInput) userInput.value = "teacher";
-            if (passInput) passInput.value = "teacher@ccs";
-            window.handleTeacherLogin();
-        };
-
-        window.logoutPortal = function() {
-            if (confirm("Are you sure you want to logout from Faculty Portal?")) {
-                sessionStorage.removeItem(window.TEACHER_AUTH_KEY);
-                window.checkTeacherAuth();
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', function() {
-            window.checkTeacherAuth();
-        });
-    </script>
-
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
@@ -430,33 +254,41 @@
                 </div>
             </div>
 
-                        <!-- LOGIN TERMINAL CONTAINER (Revealed with Emerald/Golden Light after Ribbon Pull) -->
+            <!-- LOGIN TERMINAL CONTAINER (Revealed with Golden Light after Ribbon Pull) -->
             <div id="lampLoginFieldsContainer" class="hidden transition-all duration-700 space-y-3.5 text-left p-4 rounded-2xl bg-slate-950/90 border-2 border-emerald-400/60 shadow-[0_0_35px_rgba(16,185,129,0.3)]">
                 
+                <!-- Radiant Badge -->
                 <div class="flex items-center justify-between pb-2 border-b border-emerald-500/30">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Faculty Sign In</span>
+                        <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Faculty Terminal Illuminated</span>
                     </div>
+                    <button type="button" onclick="window.autoFillTeacherCredentials()" class="px-2.5 py-1 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 text-[10px] font-black rounded-lg transition-all shadow-md active:scale-95">
+                        <i class="fa-solid fa-bolt mr-1"></i> 1-Click Auto Fill
+                    </button>
+                </div>
+
+                <!-- Credentials hint -->
+                <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl px-3 py-1.5 text-[11px] font-mono text-emerald-200 flex justify-between">
+                    <span>User: <b class="text-white">teacher</b></span>
+                    <span>Pass: <b class="text-white">teacher@ccs</b></span>
                 </div>
 
                 <form onsubmit="window.handleTeacherLogin(event)" class="space-y-3 pt-1">
-                    <!-- Username Input (Clean & Secret) -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
                         <div class="relative">
                             <i class="fa-solid fa-user absolute left-3.5 top-3 text-emerald-400 text-xs"></i>
-                            <input type="text" id="authUserInput" required placeholder="Enter your username" 
+                            <input type="text" id="authUserInput" required placeholder="teacher" value="teacher"
                                 class="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-emerald-500/40 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all font-medium">
                         </div>
                     </div>
 
-                    <!-- Password Input (Clean & Masked) -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
                         <div class="relative">
                             <i class="fa-solid fa-lock absolute left-3.5 top-3 text-emerald-400 text-xs"></i>
-                            <input type="password" id="authPassInput" required placeholder="••••••••" 
+                            <input type="password" id="authPassInput" required placeholder="teacher@ccs" value="teacher@ccs"
                                 class="w-full pl-9 pr-10 py-2.5 bg-slate-900 border border-emerald-500/40 rounded-xl text-xs text-white tracking-widest focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all font-medium">
                             <button type="button" onclick="window.toggleAuthPassVisibility('authPassInput', this)" class="absolute right-3 top-2.5 text-slate-400 hover:text-emerald-300 text-xs p-1 transition-colors" title="Toggle Password View">
                                 <i class="fa-solid fa-eye"></i>
@@ -1087,225 +919,190 @@
             });
         };
 
-        
         window.loadSubjectMarksTable = function() {
-            try {
-                const examSelect = document.getElementById('me_examSelect');
-                const classSelect = document.getElementById('me_classSelect');
-                const secSelect = document.getElementById('me_sectionSelect');
-                const subSelect = document.getElementById('me_subjectSelect');
-                const sortSelect = document.getElementById('me_sortSelect');
-                const tbody = document.getElementById('subjectMarksTableBody');
-                const lockBanner = document.getElementById('lockNoticeBanner');
-                const saveBtnMain = document.getElementById('btnSaveMarksMain');
-                const saveBtnBottom = document.getElementById('btnSaveMarksBottom');
-                
-                if (!examSelect || !classSelect || !subSelect || !tbody) return;
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
+            const tbody = document.getElementById('subjectMarksTableBody');
+            const lockBanner = document.getElementById('lockNoticeBanner');
+            const saveBtnMain = document.getElementById('btnSaveMarksMain');
+            const saveBtnBottom = document.getElementById('btnSaveMarksBottom');
+            
+            if (!examSelect || !classSelect || !subSelect || !tbody) return;
 
-                const examId = examSelect.value;
-                const selectedClass = classSelect.value;
-                const selectedSection = secSelect ? secSelect.value : 'ALL';
-                const selectedSubject = subSelect.value;
-                const selectedSort = sortSelect ? sortSelect.value : 'roll_asc';
-                tbody.innerHTML = '';
+            const examId = examSelect.value;
+            const selectedClass = classSelect.value;
+            const selectedSubject = subSelect.value;
+            tbody.innerHTML = '';
 
-                const exam = examsSetupList.find(e => e.id === examId);
-                if (!exam) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-500">No examination selected.</td></tr>';
-                    return;
+            const exam = examsSetupList.find(e => e.id === examId);
+            if (!exam) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-500">No examination selected.</td></tr>';
+                return;
+            }
+
+            const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
+            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+            
+            const badgeEl = document.getElementById('activeSubjectBadge');
+            const thMaxEl = document.getElementById('thMaxMarks');
+            if (badgeEl) badgeEl.textContent = `${subObj.name} (Max: ${subObj.marks} Marks)`;
+            if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks})`;
+
+            const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
+            const isLocked = Boolean(marksLocksDatabase[lockKey]);
+
+            // Handle Lock State UI
+            if (isLocked) {
+                lockBanner.classList.remove('hidden');
+                if (saveBtnMain) {
+                    saveBtnMain.disabled = true;
+                    saveBtnMain.className = "px-5 py-2.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed flex items-center space-x-2";
+                    saveBtnMain.innerHTML = '<i class="fa-solid fa-lock"></i><span>Marks Locked</span>';
                 }
+                if (saveBtnBottom) {
+                    saveBtnBottom.disabled = true;
+                    saveBtnBottom.className = "px-6 py-2 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed";
+                    saveBtnBottom.innerHTML = '<i class="fa-solid fa-lock mr-1.5"></i> Marks Locked (Contact Admin)';
+                }
+            } else {
+                lockBanner.classList.add('hidden');
+                if (saveBtnMain) {
+                    saveBtnMain.disabled = false;
+                    saveBtnMain.className = "px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition-all";
+                    saveBtnMain.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>Save & Finalize Marks</span>';
+                }
+                if (saveBtnBottom) {
+                    saveBtnBottom.disabled = false;
+                    saveBtnBottom.className = "px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20";
+                    saveBtnBottom.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i> Save & Lock Subject Marks';
+                }
+            }
 
-                const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
-                const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
-                const maxMarks = Number(subObj.marks || 100);
-                
-                const badgeEl = document.getElementById('activeSubjectBadge');
-                const thMaxEl = document.getElementById('thMaxMarks');
-                if (badgeEl) badgeEl.textContent = `${subObj.name} (Max: ${maxMarks} Marks)`;
-                if (thMaxEl) thMaxEl.textContent = `(Max: ${maxMarks})`;
+            const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
 
-                const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
-                const isLocked = Boolean(marksLocksDatabase[lockKey]);
+            if (classStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}". Please register students in Student Enrollment tab.</td></tr>`;
+                return;
+            }
 
-                // Handle Lock State UI
-                if (isLocked) {
-                    if (lockBanner) lockBanner.classList.remove('hidden');
-                    if (saveBtnMain) {
-                        saveBtnMain.disabled = true;
-                        saveBtnMain.className = "px-5 py-2.5 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed flex items-center space-x-2";
-                        saveBtnMain.innerHTML = '<i class="fa-solid fa-lock"></i><span>Marks Locked (Submitted)</span>';
-                    }
-                    if (saveBtnBottom) {
-                        saveBtnBottom.disabled = true;
-                        saveBtnBottom.className = "px-6 py-2 bg-slate-800 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed";
-                        saveBtnBottom.innerHTML = '<i class="fa-solid fa-lock mr-1.5"></i> Marks Locked (Contact Admin)';
-                    }
+            classStudents.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+
+                const key = `${examId}_${s.rollNo}`;
+                const savedVal = (marksDatabase[key] && marksDatabase[key][selectedSubject] !== undefined) ? marksDatabase[key][selectedSubject] : '';
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
+                    <td class="py-2.5 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
+                    <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
+                    <td class="py-2.5 px-4 text-slate-400">${s.father}</td>
+                    <td class="py-2 px-4 text-center">
+                        <input type="text" placeholder="0-${subObj.marks} / A / L"
+                            value="${savedVal}"
+                            data-roll="${s.rollNo}" 
+                            data-index="${idx}"
+                            ${isLocked ? 'disabled' : ''}
+                            oninput="this.value = this.value.toUpperCase()"
+                            onkeydown="window.handleMarksEnterKey(event, ${idx})"
+                            class="marks-input-single w-28 px-3 py-2 ${isLocked ? 'bg-slate-900 border-slate-800 text-slate-400 font-bold cursor-not-allowed' : 'bg-slate-950 border-slate-700 text-white font-bold focus:ring-2 focus:ring-indigo-500'} border rounded-xl text-sm font-mono text-center transition-all">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.handleMarksEnterKey = function(event, currentIndex) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const inputs = document.querySelectorAll('.marks-input-single:not([disabled])');
+                if (currentIndex + 1 < inputs.length) {
+                    inputs[currentIndex + 1].focus();
+                    inputs[currentIndex + 1].select();
                 } else {
-                    if (lockBanner) lockBanner.classList.add('hidden');
-                    if (saveBtnMain) {
-                        saveBtnMain.disabled = false;
-                        saveBtnMain.className = "px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition-all";
-                        saveBtnMain.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i><span>Save & Finalize Marks</span>';
-                    }
-                    if (saveBtnBottom) {
-                        saveBtnBottom.disabled = false;
-                        saveBtnBottom.className = "px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20";
-                        saveBtnBottom.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1.5"></i> Save & Lock Subject Marks';
-                    }
+                    window.saveCurrentSubjectMarks();
                 }
-
-                // Filter students
-                let classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
-                if (selectedSection && selectedSection !== 'ALL') {
-                    classStudents = classStudents.filter(s => s.group === selectedSection);
-                }
-
-                if (classStudents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}${selectedSection !== 'ALL' ? ' - Section ' + selectedSection : ''}".</td></tr>`;
-                    return;
-                }
-
-                // Sort students
-                if (selectedSort === 'name_asc') {
-                    classStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                } else if (selectedSort === 'section_asc') {
-                    classStudents.sort((a, b) => (a.group || '').localeCompare(b.group || '') || (parseInt(a.rollNo) || 0) - (parseInt(b.rollNo) || 0));
-                } else {
-                    classStudents.sort((a, b) => (parseInt(a.rollNo) || 0) - (parseInt(b.rollNo) || 0));
-                }
-
-                classStudents.forEach((s, idx) => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-800/40 transition-colors";
-
-                    const key = `${examId}_${s.rollNo}`;
-                    let savedVal = '';
-                    if (marksDatabase[key] && marksDatabase[key][selectedSubject] !== undefined) {
-                        savedVal = marksDatabase[key][selectedSubject];
-                    } else if (marksDatabase[s.id] && marksDatabase[s.id][examId] && marksDatabase[s.id][examId][selectedSubject] !== undefined) {
-                        savedVal = marksDatabase[s.id][examId][selectedSubject];
-                    }
-
-                    tr.innerHTML = `
-                        <td class="py-2.5 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
-                        <td class="py-2.5 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
-                        <td class="py-2.5 px-4 font-bold text-white uppercase">${s.name}</td>
-                        <td class="py-2.5 px-4 text-slate-400 uppercase">${s.father}</td>
-                        <td class="py-2.5 px-4 text-slate-300 font-semibold text-xs"><span class="bg-slate-800 px-2 py-0.5 rounded border border-slate-700">${s.group || 'General'}</span></td>
-                        <td class="py-2 px-4 text-center">
-                            <input type="text" placeholder="0-${maxMarks} / A / L"
-                                value="${savedVal}"
-                                data-roll="${s.rollNo}" 
-                                data-id="${s.id}"
-                                data-index="${idx}"
-                                ${isLocked ? 'disabled' : ''}
-                                oninput="window.handleMarksInput(this, ${maxMarks})"
-                                onkeydown="window.handleMarksEnterKey(event, ${idx})"
-                                class="marks-input-single w-28 px-3 py-2 ${isLocked ? 'bg-slate-900 border-slate-800 text-slate-400 font-bold cursor-not-allowed' : 'bg-slate-950 border-slate-700 text-white font-bold focus:ring-2 focus:ring-indigo-500'} border rounded-xl text-sm font-mono text-center transition-all">
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch(e) {
-                console.error("loadSubjectMarksTable error:", e);
             }
         };
 
         window.saveCurrentSubjectMarks = function() {
-            try {
-                const examSelect = document.getElementById('me_examSelect');
-                const classSelect = document.getElementById('me_classSelect');
-                const subSelect = document.getElementById('me_subjectSelect');
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
 
-                if (!examSelect || !classSelect || !subSelect) return;
+            if (!examSelect || !classSelect || !subSelect) return;
 
-                const examId = examSelect.value;
-                const selectedClass = classSelect.value;
-                const selectedSubject = subSelect.value;
+            const examId = examSelect.value;
+            const selectedClass = classSelect.value;
+            const selectedSubject = subSelect.value;
 
-                if (!examId || !selectedSubject) {
-                    alert('Please select an examination and subject!');
-                    return;
-                }
-
-                const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
-                if (marksLocksDatabase[lockKey]) {
-                    alert('⚠️ These marks are locked! Only the Admin can unlock them.');
-                    return;
-                }
-
-                const exam = examsSetupList.find(e => e.id === examId);
-                const subjects = exam ? (exam.subjects || []) : [];
-                const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
-                const maxMarks = Number(subObj.marks || 100);
-
-                const inputs = document.querySelectorAll('.marks-input-single:not([disabled])');
-                if (inputs.length === 0) {
-                    alert('No students found to save marks for!');
-                    return;
-                }
-
-                // Confirm lock submission
-                const confirmMsg = `⚠️ CONFIRMATION & LOCK NOTICE:\n\nAre you sure you want to save marks for "${selectedSubject}" (${selectedClass})?\n\nOnce saved, these marks will be LOCKED for security and sent to the cloud.`;
-                if (!confirm(confirmMsg)) {
-                    return;
-                }
-
-                inputs.forEach(input => {
-                    const rollNo = input.getAttribute('data-roll');
-                    const stId = input.getAttribute('data-id');
-                    let val = input.value.trim().toUpperCase();
-
-                    const key = `${examId}_${rollNo}`;
-                    if (!marksDatabase[key]) {
-                        marksDatabase[key] = {};
-                    }
-
-                    if (val !== '') {
-                        if (val === 'A' || val === 'ABSENT') {
-                            marksDatabase[key][selectedSubject] = 'A';
-                        } else if (val === 'L' || val === 'LEAVE') {
-                            marksDatabase[key][selectedSubject] = 'L';
-                        } else {
-                            let parsed = parseFloat(val);
-                            if (isNaN(parsed) || parsed < 0) parsed = 0;
-                            if (parsed > maxMarks) parsed = maxMarks;
-                            marksDatabase[key][selectedSubject] = parsed;
-                        }
-                    } else {
-                        delete marksDatabase[key][selectedSubject];
-                    }
-
-                    if (stId) {
-                        const idKey = `${examId}_${stId}`;
-                        if (!marksDatabase[idKey]) marksDatabase[idKey] = {};
-                        if (marksDatabase[key][selectedSubject] !== undefined) {
-                            marksDatabase[idKey][selectedSubject] = marksDatabase[key][selectedSubject];
-                        }
-                    }
-                });
-
-                // Auto-lock for security
-                marksLocksDatabase[lockKey] = {
-                    locked: true,
-                    lockedAt: new Date().toISOString(),
-                    lockedBy: 'Teacher Portal'
-                };
-
-                localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
-                localStorage.setItem('ccs_marks_locks', JSON.stringify(marksLocksDatabase));
-
-                window.syncCloud('marks', marksDatabase);
-                window.syncCloud('marksLocks', marksLocksDatabase);
-
-                window.renderSubjectProgressTracker();
-                window.loadSubjectMarksTable();
-
-                alert(`✅ SUCCESS: Marks for "${selectedSubject}" (${selectedClass}) saved and LOCKED successfully!`);
-            } catch(e) {
-                console.error("saveCurrentSubjectMarks error:", e);
-                alert("Error saving marks: " + e.message);
+            if (!examId || !selectedSubject) {
+                alert('Please select an examination and subject!');
+                return;
             }
+
+            const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
+            if (marksLocksDatabase[lockKey]) {
+                alert('⚠️ These marks are locked! Only the Admin can unlock them.');
+                return;
+            }
+
+            const exam = examsSetupList.find(e => e.id === examId);
+            const subjects = exam ? (exam.subjects || []) : [];
+            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+
+            const inputs = document.querySelectorAll('.marks-input-single');
+            if (inputs.length === 0) {
+                alert('No students found to save marks for!');
+                return;
+            }
+
+            // Confirm lock submission
+            const confirmMsg = `⚠️ CONFIRMATION & LOCK NOTICE:\n\nAre you sure you want to save marks for "${selectedSubject}" (${selectedClass})?\n\nOnce saved, these marks will be LOCKED for security and sent to the cloud. You will not be able to edit them afterwards without contacting the Admin.`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            inputs.forEach(input => {
+                const rollNo = input.getAttribute('data-roll');
+                const val = input.value.trim().toUpperCase();
+
+                const key = `${examId}_${rollNo}`;
+                if (!marksDatabase[key]) {
+                    marksDatabase[key] = {};
+                }
+
+                if (val !== '') {
+                    if (val === 'A' || val === 'ABSENT') {
+                        marksDatabase[key][selectedSubject] = 'A';
+                    } else if (val === 'L' || val === 'LEAVE') {
+                        marksDatabase[key][selectedSubject] = 'L';
+                    } else {
+                        const parsed = parseInt(val);
+                        marksDatabase[key][selectedSubject] = isNaN(parsed) ? 0 : Math.min(parsed, subObj.marks || 100);
+                    }
+                } else {
+                    delete marksDatabase[key][selectedSubject];
+                }
+            });
+
+            // Mark as locked
+            marksLocksDatabase[lockKey] = {
+                locked: true,
+                lockedAt: new Date().toISOString(),
+                lockedBy: 'Teacher Portal'
+            };
+
+            // Save locally and sync to Firebase Cloud
+            localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
+            localStorage.setItem('ccs_marks_locks', JSON.stringify(marksLocksDatabase));
+            window.syncCloud('marks', marksDatabase);
+            window.syncCloud('marksLocks', marksLocksDatabase);
+
+            window.renderSubjectProgressTracker();
+            window.loadSubjectMarksTable();
+            alert(`🎉 Success: Marks for "${selectedSubject}" have been saved to Cloud and LOCKED successfully!`);
         };
 
 
