@@ -390,13 +390,6 @@
                         <h2 class="text-xl md:text-2xl font-extrabold text-white font-royal-title">Subject Marks Entry</h2>
                         <p class="text-xs text-slate-400 mt-1">Select examination, class and subject to enter marks. Use <b>A</b> for Absent and <b>L</b> for Leave.</p>
                     </div>
-
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="window.saveCurrentSubjectMarks()" id="btnSaveMarksMain" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center space-x-2 transition-all">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span id="saveBtnLabel">Save & Finalize Marks</span>
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -1004,13 +997,29 @@
                             data-roll="${s.rollNo}" 
                             data-index="${idx}"
                             ${isLocked ? 'disabled' : ''}
-                            oninput="this.value = this.value.toUpperCase()"
+                            oninput="window.validateMarksInput(this, ${subObj.marks || 100})"
                             onkeydown="window.handleMarksEnterKey(event, ${idx})"
                             class="marks-input-single w-28 px-3 py-2 ${isLocked ? 'bg-slate-900 border-slate-800 text-slate-400 font-bold cursor-not-allowed' : 'bg-slate-950 border-slate-700 text-white font-bold focus:ring-2 focus:ring-indigo-500'} border rounded-xl text-sm font-mono text-center transition-all">
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        };
+
+        window.validateMarksInput = function(input, maxMarks) {
+            if (!input) return;
+            input.value = input.value.toUpperCase();
+            const val = input.value.trim();
+            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
+                input.classList.remove('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+                return;
+            }
+            const parsed = parseInt(val);
+            if (isNaN(parsed) || parsed < 0 || parsed > maxMarks) {
+                input.classList.add('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+            } else {
+                input.classList.remove('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+            }
         };
 
         window.handleMarksEnterKey = function(event, currentIndex) {
@@ -1051,10 +1060,37 @@
             const exam = examsSetupList.find(e => e.id === examId);
             const subjects = exam ? (exam.subjects || []) : [];
             const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+            const maxAllowed = subObj.marks || 100;
 
             const inputs = document.querySelectorAll('.marks-input-single');
             if (inputs.length === 0) {
                 alert('No students found to save marks for!');
+                return;
+            }
+
+            // Pre-save check: Strictly reject any marks exceeding maxAllowed or invalid numeric entry
+            let invalidInput = null;
+            let invalidRoll = '';
+            let invalidValue = '';
+
+            for (let input of inputs) {
+                const val = input.value.trim().toUpperCase();
+                if (val !== '' && val !== 'A' && val !== 'ABSENT' && val !== 'L' && val !== 'LEAVE') {
+                    const parsed = parseInt(val);
+                    if (isNaN(parsed) || parsed < 0 || parsed > maxAllowed) {
+                        invalidInput = input;
+                        invalidRoll = input.getAttribute('data-roll') || '';
+                        invalidValue = val;
+                        break;
+                    }
+                }
+            }
+
+            if (invalidInput) {
+                invalidInput.classList.add('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+                invalidInput.focus();
+                invalidInput.select();
+                alert(`⚠️ MARKS ENTRY REJECTED!\n\nRoll No. ${invalidRoll} has entered marks "${invalidValue}" which EXCEEDS the total maximum marks (${maxAllowed}) for "${selectedSubject}"!\n\nPlease correct this entry before saving.`);
                 return;
             }
 
@@ -1080,7 +1116,7 @@
                         marksDatabase[key][selectedSubject] = 'L';
                     } else {
                         const parsed = parseInt(val);
-                        marksDatabase[key][selectedSubject] = isNaN(parsed) ? 0 : Math.min(parsed, subObj.marks || 100);
+                        marksDatabase[key][selectedSubject] = parsed;
                     }
                 } else {
                     delete marksDatabase[key][selectedSubject];
