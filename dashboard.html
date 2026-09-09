@@ -227,184 +227,6 @@
         };
     </script>
 
-
-<script>
-        // REAL-TIME MARKS INPUT VALIDATION ENGINE (Prevents values > maxMarks)
-        window.validateMarksInput = function(input, maxMarks) {
-            if (!input) return;
-            let val = input.value.trim().toUpperCase();
-            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-                return;
-            }
-
-            const num = parseFloat(val);
-            if (isNaN(num) || num < 0) {
-                input.value = '';
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            } else if (num > maxMarks) {
-                // Instantly clamp to maxMarks and highlight alert
-                input.value = maxMarks;
-                input.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.remove('border-slate-700');
-                
-                // Show gentle warning toast
-                alert(`Warning: Marks cannot exceed Total Marks (${maxMarks})! Automatically set to maximum (${maxMarks}).`);
-                setTimeout(() => {
-                    input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                    input.classList.add('border-slate-700');
-                }, 1200);
-            } else {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            }
-        };
-
-        // UNIVERSAL STUDENT MARKS RETRIEVAL ENGINE
-        window.getStudentSubjectMarks = function(examId, st, subName) {
-            if (!st || !examId || !subName) return undefined;
-            const rollNo = st.rollNo;
-            const stId = st.id;
-
-            // Check 1: Key format `examId_rollNo`
-            if (marksDatabase[`${examId}_${rollNo}`] && marksDatabase[`${examId}_${rollNo}`][subName] !== undefined) {
-                return marksDatabase[`${examId}_${rollNo}`][subName];
-            }
-            // Check 2: Key format `examId_stId`
-            if (marksDatabase[`${examId}_${stId}`] && marksDatabase[`${examId}_${stId}`][subName] !== undefined) {
-                return marksDatabase[`${examId}_${stId}`][subName];
-            }
-            // Check 3: Key format `stId` -> `examId` -> `subName`
-            if (marksDatabase[stId] && marksDatabase[stId][examId] && marksDatabase[stId][examId][subName] !== undefined) {
-                return marksDatabase[stId][examId][subName];
-            }
-            // Check 4: Key format `rollNo` -> `examId` -> `subName`
-            if (marksDatabase[rollNo] && marksDatabase[rollNo][examId] && marksDatabase[rollNo][examId][subName] !== undefined) {
-                return marksDatabase[rollNo][examId][subName];
-            }
-            return undefined;
-        };
-</script>
-
-<script>
-        window.handleMarksInput = function(input, maxMarks) {
-            if (!input) return;
-            let val = input.value.trim().toUpperCase();
-            input.value = val;
-
-            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-                return;
-            }
-
-            const num = parseFloat(val);
-            if (isNaN(num) || num < 0) {
-                input.value = '';
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            } else if (num > maxMarks) {
-                input.value = maxMarks;
-                input.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.remove('border-slate-700');
-                alert(`Warning: Total marks for this subject is ${maxMarks}. Entered marks cannot exceed ${maxMarks}!`);
-                setTimeout(() => {
-                    input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                    input.classList.add('border-slate-700');
-                }, 1500);
-            } else {
-                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
-                input.classList.add('border-slate-700');
-            }
-        };
-</script>
-
-    <script>
-        // GLOBAL MASTER ADMIN AUTHENTICATION ENGINE
-        window.ADMIN_AUTH_KEY = 'ccs_admin_auth_session';
-        window.ADMIN_USER = 'admin';
-        window.ADMIN_PASS = 'admin@ccs';
-
-        window.checkAdminAuth = function() {
-            try {
-                const overlay = document.getElementById('adminAuthOverlay');
-                if (!overlay) return;
-                const isAuth = sessionStorage.getItem(window.ADMIN_AUTH_KEY) === 'true';
-                if (isAuth) {
-                    overlay.classList.add('hidden');
-                    overlay.style.display = 'none';
-                } else {
-                    overlay.classList.remove('hidden');
-                    overlay.style.display = 'flex';
-                }
-            } catch(e) {
-                console.error("checkAdminAuth error:", e);
-            }
-        };
-
-        window.handleAdminLogin = function(e) {
-            if (e && e.preventDefault) e.preventDefault();
-            try {
-                const userInp = document.getElementById('adminAuthUserInput');
-                const passInp = document.getElementById('adminAuthPassInput');
-                const err = document.getElementById('adminAuthErrorMsg');
-                const overlay = document.getElementById('adminAuthOverlay');
-                
-                const userVal = userInp ? userInp.value.trim().toLowerCase() : '';
-                const passVal = passInp ? passInp.value.trim() : '';
-
-                if (userVal === 'admin' && (passVal === 'admin@ccs' || passVal === 'admin')) {
-                    sessionStorage.setItem(window.ADMIN_AUTH_KEY, 'true');
-                    if (err) err.classList.add('hidden');
-                    if (overlay) {
-                        overlay.classList.add('hidden');
-                        overlay.style.display = 'none';
-                    }
-                    if (typeof window.showTab === 'function') {
-                        window.showTab('enrollment');
-                    }
-                    return false;
-                } else {
-                    if (err) {
-                        err.classList.remove('hidden');
-                        err.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Credentials! (User: <b>admin</b>, Pass: <b>admin@ccs</b>)';
-                    }
-                    if (passInp) {
-                        passInp.value = '';
-                        passInp.focus();
-                    }
-                    return false;
-                }
-            } catch(err) {
-                console.error("handleAdminLogin error:", err);
-                return false;
-            }
-        };
-
-        window.autoFillAdminCredentials = function() {
-            const userInput = document.getElementById('adminAuthUserInput');
-            const passInput = document.getElementById('adminAuthPassInput');
-            if (userInput) userInput.value = "admin";
-            if (passInput) passInput.value = "admin@ccs";
-            // Auto login directly
-            window.handleAdminLogin();
-        };
-
-        window.logoutAdminPortal = function() {
-            if (confirm("Are you sure you want to logout from Master Admin Control Portal?")) {
-                sessionStorage.removeItem(window.ADMIN_AUTH_KEY);
-                window.checkAdminAuth();
-            }
-        };
-
-        // Check auth on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', function() {
-            window.checkAdminAuth();
-        });
-    </script>
-
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
@@ -503,38 +325,43 @@
                 </div>
             </div>
 
-                        <!-- LOGIN TERMINAL CONTAINER (Revealed with Golden Light after Ribbon Pull) -->
+            <!-- LOGIN TERMINAL CONTAINER (Revealed with Golden Light after Ribbon Pull) -->
             <div id="lampLoginFieldsContainer" class="hidden transition-all duration-700 space-y-3.5 text-left p-4 rounded-2xl bg-slate-950/90 border-2 border-amber-400/60 shadow-[0_0_35px_rgba(251,191,36,0.3)]">
                 
-                <!-- Radiant Golden Top Header with Admin Fast Fill -->
+                <!-- Radiant Golden Badge -->
                 <div class="flex items-center justify-between pb-2 border-b border-amber-500/30">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                        <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Terminal Ready</span>
+                        <span class="text-xs font-bold text-amber-300 uppercase tracking-wider">Terminal Illuminated</span>
                     </div>
-                    <!-- Admin Fast Auto-Fill (Discreet & Protected) -->
-                    <button type="button" onclick="window.autoFillAdminCredentials()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-400/40 text-[10px] font-bold rounded-lg transition-all shadow-sm active:scale-95" title="Admin Fast Auto Fill">
-                        <i class="fa-solid fa-key mr-1"></i> Fast Auto-Fill
+                    <button type="button" onclick="window.autoFillAdminCredentials()" class="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-[10px] font-black rounded-lg transition-all shadow-md active:scale-95">
+                        <i class="fa-solid fa-bolt mr-1"></i> 1-Click Auto Fill
                     </button>
                 </div>
 
+                <!-- Credentials hint -->
+                <div class="bg-amber-950/30 border border-amber-500/30 rounded-xl px-3 py-1.5 text-[11px] font-mono text-amber-200 flex justify-between">
+                    <span>User: <b class="text-white">admin</b></span>
+                    <span>Pass: <b class="text-white">admin@ccs</b></span>
+                </div>
+
                 <form onsubmit="window.handleAdminLogin(event)" class="space-y-3 pt-1">
-                    <!-- Username Input (Clean & Secret) -->
+                    <!-- Username Input -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
                         <div class="relative">
                             <i class="fa-solid fa-user-shield absolute left-3.5 top-3 text-amber-400 text-xs"></i>
-                            <input type="text" id="adminAuthUserInput" required placeholder="Enter username" 
+                            <input type="text" id="adminAuthUserInput" required placeholder="admin" value="admin"
                                 class="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-amber-500/40 rounded-xl text-xs text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all font-medium">
                         </div>
                     </div>
 
-                    <!-- Password Input (Clean & Masked) -->
+                    <!-- Password Input -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Secret Password</label>
                         <div class="relative">
                             <i class="fa-solid fa-lock absolute left-3.5 top-3 text-amber-400 text-xs"></i>
-                            <input type="password" id="adminAuthPassInput" required placeholder="••••••••" 
+                            <input type="password" id="adminAuthPassInput" required placeholder="admin@ccs" value="admin@ccs"
                                 class="w-full pl-9 pr-10 py-2.5 bg-slate-900 border border-amber-500/40 rounded-xl text-xs text-white tracking-widest focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all font-medium">
                             <button type="button" onclick="window.toggleAuthPassVisibility('adminAuthPassInput', this)" class="absolute right-3 top-2.5 text-slate-400 hover:text-amber-300 text-xs p-1 transition-colors" title="Toggle Password View">
                                 <i class="fa-solid fa-eye"></i>
@@ -1197,8 +1024,7 @@
                 </div>
             </div>
 
-            <!-- Marks Entry Filter Bar with Section & Alphabetical / Roll No Sorting -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Select Exam *</label>
                     <select id="me_examSelect" onchange="window.onExamOrClassChange()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500"></select>
@@ -1212,24 +1038,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">3. Select Section *</label>
-                    <select id="me_sectionSelect" onchange="window.loadSubjectMarksTable()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500">
-                        <option value="ALL">⭐ All Sections</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-indigo-400 mb-1.5">4. Select Subject *</label>
+                    <label class="block text-xs font-bold text-indigo-400 mb-1.5">3. Select Subject *</label>
                     <select id="me_subjectSelect" onchange="window.loadSubjectMarksTable()" class="w-full px-3.5 py-2.5 bg-indigo-950/60 border border-indigo-500/50 rounded-xl text-xs text-white font-bold focus:ring-2 focus:ring-indigo-500"></select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">5. Student Sort Order</label>
-                    <select id="me_sortSelect" onchange="window.loadSubjectMarksTable()" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-200 focus:ring-2 focus:ring-indigo-500">
-                        <option value="roll_asc">🔢 Roll No (1, 2, 3...)</option>
-                        <option value="name_asc">🔤 Name (A to Z Alphabetical)</option>
-                        <option value="section_asc">🏛️ By Section Name</option>
-                    </select>
                 </div>
             </div>
 
@@ -1731,30 +1541,6 @@
                 </div>
             </div>
 
-            <!-- Overall Exam Institutional GPA Banner -->
-            <div class="no-print bg-gradient-to-r from-indigo-950/80 via-slate-900 to-purple-950/80 border border-indigo-500/40 rounded-3xl p-5 mb-6 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-400 text-xl shadow-lg">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                    </div>
-                    <div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-300 block">Institutional Academic Index</span>
-                        <h3 class="text-base font-black text-white">Overall Exam Institutional GPA (All Subjects Cumulative)</h3>
-                    </div>
-                </div>
-                <div class="flex items-center gap-6 bg-slate-950/70 border border-indigo-500/30 px-6 py-2.5 rounded-2xl">
-                    <div class="text-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Grand Exam GPA (4.0)</span>
-                        <span id="tp_grandExamGpa" class="text-2xl font-black text-amber-400 font-mono">0.00</span>
-                    </div>
-                    <div class="w-px h-8 bg-slate-800"></div>
-                    <div class="text-center">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Overall Pass Rate</span>
-                        <span id="tp_grandPassRate" class="text-xl font-black text-emerald-400 font-mono">0.0%</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Live Performance KPI Dashboard Cards -->
             <div class="no-print grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
                 <!-- Teacher Profile Card -->
@@ -1883,43 +1669,6 @@
                         </thead>
                         <tbody id="tp_studentTableBody" class="divide-y divide-slate-800 text-slate-300">
                             <!-- Populated Dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            
-            <!-- PRINCIPAL'S MASTER RANKED TEACHER LEADERBOARD TABLE (Sorted by Highest GPA Descending) -->
-            <div class="no-print bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl mb-8">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-slate-800">
-                    <div>
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-ranking-star text-amber-400"></i> Principal's Teacher Performance Leaderboard (Ranked by GPA)
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Automated Faculty Ranking Table — Highest GPA on top with Gold 🥇, Silver 🥈 & Bronze 🥉 Honors</p>
-                    </div>
-                    <button type="button" onclick="window.printAllTeachersMasterSummary()" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-600/30 flex items-center gap-1.5 transition-all">
-                        <i class="fa-solid fa-print"></i> Print Executive Leaderboard
-                    </button>
-                </div>
-
-                <div class="overflow-x-auto rounded-2xl border border-slate-800">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
-                            <tr>
-                                <th class="py-3 px-3.5 text-center w-14">Rank</th>
-                                <th class="py-3 px-4">Faculty Teacher Name</th>
-                                <th class="py-3 px-4">Subject</th>
-                                <th class="py-3 px-4 text-center">Class & Section</th>
-                                <th class="py-3 px-4 text-center">Students</th>
-                                <th class="py-3 px-4 text-center text-amber-400">Subject GPA (4.0)</th>
-                                <th class="py-3 px-4 text-center">Pass Rate (%)</th>
-                                <th class="py-3 px-4 text-center">Average Score</th>
-                                <th class="py-3 px-4 text-center">Performance Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tp_leaderboardTableBody" class="divide-y divide-slate-800/80 text-slate-200">
-                            <!-- Populated Dynamically with Ranked Teachers -->
                         </tbody>
                     </table>
                 </div>
@@ -2404,20 +2153,6 @@
                     opt.textContent = c;
                     if (c === cur) opt.selected = true;
                     dsClass.appendChild(opt);
-                });
-            }
-
-                        // 5b. Marks Entry Section Select
-            const meSec = document.getElementById('me_sectionSelect');
-            if (meSec) {
-                const cur = meSec.value || "ALL";
-                meSec.innerHTML = '<option value="ALL">⭐ All Sections</option>';
-                sections.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s;
-                    opt.textContent = `Section ${s}`;
-                    if (s === cur) opt.selected = true;
-                    meSec.appendChild(opt);
                 });
             }
 
@@ -3646,173 +3381,375 @@
             window.loadSubjectMarksTable();
         };
 
-        
         window.loadSubjectMarksTable = function() {
-            try {
-                const examSelect = document.getElementById('me_examSelect');
-                const classSelect = document.getElementById('me_classSelect');
-                const secSelect = document.getElementById('me_sectionSelect');
-                const subSelect = document.getElementById('me_subjectSelect');
-                const sortSelect = document.getElementById('me_sortSelect');
-                const tbody = document.getElementById('subjectMarksTableBody');
-                
-                if (!examSelect || !classSelect || !subSelect || !tbody) return;
+            const examSelect = document.getElementById('me_examSelect');
+            const classSelect = document.getElementById('me_classSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
+            const tbody = document.getElementById('subjectMarksTableBody');
+            
+            if (!examSelect || !classSelect || !subSelect || !tbody) return;
 
-                const examId = examSelect.value;
-                const selectedClass = classSelect.value;
-                const selectedSection = secSelect ? secSelect.value : 'ALL';
-                const selectedSubject = subSelect.value;
-                const selectedSort = sortSelect ? sortSelect.value : 'roll_asc';
-                tbody.innerHTML = '';
+            const examId = examSelect.value;
+            const selectedClass = classSelect.value;
+            const selectedSubject = subSelect.value;
+            tbody.innerHTML = '';
 
-                const exam = examsSetupList.find(e => e.id === examId);
-                if (!exam) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-500">Please define an Exam first in Exam Setup tab.</td></tr>';
-                    return;
-                }
+            const exam = examsSetupList.find(e => e.id === examId);
+            if (!exam) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-500">Please define an Exam first in Exam Setup tab.</td></tr>';
+                return;
+            }
 
-                const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
-                const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
-                const maxMarks = Number(subObj.marks || 100);
-                
-                const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
-                const isLocked = Boolean(marksLocksDatabase[lockKey]);
+            const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
+            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+            
+            const lockKey = `${examId}_${selectedClass}_${selectedSubject}`;
+            const isLocked = Boolean(marksLocksDatabase[lockKey]);
 
-                const badgeEl = document.getElementById('activeSubjectBadge');
-                const thMaxEl = document.getElementById('thMaxMarks');
-                if (badgeEl) {
-                    const lockHtml = isLocked 
-                        ? ` <span class="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg text-[10px] ml-2 font-bold"><i class="fa-solid fa-lock mr-1"></i>Locked for Teachers</span> <button type="button" onclick="window.toggleMarksLock()" class="ml-2 px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition-all">🔓 Unlock</button>`
-                        : ` <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg text-[10px] ml-2 font-bold"><i class="fa-solid fa-lock-open mr-1"></i>Open</span> <button type="button" onclick="window.toggleMarksLock()" class="ml-2 px-2 py-0.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold transition-all">🔒 Lock</button>`;
-                    badgeEl.innerHTML = `${subObj.name} (Max: ${maxMarks} Marks)${lockHtml}`;
-                }
-                if (thMaxEl) thMaxEl.textContent = `(Max: ${maxMarks})`;
+            const badgeEl = document.getElementById('activeSubjectBadge');
+            const thMaxEl = document.getElementById('thMaxMarks');
+            if (badgeEl) {
+                const lockHtml = isLocked 
+                    ? ` <span class="bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-lg text-[10px] ml-2 font-bold"><i class="fa-solid fa-lock mr-1"></i>Locked for Teachers</span> <button type="button" onclick="window.toggleMarksLock()" class="ml-2 px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition-all">🔓 Unlock</button>`
+                    : ` <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-lg text-[10px] ml-2 font-bold"><i class="fa-solid fa-lock-open mr-1"></i>Open</span> <button type="button" onclick="window.toggleMarksLock()" class="ml-2 px-2 py-0.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold transition-all">🔒 Lock</button>`;
+                badgeEl.innerHTML = `${subObj.name} (Max: ${subObj.marks} Marks)${lockHtml}`;
+            }
+            if (thMaxEl) thMaxEl.textContent = `(Max: ${subObj.marks})`;
 
-                // Filter students by class and section
-                let classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
-                if (selectedSection && selectedSection !== 'ALL') {
-                    classStudents = classStudents.filter(s => s.group === selectedSection);
-                }
+            const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
 
-                if (classStudents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}${selectedSection !== 'ALL' ? ' - Section ' + selectedSection : ''}".</td></tr>`;
-                    return;
-                }
+            if (classStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-medium">No active students found in "${selectedClass}". Please add students in Student Enrollment first!</td></tr>`;
+                return;
+            }
 
-                // Sort students
-                if (selectedSort === 'name_asc') {
-                    classStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                } else if (selectedSort === 'section_asc') {
-                    classStudents.sort((a, b) => (a.group || '').localeCompare(b.group || '') || (parseInt(a.rollNo) || 0) - (parseInt(b.rollNo) || 0));
+            classStudents.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+
+                const key = `${examId}_${s.rollNo}`;
+                const savedVal = (marksDatabase[key] && marksDatabase[key][selectedSubject] !== undefined) ? marksDatabase[key][selectedSubject] : '';
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
+                    <td class="py-2.5 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
+                    <td class="py-2.5 px-4 font-bold text-white">${s.name}</td>
+                    <td class="py-2.5 px-4 text-slate-400">${s.father}</td>
+                    <td class="py-2 px-4 text-center">
+                        <input type="text" placeholder="0-${subObj.marks} / A / L"
+                            value="${savedVal}"
+                            data-roll="${s.rollNo}" 
+                            data-index="${idx}"
+                            oninput="this.value = this.value.toUpperCase()"
+                            onkeydown="window.handleMarksEnterKey(event, ${idx})"
+                            class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.handleMarksEnterKey = function(event, currentIndex) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const inputs = document.querySelectorAll('.marks-input-single');
+                if (currentIndex + 1 < inputs.length) {
+                    inputs[currentIndex + 1].focus();
+                    inputs[currentIndex + 1].select();
                 } else {
-                    // Roll No numeric ascending
-                    classStudents.sort((a, b) => (parseInt(a.rollNo) || 0) - (parseInt(b.rollNo) || 0));
+                    window.saveCurrentSubjectMarks();
                 }
-
-                classStudents.forEach((s, idx) => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-800/40 transition-colors";
-
-                    const key = `${examId}_${s.rollNo}`;
-                    let savedVal = '';
-                    if (marksDatabase[key] && marksDatabase[key][selectedSubject] !== undefined) {
-                        savedVal = marksDatabase[key][selectedSubject];
-                    } else if (marksDatabase[s.id] && marksDatabase[s.id][examId] && marksDatabase[s.id][examId][selectedSubject] !== undefined) {
-                        savedVal = marksDatabase[s.id][examId][selectedSubject];
-                    }
-
-                    tr.innerHTML = `
-                        <td class="py-2.5 px-4 text-center font-bold text-slate-400">${idx + 1}</td>
-                        <td class="py-2.5 px-4 font-mono font-bold text-indigo-400">${s.rollNo}</td>
-                        <td class="py-2.5 px-4 font-bold text-white uppercase">${s.name}</td>
-                        <td class="py-2.5 px-4 text-slate-400 uppercase">${s.father}</td>
-                        <td class="py-2.5 px-4 text-slate-300 font-semibold text-xs"><span class="bg-slate-800 px-2 py-0.5 rounded border border-slate-700">${s.group || 'General'}</span></td>
-                        <td class="py-2 px-4 text-center">
-                            <input type="text" placeholder="0-${maxMarks} / A / L"
-                                value="${savedVal}"
-                                data-roll="${s.rollNo}" 
-                                data-id="${s.id}"
-                                data-index="${idx}"
-                                oninput="window.handleMarksInput(this, ${maxMarks})"
-                                onkeydown="window.handleMarksEnterKey(event, ${idx})"
-                                class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch(e) {
-                console.error("loadSubjectMarksTable error:", e);
             }
         };
 
         window.saveCurrentSubjectMarks = function() {
-            try {
-                const examSelect = document.getElementById('me_examSelect');
-                const subSelect = document.getElementById('me_subjectSelect');
+            const examSelect = document.getElementById('me_examSelect');
+            const subSelect = document.getElementById('me_subjectSelect');
 
-                if (!examSelect || !subSelect) return;
+            if (!examSelect || !subSelect) return;
+
+            const examId = examSelect.value;
+            const selectedSubject = subSelect.value;
+
+            if (!examId || !selectedSubject) {
+                alert('Please select an examination and subject!');
+                return;
+            }
+
+            const inputs = document.querySelectorAll('.marks-input-single');
+            if (inputs.length === 0) {
+                alert('No student marks to save!');
+                return;
+            }
+
+            inputs.forEach(input => {
+                const rollNo = input.getAttribute('data-roll');
+                const val = input.value.trim().toUpperCase();
+
+                const key = `${examId}_${rollNo}`;
+                if (!marksDatabase[key]) {
+                    marksDatabase[key] = {};
+                }
+
+                if (val !== '') {
+                    if (val === 'A' || val === 'ABSENT') {
+                        marksDatabase[key][selectedSubject] = 'A';
+                    } else if (val === 'L' || val === 'LEAVE') {
+                        marksDatabase[key][selectedSubject] = 'L';
+                    } else {
+                        const parsed = parseInt(val);
+                        marksDatabase[key][selectedSubject] = isNaN(parsed) ? 0 : Math.min(parsed, subObj.marks || 100);
+                    }
+                } else {
+                    delete marksDatabase[key][selectedSubject];
+                }
+            });
+
+            localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
+            window.syncCloud('marks', marksDatabase);
+            window.renderSubjectProgressTracker();
+            alert(`Success: Marks for "${selectedSubject}" saved successfully!`);
+        };
+
+        // ================= TAB 6: CONSOLIDATIVE RESULT SHEET LOGIC =================
+        window.generateConsolidatedSheet = function(blankMode = false) {
+            try {
+                window.isBlankMode = blankMode;
+                const examSelect = document.getElementById('cr_examSelect');
+                const classSelect = document.getElementById('cr_classSelect');
+                const passSelect = document.getElementById('cr_passPct');
+
+                if (!examSelect || !classSelect || !passSelect) return;
 
                 const examId = examSelect.value;
-                const selectedSubject = subSelect.value;
+                const selectedClass = classSelect.value;
+                const passCriteria = parseInt(passSelect.value) || 33;
 
-                if (!examId || !selectedSubject) {
-                    alert('Please select an examination and subject!');
-                    return;
-                }
+                const thead = document.getElementById('consolidatedTableHead');
+                const tbody = document.getElementById('consolidatedTableBody');
+                const docTitle = document.getElementById('cr_docTitle');
+
+                if (!thead || !tbody) return;
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
 
                 const exam = examsSetupList.find(e => e.id === examId);
-                const subjects = (exam && Array.isArray(exam.subjects)) ? exam.subjects : [];
-                const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
-                const maxMarks = Number(subObj.marks || 100);
-
-                const inputs = document.querySelectorAll('.marks-input-single');
-                if (inputs.length === 0) {
-                    alert('No student marks to save!');
+                if (!exam) {
+                    tbody.innerHTML = '<tr><td colspan="12" class="text-center py-6 text-slate-500">Please define an Exam first in Exam Setup tab.</td></tr>';
                     return;
                 }
 
-                inputs.forEach(input => {
-                    const rollNo = input.getAttribute('data-roll');
-                    const stId = input.getAttribute('data-id');
-                    let val = input.value.trim().toUpperCase();
+                document.getElementById('cr_printExamTitle').textContent = exam.name;
+                document.getElementById('cr_printClassTitle').textContent = selectedClass;
+                document.getElementById('cr_printDate').textContent = new Date().toLocaleDateString('en-GB');
 
-                    const key = `${examId}_${rollNo}`;
-                    if (!marksDatabase[key]) {
-                        marksDatabase[key] = {};
-                    }
+                if (blankMode) {
+                    docTitle.textContent = "BLANK MASTER MARKS AWARD LIST (TEACHER EVALUATION SHEET)";
+                } else {
+                    docTitle.textContent = "CONSOLIDATIVE RESULT SHEET";
+                }
 
-                    if (val !== '') {
-                        if (val === 'A' || val === 'ABSENT') {
-                            marksDatabase[key][selectedSubject] = 'A';
-                        } else if (val === 'L' || val === 'LEAVE') {
-                            marksDatabase[key][selectedSubject] = 'L';
-                        } else {
-                            let parsed = parseFloat(val);
-                            if (isNaN(parsed) || parsed < 0) parsed = 0;
-                            if (parsed > maxMarks) parsed = maxMarks;
-                            marksDatabase[key][selectedSubject] = parsed;
-                        }
+                const subjects = Array.isArray(exam.subjects) ? exam.subjects : [];
+
+                let headHtml = `
+                    <tr>
+                        <th class="py-2.5 px-2 text-center w-10">Sr #</th>
+                        <th class="py-2.5 px-2 w-16">Roll No</th>
+                        <th class="py-2.5 px-3">Student Name</th>
+                        <th class="py-2.5 px-3">Father Name</th>
+                `;
+                subjects.forEach(sub => {
+                    headHtml += `<th class="py-2.5 px-2 text-center min-w-[70px]">${sub.name} <span class="block text-[9px] text-slate-500">(${sub.marks})</span></th>`;
+                });
+
+                if (blankMode) {
+                    headHtml += `
+                        <th class="py-2.5 px-2 text-center min-w-[80px]">Total Obt</th>
+                        <th class="py-2.5 px-2 text-center min-w-[80px]">Teacher Sign</th>
+                    </tr>`;
+                } else {
+                    headHtml += `
+                        <th class="py-2.5 px-2 text-center">Total</th>
+                        <th class="py-2.5 px-2 text-center">Obt</th>
+                        <th class="py-2.5 px-2 text-center">%</th>
+                        <th class="py-2.5 px-2 text-center">Grade</th>
+                        <th class="py-2.5 px-2 text-center">Status</th>
+                        <th class="py-2.5 px-2 text-center">Position</th>
+                    </tr>`;
+                }
+                thead.innerHTML = headHtml;
+
+                const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+
+                if (classStudents.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="${10 + subjects.length}" class="text-center py-6 text-slate-500 font-medium">No active students enrolled in "${selectedClass}".</td></tr>`;
+                    window.updateConsolidatedStats(0, 0, 0, 0, "-");
+                    return;
+                }
+
+                const totalMaxMarks = subjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
+                let studentResults = [];
+
+                classStudents.forEach((s, idx) => {
+                    if (blankMode) {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 h-8";
+
+                        let rowHtml = `
+                            <td class="py-2 px-2 text-center font-bold">${idx + 1}</td>
+                            <td class="py-2 px-2 font-mono font-bold text-slate-900">${s.rollNo}</td>
+                            <td class="py-2 px-3 font-bold text-slate-900">${s.name}</td>
+                            <td class="py-2 px-3 text-slate-700">${s.father}</td>
+                        `;
+
+                        subjects.forEach(() => {
+                            rowHtml += `<td class="py-2 px-2 text-center border-slate-300"></td>`;
+                        });
+
+                        rowHtml += `
+                            <td class="py-2 px-2 text-center border-slate-300"></td>
+                            <td class="py-2 px-2 text-center border-slate-300"></td>
+                        `;
+                        tr.innerHTML = rowHtml;
+                        tbody.appendChild(tr);
                     } else {
-                        delete marksDatabase[key][selectedSubject];
-                    }
+                        const key = `${examId}_${s.rollNo}`;
+                        const savedMarks = marksDatabase[key] || {};
 
-                    // Also mirror into student ID key if needed
-                    if (stId) {
-                        const idKey = `${examId}_${stId}`;
-                        if (!marksDatabase[idKey]) marksDatabase[idKey] = {};
-                        if (marksDatabase[key][selectedSubject] !== undefined) {
-                            marksDatabase[idKey][selectedSubject] = marksDatabase[key][selectedSubject];
-                        }
+                        let totalObt = 0;
+                        let isSubjectFail = false;
+                        let hasMarks = false;
+                        let subMarksMap = {};
+
+                        subjects.forEach(sub => {
+                            const rawVal = savedMarks[sub.name];
+                            let obt = 0;
+                            const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+
+                            if (rawVal !== undefined && rawVal !== '') {
+                                hasMarks = true;
+                                if (rawVal === 'A' || rawVal === 'Absent') {
+                                    isSubjectFail = true;
+                                    subMarksMap[sub.name] = 'A';
+                                } else if (rawVal === 'L' || rawVal === 'Leave') {
+                                    isSubjectFail = true;
+                                    subMarksMap[sub.name] = 'L';
+                                } else {
+                                    obt = parseInt(rawVal) || 0;
+                                    totalObt += obt;
+                                    subMarksMap[sub.name] = obt;
+                                    if (obt < subPassMin) {
+                                        isSubjectFail = true;
+                                    }
+                                }
+                            } else {
+                                subMarksMap[sub.name] = '-';
+                            }
+                        });
+
+                        const percentage = totalMaxMarks > 0 ? parseFloat(((totalObt / totalMaxMarks) * 100).toFixed(1)) : 0;
+
+                        let grade = 'F';
+                        if (percentage >= 80) grade = 'A+';
+                        else if (percentage >= 70) grade = 'A';
+                        else if (percentage >= 60) grade = 'B';
+                        else if (percentage >= 50) grade = 'C';
+                        else if (percentage >= 40) grade = 'D';
+                        else grade = 'E';
+
+                        const isPass = hasMarks && !isSubjectFail && percentage >= passCriteria;
+                        if (!isPass) grade = 'F';
+
+                        studentResults.push({
+                            rollNo: s.rollNo,
+                            name: s.name,
+                            father: s.father,
+                            subMarksMap,
+                            totalMaxMarks,
+                            totalObt,
+                            percentage,
+                            grade,
+                            status: isPass ? 'PASS' : 'FAIL',
+                            hasMarks
+                        });
                     }
                 });
 
-                localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
-                window.syncCloud('marks', marksDatabase);
-                window.renderSubjectProgressTracker();
-                alert(`Success: Marks for "${selectedSubject}" saved successfully and synced to cloud!`);
-            } catch(e) {
-                console.error("saveCurrentSubjectMarks error:", e);
-                alert("Error saving marks: " + e.message);
+                if (!blankMode) {
+                    const passedStudents = studentResults.filter(s => s.status === 'PASS').sort((a, b) => b.totalObt - a.totalObt);
+
+                    passedStudents.forEach((s, idx) => {
+                        if (idx === 0) s.position = '1st 🥇';
+                        else if (idx === 1) s.position = '2nd 🥈';
+                        else if (idx === 2) s.position = '3rd 🥉';
+                        else s.position = `${idx + 1}th`;
+                    });
+
+                    studentResults.forEach(s => {
+                        if (s.status !== 'PASS') s.position = '-';
+                    });
+
+                    currentConsolidatedRows = studentResults;
+
+                    let passedCount = 0;
+                    let failedCount = 0;
+
+                    studentResults.forEach((s, idx) => {
+                        if (s.status === 'PASS') passedCount++; else failedCount++;
+
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50";
+
+                        let rowHtml = `
+                            <td class="py-2 px-2 text-center font-bold">${idx + 1}</td>
+                            <td class="py-2 px-2 font-mono font-bold text-slate-900">${s.rollNo}</td>
+                            <td class="py-2 px-3 font-bold text-slate-900">${s.name}</td>
+                            <td class="py-2 px-3 text-slate-700">${s.father}</td>
+                        `;
+
+                        subjects.forEach(sub => {
+                            const val = s.subMarksMap[sub.name];
+                            let markHtml = `<span class="text-slate-400">-</span>`;
+                            if (val === 'A' || val === 'Absent') {
+                                markHtml = `<span class="text-rose-600 font-black bg-rose-50 px-1.5 py-0.5 rounded text-[10px] border border-rose-200">A</span>`;
+                            } else if (val === 'L' || val === 'Leave') {
+                                markHtml = `<span class="text-amber-600 font-black bg-amber-50 px-1.5 py-0.5 rounded text-[10px] border border-amber-200">L</span>`;
+                            } else if (val !== '-') {
+                                const subPassMin = (parseInt(sub.marks) * passCriteria) / 100;
+                                const isSubPass = parseInt(val) >= subPassMin;
+                                const markColor = isSubPass ? 'text-slate-900 font-semibold' : 'text-rose-600 font-bold';
+                                markHtml = `<span class="${markColor}">${val}</span>`;
+                            }
+                            rowHtml += `<td class="py-2 px-2 text-center">${markHtml}</td>`;
+                        });
+
+                        rowHtml += `
+                            <td class="py-2 px-2 text-center font-bold text-slate-700">${s.totalMaxMarks}</td>
+                            <td class="py-2 px-2 text-center font-bold text-slate-950 font-mono">${s.totalObt}</td>
+                            <td class="py-2 px-2 text-center font-bold ${s.status === 'PASS' ? 'text-indigo-600' : 'text-rose-600'}">${s.percentage}%</td>
+                            <td class="py-2 px-2 text-center font-black ${s.grade === 'A+' || s.grade === 'A' ? 'text-emerald-600' : (s.grade === 'F' ? 'text-rose-600' : 'text-indigo-600')}">${s.grade}</td>
+                            <td class="py-2 px-2 text-center">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${s.status === 'PASS' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                    ${s.status}
+                                </span>
+                            </td>
+                            <td class="py-2 px-2 text-center font-black text-amber-600">${s.position}</td>
+                        `;
+
+                        tr.innerHTML = rowHtml;
+                        tbody.appendChild(tr);
+                    });
+
+                    const totalAppeared = studentResults.length;
+                    const overallPassPct = totalAppeared > 0 ? ((passedCount / totalAppeared) * 100).toFixed(1) : 0;
+                    const topStudent = passedStudents.length > 0 ? `${passedStudents[0].name} (${passedStudents[0].totalObt})` : "-";
+
+                    window.updateConsolidatedStats(totalAppeared, passedCount, failedCount, overallPassPct, topStudent);
+                } else {
+                    window.updateConsolidatedStats(classStudents.length, "-", "-", "-", "-");
+                }
+            } catch (e) {
+                console.error("Error in generateConsolidatedSheet:", e);
             }
         };
 
@@ -5320,8 +5257,7 @@
                 console.error("Error in loadTeacherProgressData:", e);
             }
         };
-
-        window.renderTeacherProgressReport = function() {
+window.renderTeacherProgressReport = function() {
             try {
                 const examSelect = document.getElementById('tp_examSelect');
                 const classSelect = document.getElementById('tp_classSelect');
@@ -5340,7 +5276,7 @@
                 const maxMarks = subObj ? Number(subObj.marks || 100) : 100;
 
                 const allocKey = `${cls}_${sec}_${subName}`;
-                const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Member';
+                const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Incharge';
 
                 // DOM Card Elements
                 const cardTeacher = document.getElementById('tp_cardTeacherName');
@@ -5373,7 +5309,6 @@
                         tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-500 font-semibold">No students or marks found for selected filters.</td></tr>';
                     }
                     window.drawBellCurveChart([], maxMarks, 0, 0);
-                    window.renderPrincipalLeaderboard(examId);
                     return;
                 }
 
@@ -5388,16 +5323,16 @@
                 let gradeCounts = { 'A+': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
 
                 activeStudents.forEach((st, idx) => {
-                    // UNIVERSAL RELIABLE MARKS LOOKUP
-                    const rawVal = window.getStudentSubjectMarks(examId, st, subName);
+                    const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
+                    const rawVal = stMarks[subName];
                     let displayMarks = "-";
                     let pct = 0;
                     let gpaObj = { grade: 'F', gpa: 0.00, desc: 'Fail' };
                     let isAppeared = false;
 
-                    if (rawVal === 'A' || rawVal === 'a' || rawVal === 'ABSENT') {
+                    if (rawVal === 'A' || rawVal === 'a') {
                         displayMarks = "Absent (A)";
-                    } else if (rawVal === 'L' || rawVal === 'l' || rawVal === 'LEAVE') {
+                    } else if (rawVal === 'L' || rawVal === 'l') {
                         displayMarks = "Leave (L)";
                     } else if (rawVal !== undefined && rawVal !== null && rawVal !== '') {
                         const numVal = Number(rawVal);
@@ -5439,7 +5374,7 @@
                             <td class="py-2.5 px-3 text-center">
                                 <span class="px-2 py-0.5 rounded-lg text-xs font-black ${gradeColor}">${isAppeared ? gpaObj.grade : '-'}</span>
                             </td>
-                            <td class="py-2.5 px-3 text-center font-bold font-mono text-teal-400">${isAppeared ? gpaObj.gpa.toFixed(2) : '-'}</td>
+                            <td class="py-2.5 px-3 text-center font-bold font-mono text-indigo-400">${isAppeared ? gpaObj.gpa.toFixed(2) : '-'}</td>
                         `;
                         tableBody.appendChild(tr);
                     }
@@ -5476,140 +5411,8 @@
                 // Draw Bell Curve
                 window.drawBellCurveChart(marksList, maxMarks, meanScore, stdDev);
 
-                // Render Principal Leaderboard & Grand Exam Cumulative GPA
-                window.renderPrincipalLeaderboard(examId);
-
             } catch(e) {
                 console.error("Error in renderTeacherProgressReport:", e);
-            }
-        };
-
-        window.renderPrincipalLeaderboard = function(examId) {
-            try {
-                const exam = examsSetupList.find(e => e.id === examId);
-                const tbody = document.getElementById('tp_leaderboardTableBody');
-                const grandGpaEl = document.getElementById('tp_grandExamGpa');
-                const grandPassEl = document.getElementById('tp_grandPassRate');
-
-                if (!exam || !tbody) return;
-                tbody.innerHTML = '';
-
-                const teacherRows = [];
-                let grandTotalGpa = 0;
-                let grandAppearedCount = 0;
-                let grandPassedCount = 0;
-
-                masterClassesList.forEach(cls => {
-                    masterSectionsList.forEach(sec => {
-                        const classSecStudents = studentsList.filter(s => s.class === cls && s.group === sec && (s.status || 'Active') !== 'Left');
-                        if (classSecStudents.length === 0) return;
-
-                        (exam.subjects || []).forEach(sub => {
-                            const allocKey = `${cls}_${sec}_${sub.name}`;
-                            const teacherName = teacherAllocDatabase[allocKey] || 'Unassigned';
-                            const maxMarks = Number(sub.marks || 100);
-
-                            let totalGpa = 0;
-                            let passed = 0;
-                            let totalMarks = 0;
-                            let validCount = 0;
-
-                            classSecStudents.forEach(st => {
-                                const raw = window.getStudentSubjectMarks(examId, st, sub.name);
-                                if (raw !== undefined && raw !== null && raw !== '' && raw !== 'A' && raw !== 'L' && raw !== 'ABSENT' && raw !== 'LEAVE') {
-                                    const num = Number(raw);
-                                    if (!isNaN(num)) {
-                                        validCount++;
-                                        totalMarks += num;
-                                        const pct = (num / maxMarks) * 100;
-                                        const gpa = window.calculateGPA4(pct);
-                                        totalGpa += gpa;
-                                        if (pct >= 40) passed++;
-                                    }
-                                }
-                            });
-
-                            if (validCount > 0) {
-                                const avgGPA = totalGpa / validCount;
-                                const passRate = (passed / validCount) * 100;
-                                const avgPct = ((totalMarks / validCount) / maxMarks) * 100;
-
-                                grandTotalGpa += totalGpa;
-                                grandAppearedCount += validCount;
-                                grandPassedCount += passed;
-
-                                teacherRows.push({
-                                    teacher: teacherName,
-                                    subject: sub.name,
-                                    class: cls,
-                                    section: sec,
-                                    students: validCount,
-                                    gpa: avgGPA,
-                                    passRate: passRate,
-                                    avgPct: avgPct
-                                });
-                            }
-                        });
-                    });
-                });
-
-                // Update Grand Institutional GPA
-                if (grandGpaEl) {
-                    const grandGPA = grandAppearedCount > 0 ? (grandTotalGpa / grandAppearedCount) : 0;
-                    grandGpaEl.textContent = grandGPA.toFixed(2);
-                }
-                if (grandPassEl) {
-                    const grandPassRate = grandAppearedCount > 0 ? ((grandPassedCount / grandAppearedCount) * 100) : 0;
-                    grandPassEl.textContent = grandPassRate.toFixed(1) + '%';
-                }
-
-                if (teacherRows.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-500 font-semibold">No teacher performance data found for this examination yet. Enter marks to generate leaderboard!</td></tr>';
-                    return;
-                }
-
-                // SORT DESCENDING BY GPA (Highest GPA on top!)
-                teacherRows.sort((a, b) => b.gpa - a.gpa);
-
-                teacherRows.forEach((r, idx) => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-800/40 transition-colors";
-
-                    let rankBadge = `<span class="font-mono font-bold text-slate-400">#${idx + 1}</span>`;
-                    let rowGlow = "";
-                    let ratingBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">Satisfactory</span>';
-
-                    if (idx === 0) {
-                        rankBadge = '<span class="text-base" title="1st Position - Gold Medalist">🥇 <b class="text-amber-300 font-mono text-xs">1st</b></span>';
-                        rowGlow = "bg-amber-500/5 font-semibold";
-                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/40">⭐ Gold Topper</span>';
-                    } else if (idx === 1) {
-                        rankBadge = '<span class="text-base" title="2nd Position - Silver Medalist">🥈 <b class="text-slate-200 font-mono text-xs">2nd</b></span>';
-                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-300/20 text-slate-200 border border-slate-400/40">🥈 Silver Performer</span>';
-                    } else if (idx === 2) {
-                        rankBadge = '<span class="text-base" title="3rd Position - Bronze Medalist">🥉 <b class="text-amber-600 font-mono text-xs">3rd</b></span>';
-                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-700/20 text-amber-400 border border-amber-600/40">🥉 Bronze Performer</span>';
-                    } else if (r.gpa >= 3.5) {
-                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Excellent Track</span>';
-                    } else if (r.gpa < 2.0) {
-                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">Needs Improvement</span>';
-                    }
-
-                    tr.innerHTML = `
-                        <td class="py-3 px-3.5 text-center">${rankBadge}</td>
-                        <td class="py-3 px-4 font-black text-white uppercase">${r.teacher}</td>
-                        <td class="py-3 px-4 font-bold text-indigo-300 uppercase">${r.subject}</td>
-                        <td class="py-3 px-4 text-center font-semibold text-slate-300">${r.class} — ${r.section}</td>
-                        <td class="py-3 px-4 text-center font-mono text-slate-400">${r.students}</td>
-                        <td class="py-3 px-4 text-center font-black font-mono text-amber-400 text-sm">${r.gpa.toFixed(2)}</td>
-                        <td class="py-3 px-4 text-center font-bold text-emerald-400 font-mono">${r.passRate.toFixed(1)}%</td>
-                        <td class="py-3 px-4 text-center font-mono text-slate-300">${r.avgPct.toFixed(1)}%</td>
-                        <td class="py-3 px-4 text-center">${ratingBadge}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch(e) {
-                console.error("renderPrincipalLeaderboard error:", e);
             }
         };
 
@@ -5752,7 +5555,7 @@
 
                 activeStudents.forEach(st => {
                     const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
-                    const rawVal = window.getStudentSubjectMarks(examId, st, subName);
+                    const rawVal = stMarks[subName];
                     if (rawVal !== undefined && rawVal !== null && rawVal !== '' && rawVal !== 'A' && rawVal !== 'L') {
                         const numVal = Number(rawVal);
                         if (!isNaN(numVal)) {
@@ -5909,7 +5712,6 @@
             }
         };
 
-        
         window.printAllTeachersMasterSummary = function() {
             try {
                 const examSelect = document.getElementById('tp_examSelect');
@@ -5926,20 +5728,144 @@
 
                 // Aggregate stats for all class sections and subjects
                 const teacherRows = [];
-                const subjectAggregates = {};
 
-        // ================= INITIALIZE MASTER ADMIN DASHBOARD ON STARTUP =================
-        try {
-            if (typeof window.initCloudSync === 'function') window.initCloudSync();
-            if (typeof window.refreshAllClassAndSectionDropdowns === 'function') window.refreshAllClassAndSectionDropdowns();
-            if (typeof window.refreshAllExamDropdowns === 'function') window.refreshAllExamDropdowns();
-            if (typeof window.renderStudentsTable === 'function') window.renderStudentsTable();
-            if (typeof window.renderExamsTable === 'function') window.renderExamsTable();
-            if (typeof window.checkAdminAuth === 'function') window.checkAdminAuth();
-            if (typeof window.showTab === 'function') window.showTab('enrollment');
-        } catch(e) {
-            console.error("Dashboard startup initialization error:", e);
-        }
-    </script>
+                masterClassesList.forEach(cls => {
+                    masterSectionsList.forEach(sec => {
+                        const classSecStudents = studentsList.filter(s => s.class === cls && s.group === sec && (s.status || 'Active') !== 'Left');
+                        if (classSecStudents.length === 0) return;
+
+                        exam.subjects.forEach(sub => {
+                            const allocKey = `${cls}_${sec}_${sub.name}`;
+                            const teacherName = teacherAllocDatabase[allocKey] || 'Unassigned';
+                            const maxMarks = Number(sub.marks || 100);
+
+                            let totalGpa = 0;
+                            let passed = 0;
+                            let totalMarks = 0;
+                            let validCount = 0;
+
+                            classSecStudents.forEach(st => {
+                                const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
+                                const raw = stMarks[sub.name];
+                                if (raw !== undefined && raw !== null && raw !== '' && raw !== 'A' && raw !== 'L') {
+                                    const num = Number(raw);
+                                    if (!isNaN(num)) {
+                                        validCount++;
+                                        totalMarks += num;
+                                        const pct = (num / maxMarks) * 100;
+                                        const gpa = window.calculateGPA4(pct);
+                                        totalGpa += gpa;
+                                        if (pct >= 40) passed++;
+                                    }
+                                }
+                            });
+
+                            if (validCount > 0) {
+                                const avgGPA = totalGpa / validCount;
+                                const passRate = (passed / validCount) * 100;
+                                const avgPct = ((totalMarks / validCount) / maxMarks) * 100;
+
+                                teacherRows.push({
+                                    teacher: teacherName,
+                                    subject: sub.name,
+                                    class: cls,
+                                    section: sec,
+                                    students: validCount,
+                                    gpa: avgGPA,
+                                    passRate: passRate,
+                                    avgPct: avgPct
+                                });
+                            }
+                        });
+                    });
+                });
+
+                // Sort by GPA descending
+                teacherRows.sort((a, b) => b.gpa - a.gpa);
+
+                let rowsHtml = '';
+                teacherRows.forEach((r, idx) => {
+                    rowsHtml += `
+                        <tr>
+                            <td class="text-center font-bold">${idx + 1}</td>
+                            <td class="font-bold text-slate-900 uppercase">${r.teacher}</td>
+                            <td class="font-bold uppercase">${r.subject}</td>
+                            <td class="text-center">${r.class} — ${r.section}</td>
+                            <td class="text-center">${r.students}</td>
+                            <td class="text-center font-bold font-mono text-emerald-700">${r.gpa.toFixed(2)}</td>
+                            <td class="text-center font-bold">${r.passRate.toFixed(1)}%</td>
+                            <td class="text-center font-bold">${r.avgPct.toFixed(1)}%</td>
+                        </tr>
+                    `;
+                });
+
+                printContainer.innerHTML = `
+                    <div class="print-paper bg-white p-6 text-slate-900 border-2 border-slate-900">
+                        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3 mb-4">
+                            <div class="w-14 h-14 flex items-center justify-center">
+                                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <div class="text-center flex-1 px-4">
+                                <h1 class="text-xl font-black uppercase font-royal-title text-slate-950">Chenab College Shorkot</h1>
+                                <p class="text-xs font-bold uppercase tracking-wider text-indigo-950">Faculty Comparative Master Summary (Ranked by Subject GPA)</p>
+                                <p class="text-[10px] text-slate-600 font-semibold">${exam ? exam.name : 'Examination'} — Session 2025-2026</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-white rounded">Executive</span>
+                                <p class="text-[9px] text-slate-500 mt-1">${new Date().toLocaleDateString('en-GB')}</p>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto mb-6">
+                            <table class="print-table w-full text-left text-[9px]">
+                                <thead>
+                                    <tr class="bg-slate-100 font-bold uppercase">
+                                        <th class="py-1 px-2 text-center w-8">Rank</th>
+                                        <th class="py-1 px-2">Teacher Name</th>
+                                        <th class="py-1 px-2">Subject</th>
+                                        <th class="py-1 px-2 text-center">Class & Sec</th>
+                                        <th class="py-1 px-2 text-center">Students</th>
+                                        <th class="py-1 px-2 text-center">Subject GPA (4.0)</th>
+                                        <th class="py-1 px-2 text-center">Pass Rate</th>
+                                        <th class="py-1 px-2 text-center">Class Avg %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml || '<tr><td colspan="8" class="text-center py-4">No data available for this examination.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-between items-end text-[9px] text-slate-950 font-bold pt-4 border-t border-slate-300">
+                            <div class="text-center">
+                                <div class="w-36 border-b border-slate-900 mb-1"></div>
+                                <span>Prepared by Examination Branch</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-36 border-b border-slate-900 mb-1"></div>
+                                <span>Academic Coordinator</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-40 border-b border-slate-900 mb-1"></div>
+                                <span>Principal Official Signature</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                printContainer.classList.remove('hidden');
+                printContainer.classList.add('block');
+                window.print();
+                setTimeout(() => {
+                    printContainer.classList.add('hidden');
+                    printContainer.classList.remove('block');
+                }, 1000);
+
+            } catch(e) {
+                console.error("Error in printAllTeachersMasterSummary:", e);
+            }
+        };
+
+</script>
 </body>
 </html>
