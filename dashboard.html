@@ -3440,13 +3440,29 @@
                             value="${savedVal}"
                             data-roll="${s.rollNo}" 
                             data-index="${idx}"
-                            oninput="this.value = this.value.toUpperCase()"
+                            oninput="window.validateMarksInput(this, ${subObj.marks || 100})"
                             onkeydown="window.handleMarksEnterKey(event, ${idx})"
                             class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        };
+
+        window.validateMarksInput = function(input, maxMarks) {
+            if (!input) return;
+            input.value = input.value.toUpperCase();
+            const val = input.value.trim();
+            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
+                input.classList.remove('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+                return;
+            }
+            const parsed = parseInt(val);
+            if (isNaN(parsed) || parsed < 0 || parsed > maxMarks) {
+                input.classList.add('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+            } else {
+                input.classList.remove('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+            }
         };
 
         window.handleMarksEnterKey = function(event, currentIndex) {
@@ -3476,9 +3492,40 @@
                 return;
             }
 
+            const exam = examsSetupList.find(e => e.id === examId);
+            const subjects = exam ? (exam.subjects || []) : [];
+            const subObj = subjects.find(s => s.name === selectedSubject) || { name: selectedSubject, marks: 100 };
+            const maxAllowed = subObj.marks || 100;
+
             const inputs = document.querySelectorAll('.marks-input-single');
             if (inputs.length === 0) {
                 alert('No student marks to save!');
+                return;
+            }
+
+            // Pre-save check: Strictly reject any marks exceeding maxAllowed or invalid numeric entry
+            let invalidInput = null;
+            let invalidRoll = '';
+            let invalidValue = '';
+
+            for (let input of inputs) {
+                const val = input.value.trim().toUpperCase();
+                if (val !== '' && val !== 'A' && val !== 'ABSENT' && val !== 'L' && val !== 'LEAVE') {
+                    const parsed = parseInt(val);
+                    if (isNaN(parsed) || parsed < 0 || parsed > maxAllowed) {
+                        invalidInput = input;
+                        invalidRoll = input.getAttribute('data-roll') || '';
+                        invalidValue = val;
+                        break;
+                    }
+                }
+            }
+
+            if (invalidInput) {
+                invalidInput.classList.add('border-rose-500', 'bg-rose-950/60', 'text-rose-300', 'ring-2', 'ring-rose-500');
+                invalidInput.focus();
+                invalidInput.select();
+                alert(`⚠️ MARKS ENTRY REJECTED!\n\nRoll No. ${invalidRoll} has entered marks "${invalidValue}" which EXCEEDS the total maximum marks (${maxAllowed}) for "${selectedSubject}"!\n\nPlease correct this entry before saving.`);
                 return;
             }
 
@@ -3498,7 +3545,7 @@
                         marksDatabase[key][selectedSubject] = 'L';
                     } else {
                         const parsed = parseInt(val);
-                        marksDatabase[key][selectedSubject] = isNaN(parsed) ? 0 : Math.min(parsed, subObj.marks || 100);
+                        marksDatabase[key][selectedSubject] = parsed;
                     }
                 } else {
                     delete marksDatabase[key][selectedSubject];
@@ -3508,7 +3555,7 @@
             localStorage.setItem('ccs_marks_database', JSON.stringify(marksDatabase));
             window.syncCloud('marks', marksDatabase);
             window.renderSubjectProgressTracker();
-            alert(`Success: Marks for "${selectedSubject}" saved successfully!`);
+            alert(`🎉 Success: Marks for "${selectedSubject}" saved successfully to Cloud database!`);
         };
 
         // ================= TAB 6: CONSOLIDATIVE RESULT SHEET LOGIC =================
