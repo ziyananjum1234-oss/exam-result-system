@@ -717,6 +717,14 @@
                     </select>
                 </div>
 
+                <div>
+                    <label class="block text-xs font-bold text-indigo-400 mb-1"><i class="fa-solid fa-arrow-down-a-z mr-1"></i>Sort Students By</label>
+                    <select id="filterSort" onchange="window.renderClassWiseList()" class="px-4 py-2.5 bg-indigo-950/40 border border-indigo-500/40 rounded-xl text-xs text-white font-bold focus:ring-2 focus:ring-indigo-500">
+                        <option value="roll">Roll Number Order</option>
+                        <option value="name">Alphabetical Order (A to Z)</option>
+                    </select>
+                </div>
+
                 <div class="ml-auto bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3 text-xs flex items-center gap-4">
                     <span class="text-slate-400">Total (Active): <b id="cw_total" class="text-indigo-400">0</b></span>
                     <span class="text-blue-400">Boys: <b id="cw_boys">0</b></span>
@@ -1128,7 +1136,7 @@
                 </div>
             </div>
 
-            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">1. Select Examination *</label>
                     <select id="cr_examSelect" onchange="window.generateConsolidatedSheet(window.isBlankMode)" class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-indigo-500"></select>
@@ -1148,6 +1156,15 @@
                         <option value="40">40% (Board Standard)</option>
                         <option value="50">50% (High Standard)</option>
                         <option value="60">60% (First Division)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-amber-400 mb-1.5"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>4. Gazette Sort Order</label>
+                    <select id="cr_sortOrder" onchange="window.generateConsolidatedSheet(window.isBlankMode)" class="w-full px-3.5 py-2.5 bg-amber-950/40 border border-amber-500/40 rounded-xl text-xs text-amber-300 font-bold focus:ring-2 focus:ring-amber-500">
+                        <option value="position">Position / Rank Wise (1st, 2nd, 3rd...)</option>
+                        <option value="name">Alphabetical Order (A to Z)</option>
+                        <option value="roll" selected>Roll Number Order</option>
                     </select>
                 </div>
             </div>
@@ -2772,6 +2789,19 @@
             if (selectedClass !== 'All') filtered = filtered.filter(s => s.class === selectedClass);
             if (selectedGroup !== 'All') filtered = filtered.filter(s => s.group === selectedGroup);
 
+            const sortSelect = document.getElementById('filterSort');
+            const sortVal = sortSelect ? sortSelect.value : 'roll';
+
+            if (sortVal === 'name') {
+                filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            } else {
+                filtered.sort((a, b) => {
+                    const rA = parseInt(a.rollNo) || a.rollNo;
+                    const rB = parseInt(b.rollNo) || b.rollNo;
+                    return typeof rA === 'number' && typeof rB === 'number' ? rA - rB : String(rA).localeCompare(String(rB));
+                });
+            }
+
             document.getElementById('printClassTitle').textContent = selectedClass === 'All' ? 'All Classes' : selectedClass;
             document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
 
@@ -3671,12 +3701,27 @@
                 }
                 thead.innerHTML = headHtml;
 
-                const classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
+                const sortOrderSelect = document.getElementById('cr_sortOrder');
+                const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'roll';
+
+                let classStudents = studentsList.filter(s => s.class === selectedClass && (s.status || 'Active') !== 'Left');
 
                 if (classStudents.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="${10 + subjects.length}" class="text-center py-6 text-slate-500 font-medium">No active students enrolled in "${selectedClass}".</td></tr>`;
                     window.updateConsolidatedStats(0, 0, 0, 0, "-");
                     return;
+                }
+
+                if (blankMode) {
+                    if (sortOrder === 'name') {
+                        classStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    } else {
+                        classStudents.sort((a, b) => {
+                            const rA = parseInt(a.rollNo) || a.rollNo;
+                            const rB = parseInt(b.rollNo) || b.rollNo;
+                            return typeof rA === 'number' && typeof rB === 'number' ? rA - rB : String(rA).localeCompare(String(rB));
+                        });
+                    }
                 }
 
                 const totalMaxMarks = subjects.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
@@ -3780,6 +3825,26 @@
                     studentResults.forEach(s => {
                         if (s.status !== 'PASS') s.position = '-';
                     });
+
+                    // Sort studentResults according to cr_sortOrder
+                    if (sortOrder === 'position') {
+                        studentResults.sort((a, b) => {
+                            if (a.status === 'PASS' && b.status === 'PASS') {
+                                return b.totalObt - a.totalObt;
+                            }
+                            if (a.status === 'PASS') return -1;
+                            if (b.status === 'PASS') return 1;
+                            return b.totalObt - a.totalObt;
+                        });
+                    } else if (sortOrder === 'name') {
+                        studentResults.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    } else {
+                        studentResults.sort((a, b) => {
+                            const rA = parseInt(a.rollNo) || a.rollNo;
+                            const rB = parseInt(b.rollNo) || b.rollNo;
+                            return typeof rA === 'number' && typeof rB === 'number' ? rA - rB : String(rA).localeCompare(String(rB));
+                        });
+                    }
 
                     currentConsolidatedRows = studentResults;
 
