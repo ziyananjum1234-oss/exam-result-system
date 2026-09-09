@@ -227,6 +227,66 @@
         };
     </script>
 
+
+<script>
+        // REAL-TIME MARKS INPUT VALIDATION ENGINE (Prevents values > maxMarks)
+        window.validateMarksInput = function(input, maxMarks) {
+            if (!input) return;
+            let val = input.value.trim().toUpperCase();
+            if (val === '' || val === 'A' || val === 'ABSENT' || val === 'L' || val === 'LEAVE') {
+                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.add('border-slate-700');
+                return;
+            }
+
+            const num = parseFloat(val);
+            if (isNaN(num) || num < 0) {
+                input.value = '';
+                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.add('border-slate-700');
+            } else if (num > maxMarks) {
+                // Instantly clamp to maxMarks and highlight alert
+                input.value = maxMarks;
+                input.classList.add('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.remove('border-slate-700');
+                
+                // Show gentle warning toast
+                alert(`Warning: Marks cannot exceed Total Marks (${maxMarks})! Automatically set to maximum (${maxMarks}).`);
+                setTimeout(() => {
+                    input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                    input.classList.add('border-slate-700');
+                }, 1200);
+            } else {
+                input.classList.remove('border-rose-500', 'bg-rose-500/20', 'text-rose-400');
+                input.classList.add('border-slate-700');
+            }
+        };
+
+        // UNIVERSAL STUDENT MARKS RETRIEVAL ENGINE
+        window.getStudentSubjectMarks = function(examId, st, subName) {
+            if (!st || !examId || !subName) return undefined;
+            const rollNo = st.rollNo;
+            const stId = st.id;
+
+            // Check 1: Key format `examId_rollNo`
+            if (marksDatabase[`${examId}_${rollNo}`] && marksDatabase[`${examId}_${rollNo}`][subName] !== undefined) {
+                return marksDatabase[`${examId}_${rollNo}`][subName];
+            }
+            // Check 2: Key format `examId_stId`
+            if (marksDatabase[`${examId}_${stId}`] && marksDatabase[`${examId}_${stId}`][subName] !== undefined) {
+                return marksDatabase[`${examId}_${stId}`][subName];
+            }
+            // Check 3: Key format `stId` -> `examId` -> `subName`
+            if (marksDatabase[stId] && marksDatabase[stId][examId] && marksDatabase[stId][examId][subName] !== undefined) {
+                return marksDatabase[stId][examId][subName];
+            }
+            // Check 4: Key format `rollNo` -> `examId` -> `subName`
+            if (marksDatabase[rollNo] && marksDatabase[rollNo][examId] && marksDatabase[rollNo][examId][subName] !== undefined) {
+                return marksDatabase[rollNo][examId][subName];
+            }
+            return undefined;
+        };
+</script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
@@ -1536,6 +1596,30 @@
                 </div>
             </div>
 
+            <!-- Overall Exam Institutional GPA Banner -->
+            <div class="no-print bg-gradient-to-r from-indigo-950/80 via-slate-900 to-purple-950/80 border border-indigo-500/40 rounded-3xl p-5 mb-6 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-400 text-xl shadow-lg">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-300 block">Institutional Academic Index</span>
+                        <h3 class="text-base font-black text-white">Overall Exam Institutional GPA (All Subjects Cumulative)</h3>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6 bg-slate-950/70 border border-indigo-500/30 px-6 py-2.5 rounded-2xl">
+                    <div class="text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Grand Exam GPA (4.0)</span>
+                        <span id="tp_grandExamGpa" class="text-2xl font-black text-amber-400 font-mono">0.00</span>
+                    </div>
+                    <div class="w-px h-8 bg-slate-800"></div>
+                    <div class="text-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Overall Pass Rate</span>
+                        <span id="tp_grandPassRate" class="text-xl font-black text-emerald-400 font-mono">0.0%</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Live Performance KPI Dashboard Cards -->
             <div class="no-print grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
                 <!-- Teacher Profile Card -->
@@ -1664,6 +1748,43 @@
                         </thead>
                         <tbody id="tp_studentTableBody" class="divide-y divide-slate-800 text-slate-300">
                             <!-- Populated Dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            
+            <!-- PRINCIPAL'S MASTER RANKED TEACHER LEADERBOARD TABLE (Sorted by Highest GPA Descending) -->
+            <div class="no-print bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+                    <div>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-ranking-star text-amber-400"></i> Principal's Teacher Performance Leaderboard (Ranked by GPA)
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Automated Faculty Ranking Table — Highest GPA on top with Gold 🥇, Silver 🥈 & Bronze 🥉 Honors</p>
+                    </div>
+                    <button type="button" onclick="window.printAllTeachersMasterSummary()" class="px-4 py-2 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-600/30 flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-print"></i> Print Executive Leaderboard
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
+                            <tr>
+                                <th class="py-3 px-3.5 text-center w-14">Rank</th>
+                                <th class="py-3 px-4">Faculty Teacher Name</th>
+                                <th class="py-3 px-4">Subject</th>
+                                <th class="py-3 px-4 text-center">Class & Section</th>
+                                <th class="py-3 px-4 text-center">Students</th>
+                                <th class="py-3 px-4 text-center text-amber-400">Subject GPA (4.0)</th>
+                                <th class="py-3 px-4 text-center">Pass Rate (%)</th>
+                                <th class="py-3 px-4 text-center">Average Score</th>
+                                <th class="py-3 px-4 text-center">Performance Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tp_leaderboardTableBody" class="divide-y divide-slate-800/80 text-slate-200">
+                            <!-- Populated Dynamically with Ranked Teachers -->
                         </tbody>
                     </table>
                 </div>
@@ -3437,7 +3558,7 @@
                             data-index="${idx}"
                             oninput="this.value = this.value.toUpperCase()"
                             onkeydown="window.handleMarksEnterKey(event, ${idx})"
-                            class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                            class="marks-input-single w-28 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white font-mono font-bold text-center focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" oninput="window.validateMarksInput(this, typeof subObj !== \'undefined\' ? (subObj.marks || 100) : 100)">
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -5252,7 +5373,8 @@
                 console.error("Error in loadTeacherProgressData:", e);
             }
         };
-window.renderTeacherProgressReport = function() {
+
+        window.renderTeacherProgressReport = function() {
             try {
                 const examSelect = document.getElementById('tp_examSelect');
                 const classSelect = document.getElementById('tp_classSelect');
@@ -5271,7 +5393,7 @@ window.renderTeacherProgressReport = function() {
                 const maxMarks = subObj ? Number(subObj.marks || 100) : 100;
 
                 const allocKey = `${cls}_${sec}_${subName}`;
-                const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Incharge';
+                const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Member';
 
                 // DOM Card Elements
                 const cardTeacher = document.getElementById('tp_cardTeacherName');
@@ -5304,6 +5426,7 @@ window.renderTeacherProgressReport = function() {
                         tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-6 text-slate-500 font-semibold">No students or marks found for selected filters.</td></tr>';
                     }
                     window.drawBellCurveChart([], maxMarks, 0, 0);
+                    window.renderPrincipalLeaderboard(examId);
                     return;
                 }
 
@@ -5318,16 +5441,16 @@ window.renderTeacherProgressReport = function() {
                 let gradeCounts = { 'A+': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
 
                 activeStudents.forEach((st, idx) => {
-                    const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
-                    const rawVal = stMarks[subName];
+                    // UNIVERSAL RELIABLE MARKS LOOKUP
+                    const rawVal = window.getStudentSubjectMarks(examId, st, subName);
                     let displayMarks = "-";
                     let pct = 0;
                     let gpaObj = { grade: 'F', gpa: 0.00, desc: 'Fail' };
                     let isAppeared = false;
 
-                    if (rawVal === 'A' || rawVal === 'a') {
+                    if (rawVal === 'A' || rawVal === 'a' || rawVal === 'ABSENT') {
                         displayMarks = "Absent (A)";
-                    } else if (rawVal === 'L' || rawVal === 'l') {
+                    } else if (rawVal === 'L' || rawVal === 'l' || rawVal === 'LEAVE') {
                         displayMarks = "Leave (L)";
                     } else if (rawVal !== undefined && rawVal !== null && rawVal !== '') {
                         const numVal = Number(rawVal);
@@ -5369,7 +5492,7 @@ window.renderTeacherProgressReport = function() {
                             <td class="py-2.5 px-3 text-center">
                                 <span class="px-2 py-0.5 rounded-lg text-xs font-black ${gradeColor}">${isAppeared ? gpaObj.grade : '-'}</span>
                             </td>
-                            <td class="py-2.5 px-3 text-center font-bold font-mono text-indigo-400">${isAppeared ? gpaObj.gpa.toFixed(2) : '-'}</td>
+                            <td class="py-2.5 px-3 text-center font-bold font-mono text-teal-400">${isAppeared ? gpaObj.gpa.toFixed(2) : '-'}</td>
                         `;
                         tableBody.appendChild(tr);
                     }
@@ -5406,8 +5529,140 @@ window.renderTeacherProgressReport = function() {
                 // Draw Bell Curve
                 window.drawBellCurveChart(marksList, maxMarks, meanScore, stdDev);
 
+                // Render Principal Leaderboard & Grand Exam Cumulative GPA
+                window.renderPrincipalLeaderboard(examId);
+
             } catch(e) {
                 console.error("Error in renderTeacherProgressReport:", e);
+            }
+        };
+
+        window.renderPrincipalLeaderboard = function(examId) {
+            try {
+                const exam = examsSetupList.find(e => e.id === examId);
+                const tbody = document.getElementById('tp_leaderboardTableBody');
+                const grandGpaEl = document.getElementById('tp_grandExamGpa');
+                const grandPassEl = document.getElementById('tp_grandPassRate');
+
+                if (!exam || !tbody) return;
+                tbody.innerHTML = '';
+
+                const teacherRows = [];
+                let grandTotalGpa = 0;
+                let grandAppearedCount = 0;
+                let grandPassedCount = 0;
+
+                masterClassesList.forEach(cls => {
+                    masterSectionsList.forEach(sec => {
+                        const classSecStudents = studentsList.filter(s => s.class === cls && s.group === sec && (s.status || 'Active') !== 'Left');
+                        if (classSecStudents.length === 0) return;
+
+                        (exam.subjects || []).forEach(sub => {
+                            const allocKey = `${cls}_${sec}_${sub.name}`;
+                            const teacherName = teacherAllocDatabase[allocKey] || 'Unassigned';
+                            const maxMarks = Number(sub.marks || 100);
+
+                            let totalGpa = 0;
+                            let passed = 0;
+                            let totalMarks = 0;
+                            let validCount = 0;
+
+                            classSecStudents.forEach(st => {
+                                const raw = window.getStudentSubjectMarks(examId, st, sub.name);
+                                if (raw !== undefined && raw !== null && raw !== '' && raw !== 'A' && raw !== 'L' && raw !== 'ABSENT' && raw !== 'LEAVE') {
+                                    const num = Number(raw);
+                                    if (!isNaN(num)) {
+                                        validCount++;
+                                        totalMarks += num;
+                                        const pct = (num / maxMarks) * 100;
+                                        const gpa = window.calculateGPA4(pct);
+                                        totalGpa += gpa;
+                                        if (pct >= 40) passed++;
+                                    }
+                                }
+                            });
+
+                            if (validCount > 0) {
+                                const avgGPA = totalGpa / validCount;
+                                const passRate = (passed / validCount) * 100;
+                                const avgPct = ((totalMarks / validCount) / maxMarks) * 100;
+
+                                grandTotalGpa += totalGpa;
+                                grandAppearedCount += validCount;
+                                grandPassedCount += passed;
+
+                                teacherRows.push({
+                                    teacher: teacherName,
+                                    subject: sub.name,
+                                    class: cls,
+                                    section: sec,
+                                    students: validCount,
+                                    gpa: avgGPA,
+                                    passRate: passRate,
+                                    avgPct: avgPct
+                                });
+                            }
+                        });
+                    });
+                });
+
+                // Update Grand Institutional GPA
+                if (grandGpaEl) {
+                    const grandGPA = grandAppearedCount > 0 ? (grandTotalGpa / grandAppearedCount) : 0;
+                    grandGpaEl.textContent = grandGPA.toFixed(2);
+                }
+                if (grandPassEl) {
+                    const grandPassRate = grandAppearedCount > 0 ? ((grandPassedCount / grandAppearedCount) * 100) : 0;
+                    grandPassEl.textContent = grandPassRate.toFixed(1) + '%';
+                }
+
+                if (teacherRows.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-slate-500 font-semibold">No teacher performance data found for this examination yet. Enter marks to generate leaderboard!</td></tr>';
+                    return;
+                }
+
+                // SORT DESCENDING BY GPA (Highest GPA on top!)
+                teacherRows.sort((a, b) => b.gpa - a.gpa);
+
+                teacherRows.forEach((r, idx) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/40 transition-colors";
+
+                    let rankBadge = `<span class="font-mono font-bold text-slate-400">#${idx + 1}</span>`;
+                    let rowGlow = "";
+                    let ratingBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">Satisfactory</span>';
+
+                    if (idx === 0) {
+                        rankBadge = '<span class="text-base" title="1st Position - Gold Medalist">🥇 <b class="text-amber-300 font-mono text-xs">1st</b></span>';
+                        rowGlow = "bg-amber-500/5 font-semibold";
+                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/40">⭐ Gold Topper</span>';
+                    } else if (idx === 1) {
+                        rankBadge = '<span class="text-base" title="2nd Position - Silver Medalist">🥈 <b class="text-slate-200 font-mono text-xs">2nd</b></span>';
+                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-slate-300/20 text-slate-200 border border-slate-400/40">🥈 Silver Performer</span>';
+                    } else if (idx === 2) {
+                        rankBadge = '<span class="text-base" title="3rd Position - Bronze Medalist">🥉 <b class="text-amber-600 font-mono text-xs">3rd</b></span>';
+                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-700/20 text-amber-400 border border-amber-600/40">🥉 Bronze Performer</span>';
+                    } else if (r.gpa >= 3.5) {
+                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Excellent Track</span>';
+                    } else if (r.gpa < 2.0) {
+                        ratingBadge = '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">Needs Improvement</span>';
+                    }
+
+                    tr.innerHTML = `
+                        <td class="py-3 px-3.5 text-center">${rankBadge}</td>
+                        <td class="py-3 px-4 font-black text-white uppercase">${r.teacher}</td>
+                        <td class="py-3 px-4 font-bold text-indigo-300 uppercase">${r.subject}</td>
+                        <td class="py-3 px-4 text-center font-semibold text-slate-300">${r.class} — ${r.section}</td>
+                        <td class="py-3 px-4 text-center font-mono text-slate-400">${r.students}</td>
+                        <td class="py-3 px-4 text-center font-black font-mono text-amber-400 text-sm">${r.gpa.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center font-bold text-emerald-400 font-mono">${r.passRate.toFixed(1)}%</td>
+                        <td class="py-3 px-4 text-center font-mono text-slate-300">${r.avgPct.toFixed(1)}%</td>
+                        <td class="py-3 px-4 text-center">${ratingBadge}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                console.error("renderPrincipalLeaderboard error:", e);
             }
         };
 
@@ -5550,7 +5805,7 @@ window.renderTeacherProgressReport = function() {
 
                 activeStudents.forEach(st => {
                     const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
-                    const rawVal = stMarks[subName];
+                    const rawVal = window.getStudentSubjectMarks(examId, st, subName);
                     if (rawVal !== undefined && rawVal !== null && rawVal !== '' && rawVal !== 'A' && rawVal !== 'L') {
                         const numVal = Number(rawVal);
                         if (!isNaN(numVal)) {
@@ -5741,7 +5996,7 @@ window.renderTeacherProgressReport = function() {
 
                             classSecStudents.forEach(st => {
                                 const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
-                                const raw = stMarks[sub.name];
+                                const raw = window.getStudentSubjectMarks(examId, st, sub.name);
                                 if (raw !== undefined && raw !== null && raw !== '' && raw !== 'A' && raw !== 'L') {
                                     const num = Number(raw);
                                     if (!isNaN(num)) {
