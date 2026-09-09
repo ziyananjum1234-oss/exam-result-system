@@ -320,6 +320,91 @@
             }
         };
 </script>
+
+    <script>
+        // GLOBAL MASTER ADMIN AUTHENTICATION ENGINE
+        window.ADMIN_AUTH_KEY = 'ccs_admin_auth_session';
+        window.ADMIN_USER = 'admin';
+        window.ADMIN_PASS = 'admin@ccs';
+
+        window.checkAdminAuth = function() {
+            try {
+                const overlay = document.getElementById('adminAuthOverlay');
+                if (!overlay) return;
+                const isAuth = sessionStorage.getItem(window.ADMIN_AUTH_KEY) === 'true';
+                if (isAuth) {
+                    overlay.classList.add('hidden');
+                    overlay.style.display = 'none';
+                } else {
+                    overlay.classList.remove('hidden');
+                    overlay.style.display = 'flex';
+                }
+            } catch(e) {
+                console.error("checkAdminAuth error:", e);
+            }
+        };
+
+        window.handleAdminLogin = function(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            try {
+                const userInp = document.getElementById('adminAuthUserInput');
+                const passInp = document.getElementById('adminAuthPassInput');
+                const err = document.getElementById('adminAuthErrorMsg');
+                const overlay = document.getElementById('adminAuthOverlay');
+                
+                const userVal = userInp ? userInp.value.trim().toLowerCase() : '';
+                const passVal = passInp ? passInp.value.trim() : '';
+
+                if (userVal === 'admin' && (passVal === 'admin@ccs' || passVal === 'admin')) {
+                    sessionStorage.setItem(window.ADMIN_AUTH_KEY, 'true');
+                    if (err) err.classList.add('hidden');
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.style.display = 'none';
+                    }
+                    if (typeof window.showTab === 'function') {
+                        window.showTab('enrollment');
+                    }
+                    return false;
+                } else {
+                    if (err) {
+                        err.classList.remove('hidden');
+                        err.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Credentials! (User: <b>admin</b>, Pass: <b>admin@ccs</b>)';
+                    }
+                    if (passInp) {
+                        passInp.value = '';
+                        passInp.focus();
+                    }
+                    return false;
+                }
+            } catch(err) {
+                console.error("handleAdminLogin error:", err);
+                return false;
+            }
+        };
+
+        window.autoFillAdminCredentials = function() {
+            const userInput = document.getElementById('adminAuthUserInput');
+            const passInput = document.getElementById('adminAuthPassInput');
+            if (userInput) userInput.value = "admin";
+            if (passInput) passInput.value = "admin@ccs";
+            // Auto login directly
+            window.handleAdminLogin();
+        };
+
+        window.logoutAdminPortal = function() {
+            if (confirm("Are you sure you want to logout from Master Admin Control Portal?")) {
+                sessionStorage.removeItem(window.ADMIN_AUTH_KEY);
+                window.checkAdminAuth();
+            }
+        };
+
+        // Check auth on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            window.checkAdminAuth();
+        });
+    </script>
+
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
