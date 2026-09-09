@@ -267,6 +267,89 @@
             }
         };
 </script>
+
+    <script>
+        // GLOBAL TEACHER AUTHENTICATION ENGINE
+        window.TEACHER_AUTH_KEY = 'ccs_teacher_auth_session';
+        window.TEACHER_USER = 'teacher';
+        window.TEACHER_PASS = 'teacher@ccs';
+
+        window.checkTeacherAuth = function() {
+            try {
+                const overlay = document.getElementById('authOverlay');
+                if (!overlay) return;
+                const isAuth = sessionStorage.getItem(window.TEACHER_AUTH_KEY) === 'true';
+                if (isAuth) {
+                    overlay.classList.add('hidden');
+                    overlay.style.display = 'none';
+                } else {
+                    overlay.classList.remove('hidden');
+                    overlay.style.display = 'flex';
+                }
+            } catch(e) {
+                console.error("checkTeacherAuth error:", e);
+            }
+        };
+
+        window.handleTeacherLogin = function(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            try {
+                const userInp = document.getElementById('authUserInput');
+                const passInp = document.getElementById('authPassInput');
+                const err = document.getElementById('authErrorMsg');
+                const overlay = document.getElementById('authOverlay');
+                
+                const userVal = userInp ? userInp.value.trim().toLowerCase() : '';
+                const passVal = passInp ? passInp.value.trim() : '';
+
+                if (userVal === 'teacher' && (passVal === 'teacher@ccs' || passVal === 'teacher')) {
+                    sessionStorage.setItem(window.TEACHER_AUTH_KEY, 'true');
+                    if (err) err.classList.add('hidden');
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.style.display = 'none';
+                    }
+                    if (typeof window.showTab === 'function') {
+                        window.showTab('marksEntry');
+                    }
+                    return false;
+                } else {
+                    if (err) {
+                        err.classList.remove('hidden');
+                        err.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Credentials! (User: <b>teacher</b>, Pass: <b>teacher@ccs</b>)';
+                    }
+                    if (passInp) {
+                        passInp.value = '';
+                        passInp.focus();
+                    }
+                    return false;
+                }
+            } catch(err) {
+                console.error("handleTeacherLogin error:", err);
+                return false;
+            }
+        };
+
+        window.autoFillTeacherCredentials = function() {
+            const userInput = document.getElementById('authUserInput');
+            const passInput = document.getElementById('authPassInput');
+            if (userInput) userInput.value = "teacher";
+            if (passInput) passInput.value = "teacher@ccs";
+            window.handleTeacherLogin();
+        };
+
+        window.logoutPortal = function() {
+            if (confirm("Are you sure you want to logout from Faculty Portal?")) {
+                sessionStorage.removeItem(window.TEACHER_AUTH_KEY);
+                window.checkTeacherAuth();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.checkTeacherAuth();
+        });
+    </script>
+
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col md:flex-row antialiased selection:bg-indigo-600 selection:text-white">
 
