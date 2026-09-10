@@ -5460,11 +5460,16 @@
             const sec = secSel.value;
             tbody.innerHTML = '';
 
-            // Collect all unique subjects from all defined exams + master subjects list
+            // Collect unique subjects from defined exams for active exam or all exams
             const subjectSet = new Set();
+            const tpExamSel = document.getElementById('tp_examSelect');
+            const selectedExamId = tpExamSel ? tpExamSel.value : '';
+
             examsSetupList.forEach(ex => {
-                if (ex && Array.isArray(ex.subjects)) {
-                    ex.subjects.forEach(s => { if (s && s.name) subjectSet.add(s.name.trim()); });
+                if (!selectedExamId || ex.id === selectedExamId) {
+                    if (ex && Array.isArray(ex.subjects)) {
+                        ex.subjects.forEach(s => { if (s && s.name) subjectSet.add(s.name.trim()); });
+                    }
                 }
             });
 
@@ -5476,12 +5481,9 @@
                 }
             });
 
-            // If empty, add default subjects
+            // Fallback default list if no exam defined yet
             if (subjectSet.size === 0) {
-                window.masterSubjectsDatabase.forEach(s => subjectSet.add(s));
-            } else {
-                // Also make sure popular subjects are in list
-                window.masterSubjectsDatabase.forEach(s => subjectSet.add(s));
+                ['English', 'Mathematics', 'Urdu', 'Islamiat', 'Physics', 'Chemistry', 'Computer Science'].forEach(s => subjectSet.add(s));
             }
 
             const subjectArray = Array.from(subjectSet);
@@ -5647,7 +5649,7 @@ window.renderTeacherProgressReport = function() {
                 if (cardTeacher) cardTeacher.textContent = teacherName;
                 if (cardClassSec) cardClassSec.textContent = `${cls} — Section ${sec}`;
 
-                const activeStudents = studentsList.filter(s => s.class === cls && s.group === sec && (s.status || 'Active') !== 'Left');
+                const activeStudents = studentsList.filter(s => s.class === cls && (sec === 'All' || (s.group || 'General').trim() === sec) && (s.status || 'Active') !== 'Left');
                 
                 if (tableBody) tableBody.innerHTML = '';
 
@@ -5675,7 +5677,9 @@ window.renderTeacherProgressReport = function() {
                 let gradeCounts = { 'A+': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
 
                 activeStudents.forEach((st, idx) => {
-                    const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
+                    const key1 = `${examId}_${st.rollNo}`;
+                    const key2 = `${st.id}_${examId}`;
+                    const stMarks = marksDatabase[key1] || (marksDatabase[st.id] && marksDatabase[st.id][examId]) || marksDatabase[key2] || {};
                     const rawVal = stMarks[subName];
                     let displayMarks = "-";
                     let pct = 0;
@@ -5865,10 +5869,82 @@ window.renderTeacherProgressReport = function() {
                     <circle cx="${meanX}" cy="${height - padY - (plotH * 0.85)}" r="5" fill="#fbbf24" stroke="#0f172a" stroke-width="2" />
                     <text x="${meanX}" y="${padY - 8}" fill="#fbbf24" font-size="11" font-weight="extrabold" text-anchor="middle">Mean (μ): ${mean.toFixed(1)}</text>
 
-                    <!-- Axis Labels -->
-                    <text x="${width/2}" y="${height - 6}" fill="#64748b" font-size="11" font-weight="bold" text-anchor="middle">Marks Range / Grade Performance Distribution</text>
-                    <text x="${padX - 10}" y="${padY + 12}" fill="#64748b" font-size="10" font-weight="bold" text-anchor="end">High</text>
                     <text x="${padX - 10}" y="${height - padY - 5}" fill="#64748b" font-size="10" font-weight="bold" text-anchor="end">0</text>
+                </svg>
+            `;
+        };
+
+        window.generateSvgBellCurve = function(marksList, maxMarks, mean, stdDev) {
+            const width = 450;
+            const height = 180;
+            const padX = 35;
+            const padY = 25;
+            const plotW = width - (padX * 2);
+            const plotH = height - (padY * 2);
+
+            const bins = [
+                { label: '<40%', min: 0, max: 0.399 * maxMarks, count: 0, color: '#f43f5e' },
+                { label: '40-49%', min: 0.40 * maxMarks, max: 0.499 * maxMarks, count: 0, color: '#f97316' },
+                { label: '50-59%', min: 0.50 * maxMarks, max: 0.599 * maxMarks, count: 0, color: '#eab308' },
+                { label: '60-69%', min: 0.60 * maxMarks, max: 0.699 * maxMarks, count: 0, color: '#0284c7' },
+                { label: '70-79%', min: 0.70 * maxMarks, max: 0.799 * maxMarks, count: 0, color: '#4f46e5' },
+                { label: '80-100%', min: 0.80 * maxMarks, max: maxMarks, count: 0, color: '#059669' }
+            ];
+
+            (marksList || []).forEach(m => {
+                for (let b of bins) {
+                    if (m >= b.min && m <= b.max) { b.count++; break; }
+                }
+            });
+
+            const maxBinCount = Math.max(...bins.map(b => b.count), 3);
+            const numPoints = 60;
+            const curvePoints = [];
+            const effectiveSigma = stdDev > 0 ? stdDev : (maxMarks * 0.15);
+
+            for (let i = 0; i <= numPoints; i++) {
+                const xVal = (i / numPoints) * maxMarks;
+                const expVal = Math.exp(-0.5 * Math.pow((xVal - mean) / effectiveSigma, 2));
+                const px = padX + (xVal / maxMarks) * plotW;
+                const py = height - padY - (expVal * (plotH * 0.85));
+                curvePoints.push(`${px.toFixed(1)},${py.toFixed(1)}`);
+            }
+
+            const curvePathD = `M ${curvePoints.join(' L ')}`;
+            const areaPathD = `M ${padX},${height - padY} L ${curvePoints.join(' L ')} L ${width - padX},${height - padY} Z`;
+            const meanX = padX + ((mean / maxMarks) * plotW);
+
+            let barsSvg = '';
+            const binW = plotW / bins.length;
+            bins.forEach((b, idx) => {
+                const barH = (b.count / maxBinCount) * (plotH * 0.7);
+                const bx = padX + (idx * binW) + 3;
+                const by = height - padY - barH;
+                const bw = binW - 6;
+
+                barsSvg += `
+                    <rect x="${bx}" y="${by}" width="${bw}" height="${barH}" rx="3" fill="${b.color}" opacity="0.3" stroke="${b.color}" stroke-width="1" />
+                    <text x="${bx + bw/2}" y="${by - 3}" fill="#0f172a" font-size="9" font-weight="bold" text-anchor="middle">${b.count > 0 ? b.count : ''}</text>
+                    <text x="${bx + bw/2}" y="${height - padY + 12}" fill="#64748b" font-size="8" font-weight="bold" text-anchor="middle">${b.label}</text>
+                `;
+            });
+
+            const uniqueGradId = "bellGrad_" + Math.random().toString(36).substring(2, 8);
+
+            return `
+                <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto">
+                    <defs>
+                        <linearGradient id="${uniqueGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.35" />
+                            <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.0" />
+                        </linearGradient>
+                    </defs>
+                    <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="#94a3b8" stroke-width="1.5" />
+                    ${barsSvg}
+                    <path d="${areaPathD}" fill="url(#${uniqueGradId})" />
+                    <path d="${curvePathD}" fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" />
+                    <line x1="${meanX}" y1="${padY}" x2="${meanX}" y2="${height - padY}" stroke="#d97706" stroke-width="1.5" stroke-dasharray="3 2" />
+                    <text x="${meanX}" y="${padY - 4}" fill="#d97706" font-size="9" font-weight="bold" text-anchor="middle">Mean: ${mean.toFixed(1)}</text>
                 </svg>
             `;
         };
@@ -5895,7 +5971,7 @@ window.renderTeacherProgressReport = function() {
                 const allocKey = `${cls}_${sec}_${subName}`;
                 const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Member';
 
-                const activeStudents = studentsList.filter(s => s.class === cls && s.group === sec && (s.status || 'Active') !== 'Left');
+                const activeStudents = studentsList.filter(s => s.class === cls && (sec === 'All' || (s.group || 'General').trim() === sec) && (s.status || 'Active') !== 'Left');
 
                 let totalGpaPoints = 0;
                 let passedCount = 0;
@@ -5906,7 +5982,9 @@ window.renderTeacherProgressReport = function() {
                 let gradeCounts = { 'A+': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0 };
 
                 activeStudents.forEach(st => {
-                    const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
+                    const key1 = `${examId}_${st.rollNo}`;
+                    const key2 = `${st.id}_${examId}`;
+                    const stMarks = marksDatabase[key1] || (marksDatabase[st.id] && marksDatabase[st.id][examId]) || marksDatabase[key2] || {};
                     const rawVal = stMarks[subName];
                     if (rawVal !== undefined && rawVal !== null && rawVal !== '' && rawVal !== 'A' && rawVal !== 'L') {
                         const numVal = Number(rawVal);
@@ -6078,12 +6156,15 @@ window.renderTeacherProgressReport = function() {
                     return;
                 }
 
-                // Aggregate stats for all class sections and subjects
                 const teacherRows = [];
+                let overallTotalGpa = 0;
+                let overallPassedCount = 0;
+                let overallValidCount = 0;
+                const overallMarksList = [];
 
                 masterClassesList.forEach(cls => {
                     masterSectionsList.forEach(sec => {
-                        const classSecStudents = studentsList.filter(s => s.class === cls && s.group === sec && (s.status || 'Active') !== 'Left');
+                        const classSecStudents = studentsList.filter(s => s.class === cls && (sec === 'All' || (s.group || 'General').trim() === sec) && (s.status || 'Active') !== 'Left');
                         if (classSecStudents.length === 0) return;
 
                         exam.subjects.forEach(sub => {
@@ -6095,19 +6176,32 @@ window.renderTeacherProgressReport = function() {
                             let passed = 0;
                             let totalMarks = 0;
                             let validCount = 0;
+                            const subjectMarksList = [];
 
                             classSecStudents.forEach(st => {
-                                const stMarks = marksDatabase[st.id] && marksDatabase[st.id][examId] ? marksDatabase[st.id][examId] : {};
+                                const key1 = `${examId}_${st.rollNo}`;
+                                const key2 = `${st.id}_${examId}`;
+                                const stMarks = marksDatabase[key1] || (marksDatabase[st.id] && marksDatabase[st.id][examId]) || marksDatabase[key2] || {};
                                 const raw = stMarks[sub.name];
-                                if (raw !== undefined && raw !== null && raw !== '' && raw !== 'A' && raw !== 'L') {
+
+                                if (raw !== undefined && raw !== null && raw !== '' && raw !== 'A' && raw !== 'L' && raw !== 'a' && raw !== 'l') {
                                     const num = Number(raw);
                                     if (!isNaN(num)) {
                                         validCount++;
                                         totalMarks += num;
+                                        subjectMarksList.push(num);
+                                        overallMarksList.push(num);
+
                                         const pct = (num / maxMarks) * 100;
-                                        const gpa = window.calculateGPA4(pct);
-                                        totalGpa += gpa;
-                                        if (pct >= 40) passed++;
+                                        const gpaObj = window.getGpaGrade(pct);
+                                        totalGpa += gpaObj.gpa;
+                                        overallTotalGpa += gpaObj.gpa;
+
+                                        if (pct >= 40) {
+                                            passed++;
+                                            overallPassedCount++;
+                                        }
+                                        overallValidCount++;
                                     }
                                 }
                             });
@@ -6116,6 +6210,13 @@ window.renderTeacherProgressReport = function() {
                                 const avgGPA = totalGpa / validCount;
                                 const passRate = (passed / validCount) * 100;
                                 const avgPct = ((totalMarks / validCount) / maxMarks) * 100;
+                                const meanScore = totalMarks / validCount;
+
+                                let stdDev = 0;
+                                if (validCount > 1) {
+                                    const variance = subjectMarksList.reduce((acc, v) => acc + Math.pow(v - meanScore, 2), 0) / validCount;
+                                    stdDev = Math.sqrt(variance);
+                                }
 
                                 teacherRows.push({
                                     teacher: teacherName,
@@ -6125,83 +6226,201 @@ window.renderTeacherProgressReport = function() {
                                     students: validCount,
                                     gpa: avgGPA,
                                     passRate: passRate,
-                                    avgPct: avgPct
+                                    avgPct: avgPct,
+                                    maxMarks: maxMarks,
+                                    meanScore: meanScore,
+                                    stdDev: stdDev,
+                                    marksList: subjectMarksList
                                 });
                             }
                         });
                     });
                 });
 
-                // Sort by GPA descending
+                // Sort Teachers by GPA Descending (Rank 1st, 2nd, 3rd...)
                 teacherRows.sort((a, b) => b.gpa - a.gpa);
 
+                const instGPA = overallValidCount > 0 ? (overallTotalGpa / overallValidCount) : 0;
+                const instPassRate = overallValidCount > 0 ? ((overallPassedCount / overallValidCount) * 100) : 0;
+                const instMeanPct = overallMarksList.length > 0 ? (overallMarksList.reduce((a, b) => a + b, 0) / overallMarksList.length) : 0;
+
+                let instStdDev = 0;
+                if (overallMarksList.length > 1) {
+                    const variance = overallMarksList.reduce((acc, v) => acc + Math.pow(v - instMeanPct, 2), 0) / overallMarksList.length;
+                    instStdDev = Math.sqrt(variance);
+                }
+
+                // Render Ranking Table Rows
                 let rowsHtml = '';
                 teacherRows.forEach((r, idx) => {
+                    const rankBadge = idx === 0 ? '<span class="text-amber-600 font-extrabold">🥇 1st</span>' :
+                                      idx === 1 ? '<span class="text-slate-600 font-extrabold">🥈 2nd</span>' :
+                                      idx === 2 ? '<span class="text-amber-700 font-extrabold">🥉 3rd</span>' :
+                                      `<span class="font-bold text-slate-600">${idx + 1}th</span>`;
+
+                    const ratingBadge = r.gpa >= 3.7 ? '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-black">Outstanding</span>' :
+                                        r.gpa >= 3.0 ? '<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-bold">Very Good</span>' :
+                                        r.gpa >= 2.0 ? '<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">Satisfactory</span>' :
+                                        '<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold">Needs Focus</span>';
+
                     rowsHtml += `
-                        <tr>
-                            <td class="text-center font-bold">${idx + 1}</td>
-                            <td class="font-bold text-slate-900 uppercase">${r.teacher}</td>
-                            <td class="font-bold uppercase">${r.subject}</td>
-                            <td class="text-center">${r.class} — ${r.section}</td>
-                            <td class="text-center">${r.students}</td>
-                            <td class="text-center font-bold font-mono text-emerald-700">${r.gpa.toFixed(2)}</td>
-                            <td class="text-center font-bold">${r.passRate.toFixed(1)}%</td>
-                            <td class="text-center font-bold">${r.avgPct.toFixed(1)}%</td>
+                        <tr class="border-b border-slate-200 hover:bg-slate-50">
+                            <td class="text-center py-2 px-2">${rankBadge}</td>
+                            <td class="font-black text-slate-950 uppercase py-2 px-2">${r.teacher}</td>
+                            <td class="font-bold text-indigo-950 uppercase py-2 px-2">${r.subject}</td>
+                            <td class="text-center font-semibold py-2 px-2">${r.class} — ${r.section}</td>
+                            <td class="text-center font-bold py-2 px-2">${r.students}</td>
+                            <td class="text-center font-black font-mono text-emerald-700 text-xs py-2 px-2">${r.gpa.toFixed(2)}</td>
+                            <td class="text-center font-bold text-slate-800 py-2 px-2">${r.passRate.toFixed(1)}%</td>
+                            <td class="text-center font-bold text-slate-800 py-2 px-2">${r.avgPct.toFixed(1)}%</td>
+                            <td class="text-center text-[9px] py-2 px-2">${ratingBadge}</td>
                         </tr>
                     `;
                 });
 
+                // Render Individual Teacher Bell Curves Cards
+                let cardsHtml = '';
+                teacherRows.forEach((r, idx) => {
+                    const svgChart = window.generateSvgBellCurve(r.marksList, r.maxMarks, r.meanScore, r.stdDev);
+                    cardsHtml += `
+                        <div class="border border-slate-300 rounded-lg p-2.5 bg-slate-50 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-start mb-1 pb-1 border-b border-slate-200">
+                                <div>
+                                    <span class="text-[9px] font-black uppercase text-indigo-950 block">${r.teacher}</span>
+                                    <span class="text-[8px] font-bold text-slate-600">${r.subject} (${r.class} - ${r.section})</span>
+                                </div>
+                                <span class="text-xs font-black font-mono text-emerald-700 bg-emerald-50 border border-emerald-300 px-1.5 py-0.5 rounded">
+                                    GPA: ${r.gpa.toFixed(2)}
+                                </span>
+                            </div>
+                            <div class="my-1">
+                                ${svgChart}
+                            </div>
+                            <div class="flex justify-between items-center text-[8px] text-slate-600 font-semibold pt-1 border-t border-slate-200">
+                                <span>Pass: <b>${r.passRate.toFixed(0)}%</b></span>
+                                <span>Mean: <b>${r.avgPct.toFixed(0)}%</b></span>
+                                <span>Students: <b>${r.students}</b></span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const instSvgChart = window.generateSvgBellCurve(overallMarksList, 100, instMeanPct, instStdDev);
+
                 printContainer.innerHTML = `
-                    <div class="print-paper bg-white p-6 text-slate-900 border-2 border-slate-900">
-                        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3 mb-4">
-                            <div class="w-14 h-14 flex items-center justify-center">
+                    <div class="print-paper bg-white p-6 text-slate-900 border-2 border-slate-900 space-y-4">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3">
+                            <div class="w-16 h-16 flex items-center justify-center">
                                 <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" class="max-h-full max-w-full object-contain">
                             </div>
                             <div class="text-center flex-1 px-4">
-                                <h1 class="text-xl font-black uppercase font-royal-title text-slate-950">Chenab College Shorkot</h1>
-                                <p class="text-xs font-bold uppercase tracking-wider text-indigo-950">Faculty Comparative Master Summary (Ranked by Subject GPA)</p>
-                                <p class="text-[10px] text-slate-600 font-semibold">${exam ? exam.name : 'Examination'} — Session 2025-2026</p>
+                                <h1 class="text-2xl font-black uppercase font-royal-title tracking-tight text-slate-950">Chenab College Shorkot</h1>
+                                <p class="text-xs font-black uppercase tracking-widest text-indigo-950">ALL-TEACHERS MASTER APPRAISAL & PERFORMANCE RANKING REPORT</p>
+                                <p class="text-[10px] text-slate-600 font-semibold mt-0.5">${exam ? exam.name : 'Academic Examination'} — Session 2025-2026</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-white rounded">Executive</span>
+                                <span class="text-[9px] font-bold uppercase px-2.5 py-1 bg-slate-900 text-white rounded">Confidential</span>
                                 <p class="text-[9px] text-slate-500 mt-1">${new Date().toLocaleDateString('en-GB')}</p>
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto mb-6">
-                            <table class="print-table w-full text-left text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 font-bold uppercase">
-                                        <th class="py-1 px-2 text-center w-8">Rank</th>
-                                        <th class="py-1 px-2">Teacher Name</th>
-                                        <th class="py-1 px-2">Subject</th>
-                                        <th class="py-1 px-2 text-center">Class & Sec</th>
-                                        <th class="py-1 px-2 text-center">Students</th>
-                                        <th class="py-1 px-2 text-center">Subject GPA (4.0)</th>
-                                        <th class="py-1 px-2 text-center">Pass Rate</th>
-                                        <th class="py-1 px-2 text-center">Class Avg %</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${rowsHtml || '<tr><td colspan="8" class="text-center py-4">No data available for this examination.</td></tr>'}
-                                </tbody>
-                            </table>
+                        <!-- Institutional Overall Summary & Bell Curve -->
+                        <div class="grid grid-cols-12 gap-4 border border-slate-900 rounded-xl p-3 bg-slate-50/80">
+                            <div class="col-span-5 flex flex-col justify-between border-r border-slate-300 pr-3">
+                                <div>
+                                    <span class="text-[9px] font-black text-slate-500 uppercase block tracking-wider mb-1">Institutional Overview</span>
+                                    <div class="grid grid-cols-2 gap-2 text-center">
+                                        <div class="bg-white border border-slate-300 p-2 rounded-lg">
+                                            <span class="text-[8px] font-bold text-slate-500 block uppercase">Overall Subject GPA</span>
+                                            <span class="text-xl font-black text-indigo-950">${instGPA.toFixed(2)}</span>
+                                            <span class="text-[7px] text-slate-400 block font-semibold">4.0 Scale</span>
+                                        </div>
+                                        <div class="bg-white border border-slate-300 p-2 rounded-lg">
+                                            <span class="text-[8px] font-bold text-slate-500 block uppercase">Overall Pass Ratio</span>
+                                            <span class="text-xl font-black text-emerald-700">${instPassRate.toFixed(1)}%</span>
+                                            <span class="text-[7px] text-slate-400 block font-semibold">${overallPassedCount} / ${overallValidCount} Passed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-slate-200 text-[9px] text-slate-600 font-bold flex justify-between">
+                                    <span>Faculty Appraised: <b>${teacherRows.length} Teachers</b></span>
+                                    <span>Total Marks Records: <b>${overallValidCount}</b></span>
+                                </div>
+                            </div>
+
+                            <div class="col-span-7">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[9px] font-black text-slate-900 uppercase">Institutional Normal Distribution Bell Curve (Overall Score Distribution)</span>
+                                    <span class="text-[8px] text-slate-500">Mean: ${instMeanPct.toFixed(1)}% | StdDev: ${instStdDev.toFixed(1)}</span>
+                                </div>
+                                ${instSvgChart}
+                            </div>
                         </div>
 
-                        <div class="flex justify-between items-end text-[9px] text-slate-950 font-bold pt-4 border-t border-slate-300">
-                            <div class="text-center">
-                                <div class="w-36 border-b border-slate-900 mb-1"></div>
-                                <span>Prepared by Examination Branch</span>
+                        <!-- Teacher Merit Ranking List Table -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xs font-black uppercase text-slate-900 tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-trophy text-amber-600"></i> Teacher Performance Merit Ranking List (Sorted by Subject GPA)
+                                </h3>
+                                <span class="text-[9px] text-slate-500 font-semibold">Ordered Highest to Lowest Quality Index</span>
                             </div>
-                            <div class="text-center">
-                                <div class="w-36 border-b border-slate-900 mb-1"></div>
-                                <span>Academic Coordinator</span>
-                            </div>
-                            <div class="text-center">
-                                <div class="w-40 border-b border-slate-900 mb-1"></div>
-                                <span>Principal Official Signature</span>
+
+                            <div class="overflow-x-auto border border-slate-900 rounded-lg">
+                                <table class="print-table w-full text-left text-[9px]">
+                                    <thead>
+                                        <tr class="bg-slate-100 font-black uppercase border-b border-slate-900 text-slate-900">
+                                            <th class="py-1.5 px-2 text-center w-12">Rank</th>
+                                            <th class="py-1.5 px-2">Teacher Name</th>
+                                            <th class="py-1.5 px-2">Subject Assigned</th>
+                                            <th class="py-1.5 px-2 text-center">Class & Sec</th>
+                                            <th class="py-1.5 px-2 text-center">Students</th>
+                                            <th class="py-1.5 px-2 text-center text-emerald-800">Subject GPA (4.0)</th>
+                                            <th class="py-1.5 px-2 text-center">Pass Rate %</th>
+                                            <th class="py-1.5 px-2 text-center">Class Avg %</th>
+                                            <th class="py-1.5 px-2 text-center">Performance Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200 text-slate-900">
+                                        ${rowsHtml || '<tr><td colspan="9" class="text-center py-4 text-slate-500">No teacher appraisals recorded for this examination.</td></tr>'}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+
+                        <!-- Individual Teacher Bell Curves Breakdown Grid -->
+                        <div>
+                            <h3 class="text-xs font-black uppercase text-slate-900 tracking-wider mb-2 flex items-center gap-1.5">
+                                <i class="fa-solid fa-chart-area text-indigo-600"></i> Individual Teacher Bell Curve Performance Breakdown
+                            </h3>
+                            <div class="grid grid-cols-3 gap-3">
+                                ${cardsHtml || '<div class="col-span-3 text-center py-4 text-slate-500 text-xs">No teacher Bell Curves available.</div>'}
+                            </div>
+                        </div>
+
+                        <!-- Principal Evaluation Directive & Signatures -->
+                        <div class="border-2 border-slate-900 rounded-xl p-3 bg-slate-50/70 mt-4">
+                            <span class="text-[10px] font-black uppercase text-slate-900 block mb-1">Principal Executive Directive & Performance Remarks:</span>
+                            <div class="h-10 border-b border-dashed border-slate-400 mb-3 flex items-center">
+                                <span class="text-[9px] text-slate-400 italic">Official Principal remarks on faculty GPA outcome and academic evaluation...</span>
+                            </div>
+                            <div class="flex justify-between items-end text-[9px] text-slate-950 font-bold pt-1">
+                                <div class="text-center">
+                                    <div class="w-36 border-b border-slate-900 mb-1"></div>
+                                    <span>Examination Branch Incharge</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-36 border-b border-slate-900 mb-1"></div>
+                                    <span>Academic Coordinator</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-40 border-b border-slate-900 mb-1"></div>
+                                    <span>Principal Official Stamp & Sign</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 `;
 
