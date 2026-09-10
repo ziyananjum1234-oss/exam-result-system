@@ -144,6 +144,37 @@
                 justify-content: space-between !important;
                 position: relative !important;
             }
+
+            /* Executive Analytics 1-Page A4 Print Overrides */
+            #resultAnalyticsSection .print-paper {
+                background: white !important;
+                color: #0f172a !important;
+                border: 1.5px solid #0f172a !important;
+                box-shadow: none !important;
+                padding: 14px 18px !important;
+                border-radius: 12px !important;
+            }
+            #resultAnalyticsSection .ana-dark-card {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+            }
+            #resultAnalyticsSection .ana-podium-card {
+                background: #fffdf5 !important;
+                border: 1.5px solid #f59e0b !important;
+                color: #0f172a !important;
+            }
+            #resultAnalyticsSection table {
+                border: 1.5px solid #0f172a !important;
+            }
+            #resultAnalyticsSection th, #resultAnalyticsSection td {
+                border: 1px solid #cbd5e1 !important;
+                color: #0f172a !important;
+            }
+            #resultAnalyticsSection th {
+                background-color: #f1f5f9 !important;
+                color: #0f172a !important;
+            }
         }
     </style>
 
@@ -1272,20 +1303,25 @@
 
         <!-- ================= TAB 7: DEDICATED SEPARATE TAB — RESULT SUMMARY & GRAPHS ================= -->
         <div id="resultAnalyticsSection" class="hidden">
+            <!-- Top Controls (Screen Only) -->
             <div class="no-print flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                 <div>
                     <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-amber-400"></i> Class Performance Summary & Visual Analytics
+                        <i class="fa-solid fa-chart-pie text-amber-400"></i> Executive Performance Analytics & Visual Summary
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Multi-Color Grade Distribution, Subject Matrix & Merit Podium</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Chenab College Shorkot — Comprehensive Academic Metrics, Grade Quality & Merit Podium</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" onclick="window.showTab('consolidated')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2"><i class="fa-solid fa-table"></i> Back to Gazette Table</button>
-                    <button type="button" onclick="window.printAnalyticsReport()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"><i class="fa-solid fa-print"></i> Print Executive Summary (PDF)</button>
+                    <button type="button" onclick="window.showTab('consolidated')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2 font-medium">
+                        <i class="fa-solid fa-table"></i> Back to Gazette Table
+                    </button>
+                    <button type="button" onclick="window.printAnalyticsReport()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 transition-all active:scale-95">
+                        <i class="fa-solid fa-print"></i> Print Executive Summary (PDF)
+                    </button>
                 </div>
             </div>
 
-            <!-- Filter Controls for Analytics -->
+            <!-- Filter Controls (Screen Only) -->
             <div class="no-print bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Exam for Summary *</label>
@@ -1307,138 +1343,122 @@
                     <button type="button" onclick="window.loadAnalyticsData()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
                         <i class="fa-solid fa-arrows-rotate"></i> Refresh Analytics
                     </button>
+                </div>
             </div>
 
-            <!-- Official Printable Header Banner for Executive Analytics (A4 Print Ready) -->
-            <div class="print-paper bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 mb-6">
-                <div class="border-b-2 border-slate-900 pb-5 mb-5 flex items-center justify-between gap-4">
+            <!-- MAIN EXECUTIVE ANALYTICS PRINT PAPER CONTAINER (1-PAGE A4 READY) -->
+            <div class="print-paper bg-slate-900 border border-slate-800 text-slate-100 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+                <!-- 1. Official Header Banner -->
+                <div class="border-b-2 border-slate-700 print:border-slate-900 pb-4 flex items-center justify-between gap-4">
                     <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 flex items-center justify-center">
                         <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" alt="CCS Logo" class="max-h-full max-w-full object-contain">
                     </div>
                     <div class="text-center flex-1">
-                        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-950">Chenab College Shorkot</h1>
-                        <p class="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-widest mt-1">EXECUTIVE RESULT ANALYTICS & PERFORMANCE SUMMARY</p>
-                        <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-xs font-semibold text-slate-700 mt-2">
-                            <span>Exam: <b id="ana_printExamTitle" class="text-slate-950 font-bold">-</b></span>
-                            <span>Class: <b id="ana_printClassTitle" class="text-slate-950 font-bold underline">-</b></span>
-                            <span>Section: <b id="ana_printSecTitle" class="text-slate-950 font-bold">-</b></span>
+                        <h1 class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white print:text-slate-950">Chenab College Shorkot</h1>
+                        <p class="text-xs sm:text-sm font-black text-amber-400 print:text-slate-800 uppercase tracking-widest mt-0.5">EXECUTIVE RESULT ANALYTICS & PERFORMANCE REPORT</p>
+                        <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-xs font-semibold text-slate-300 print:text-slate-700 mt-2">
+                            <span>Exam: <b id="ana_printExamTitle" class="text-white print:text-slate-950 font-bold">-</b></span>
+                            <span>Class: <b id="ana_printClassTitle" class="text-white print:text-slate-950 font-bold underline">-</b></span>
+                            <span>Section: <b id="ana_printSecTitle" class="text-indigo-400 print:text-slate-950 font-bold">-</b></span>
                             <span>Session: <b>2025-2026</b></span>
                             <span>Date: <b id="ana_printDate">-</b></span>
                         </div>
                     </div>
                     <div class="w-16 sm:w-20 flex-shrink-0"></div>
                 </div>
-            </div>
 
-            <!-- EXECUTIVE ANALYTICS DASHBOARD -->
-            <div class="space-y-6">
-                <!-- 1. Top 5 KPI Summary Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
-                    <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-4 rounded-2xl shadow-lg">
-                        <div class="flex items-center justify-between text-slate-400 text-[11px] font-semibold mb-1">
-                            <span>Total Enrolled</span>
-                            <i class="fa-solid fa-users text-indigo-400"></i>
-                        </div>
-                        <h3 id="ana_totalStudents" class="text-2xl font-black text-white">0</h3>
-                        <p class="text-[10px] text-slate-500 mt-1">Class Strength</p>
+                <!-- 2. Top 5 Executive KPI Summary Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div class="ana-dark-card bg-slate-950/80 border border-slate-800 p-3.5 rounded-2xl shadow-md text-center">
+                        <div class="text-slate-400 print:text-slate-600 text-[10px] uppercase font-bold tracking-wider mb-1">Total Enrolled</div>
+                        <h3 id="ana_totalStudents" class="text-2xl font-black text-white print:text-slate-900">0</h3>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Class Strength</p>
                     </div>
 
-                    <div class="bg-gradient-to-br from-emerald-950/40 to-slate-950 border border-emerald-500/30 p-4 rounded-2xl shadow-lg">
-                        <div class="flex items-center justify-between text-emerald-400 text-[11px] font-semibold mb-1">
-                            <span>Passed</span>
-                            <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                        </div>
-                        <h3 id="ana_passedCount" class="text-2xl font-black text-emerald-400">0</h3>
-                        <p id="ana_passPctBadge" class="text-[10px] text-emerald-500 font-bold mt-1">0% Pass Ratio</p>
+                    <div class="ana-dark-card bg-emerald-950/30 border border-emerald-500/30 p-3.5 rounded-2xl shadow-md text-center">
+                        <div class="text-emerald-400 print:text-emerald-700 text-[10px] uppercase font-bold tracking-wider mb-1">Passed</div>
+                        <h3 id="ana_passedCount" class="text-2xl font-black text-emerald-400 print:text-emerald-700">0</h3>
+                        <p id="ana_passPctBadge" class="text-[10px] text-emerald-400 print:text-emerald-700 font-bold mt-0.5">0% Pass Ratio</p>
                     </div>
 
-                    <div class="bg-gradient-to-br from-rose-950/40 to-slate-950 border border-rose-500/30 p-4 rounded-2xl shadow-lg">
-                        <div class="flex items-center justify-between text-rose-400 text-[11px] font-semibold mb-1">
-                            <span>Failed</span>
-                            <i class="fa-solid fa-circle-xmark text-rose-400"></i>
-                        </div>
-                        <h3 id="ana_failedCount" class="text-2xl font-black text-rose-400">0</h3>
-                        <p id="ana_failPctBadge" class="text-[10px] text-rose-500 font-bold mt-1">0% Detained</p>
+                    <div class="ana-dark-card bg-rose-950/30 border border-rose-500/30 p-3.5 rounded-2xl shadow-md text-center">
+                        <div class="text-rose-400 print:text-rose-700 text-[10px] uppercase font-bold tracking-wider mb-1">Failed</div>
+                        <h3 id="ana_failedCount" class="text-2xl font-black text-rose-400 print:text-rose-700">0</h3>
+                        <p id="ana_failPctBadge" class="text-[10px] text-rose-400 print:text-rose-700 font-bold mt-0.5">0% Detained</p>
                     </div>
 
-                    <div class="bg-gradient-to-br from-indigo-950/40 to-slate-950 border border-indigo-500/30 p-4 rounded-2xl shadow-lg">
-                        <div class="flex items-center justify-between text-indigo-400 text-[11px] font-semibold mb-1">
-                            <span>Class Average</span>
-                            <i class="fa-solid fa-chart-line text-indigo-400"></i>
-                        </div>
-                        <h3 id="ana_classAvgScore" class="text-2xl font-black text-indigo-300">0%</h3>
-                        <p class="text-[10px] text-slate-400 mt-1">Mean Score</p>
+                    <div class="ana-dark-card bg-indigo-950/30 border border-indigo-500/30 p-3.5 rounded-2xl shadow-md text-center">
+                        <div class="text-indigo-400 print:text-indigo-700 text-[10px] uppercase font-bold tracking-wider mb-1">Class Average</div>
+                        <h3 id="ana_classAvgScore" class="text-2xl font-black text-indigo-300 print:text-indigo-800">0%</h3>
+                        <p class="text-[10px] text-slate-400 print:text-slate-600 mt-0.5">Mean Score</p>
                     </div>
 
-                    <div class="bg-gradient-to-br from-amber-950/40 to-slate-950 border border-amber-500/30 p-4 rounded-2xl shadow-lg col-span-2 sm:col-span-1">
-                        <div class="flex items-center justify-between text-amber-400 text-[11px] font-semibold mb-1">
-                            <span>Class Highest</span>
-                            <i class="fa-solid fa-trophy text-amber-400"></i>
-                        </div>
-                        <h3 id="ana_highestScore" class="text-xl font-black text-amber-300 truncate">-</h3>
-                        <p id="ana_highestStudent" class="text-[10px] text-amber-400/80 truncate mt-1">-</p>
+                    <div class="ana-dark-card bg-amber-950/30 border border-amber-500/30 p-3.5 rounded-2xl shadow-md text-center col-span-2 sm:col-span-1">
+                        <div class="text-amber-400 print:text-amber-700 text-[10px] uppercase font-bold tracking-wider mb-1">Class Highest</div>
+                        <h3 id="ana_highestScore" class="text-xl font-black text-amber-300 print:text-amber-800 truncate">-</h3>
+                        <p id="ana_highestStudent" class="text-[10px] text-amber-400 print:text-amber-800 truncate mt-0.5">-</p>
                     </div>
                 </div>
 
-                <!-- 2. Top 3 Position Holders Spotlight Podium -->
-                <div class="bg-slate-900/90 border border-amber-500/30 rounded-3xl p-5 sm:p-6 shadow-xl">
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-                        <h3 class="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
-                            <i class="fa-solid fa-crown text-amber-400 text-sm"></i> Class Top 3 Merit Honors Podium
+                <!-- 3. Top 3 Position Holders Spotlight Podium -->
+                <div class="ana-podium-card bg-slate-950/60 border border-amber-500/40 rounded-2xl p-4 shadow-lg">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800 print:border-amber-300">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-amber-400 print:text-amber-800 flex items-center gap-2">
+                            <i class="fa-solid fa-crown text-amber-400 print:text-amber-800 text-sm"></i> Class Top 3 Merit Honors Podium
                         </h3>
-                        <span class="text-[10px] text-slate-400 font-semibold">Annual Merit Recognition</span>
+                        <span class="text-[10px] text-slate-400 print:text-slate-600 font-semibold">Academic Merit Recognition</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5" id="topHoldersPodiumContainer">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="topHoldersPodiumContainer">
                         <!-- Populated Dynamically -->
                     </div>
                 </div>
 
-                <!-- 3. Colorful Grade Distribution Graphs & Subject Analysis Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <!-- 4. Grade Distribution & Subject Analysis Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
                     
-                    <!-- Grade Distribution Multi-Color Progress Bars -->
-                    <div class="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+                    <!-- Grade Distribution Bars & Gender Ratios -->
+                    <div class="lg:col-span-5 ana-dark-card bg-slate-950/60 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col justify-between">
                         <div>
-                            <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                                    <i class="fa-solid fa-chart-pie text-indigo-400"></i> Grade Quality Distribution
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800 print:border-slate-300">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 print:text-slate-900 flex items-center gap-2">
+                                    <i class="fa-solid fa-chart-pie text-indigo-400 print:text-indigo-700"></i> Grade Quality Breakdown
                                 </h4>
-                                <span class="text-[10px] text-slate-400 font-mono">Academic Metrics</span>
+                                <span class="text-[10px] text-slate-400 print:text-slate-600 font-mono">Academic Metrics</span>
                             </div>
 
-                            <div class="space-y-3" id="gradeDistributionBarsContainer">
+                            <div class="space-y-2.5" id="gradeDistributionBarsContainer">
                                 <!-- Multi-color progress bars populated dynamically -->
                             </div>
                         </div>
 
-                        <!-- Gender Ratio Pill below graph -->
-                        <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-slate-400">
-                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-mars text-blue-400"></i> Boys Pass: <b id="ana_boysPass" class="text-blue-300">0%</b></span>
-                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-venus text-pink-400"></i> Girls Pass: <b id="ana_girlsPass" class="text-pink-300">0%</b></span>
+                        <!-- Gender Ratio Pills -->
+                        <div class="mt-4 pt-3 border-t border-slate-800 print:border-slate-300 flex items-center justify-between text-xs font-semibold text-slate-400 print:text-slate-700">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-mars text-blue-400 print:text-blue-700"></i> Boys Pass: <b id="ana_boysPass" class="text-blue-300 print:text-blue-900">0%</b></span>
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-venus text-pink-400 print:text-pink-700"></i> Girls Pass: <b id="ana_girlsPass" class="text-pink-300 print:text-pink-900">0%</b></span>
                         </div>
                     </div>
 
-                    <!-- Subject-Wise Quality Breakdown Matrix -->
-                    <div class="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl">
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
-                                <i class="fa-solid fa-book-bookmark text-emerald-400"></i> Subject-Wise Performance Analysis
+                    <!-- Subject-Wise Quality Breakdown Matrix Table -->
+                    <div class="lg:col-span-7 ana-dark-card bg-slate-950/60 border border-slate-800 rounded-2xl p-4 shadow-lg">
+                        <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800 print:border-slate-300">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-200 print:text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-book-bookmark text-emerald-400 print:text-emerald-700"></i> Subject-Wise Performance Analysis
                             </h4>
-                            <span class="text-[10px] text-slate-400">Quality Breakdown</span>
+                            <span class="text-[10px] text-slate-400 print:text-slate-600 font-semibold">Subject Breakdown</span>
                         </div>
 
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-950 text-slate-400 uppercase font-semibold text-[10px]">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-950 print:bg-slate-100 text-slate-400 print:text-slate-900 uppercase font-bold text-[10px]">
                                     <tr>
                                         <th class="py-2 px-2.5">Subject</th>
                                         <th class="py-2 px-2 text-center">Pass / Fail</th>
                                         <th class="py-2 px-2 text-center w-28">Pass %</th>
-                                        <th class="py-2 px-2 text-center text-amber-400">Subject Topper</th>
+                                        <th class="py-2 px-2 text-center text-amber-400 print:text-amber-800">Subject Topper</th>
                                     </tr>
                                 </thead>
-                                <tbody id="subjectAnalyticsTableBody" class="divide-y divide-slate-800 text-slate-300">
+                                <tbody id="subjectAnalyticsTableBody" class="divide-y divide-slate-800 print:divide-slate-300 text-slate-300 print:text-slate-900">
                                     <!-- Populated Dynamically -->
                                 </tbody>
                             </table>
@@ -1446,6 +1466,25 @@
                     </div>
 
                 </div>
+
+                <!-- 5. Official Printable Signatures Footer -->
+                <div class="pt-6 mt-6 border-t-2 border-slate-700 print:border-slate-900">
+                    <div class="flex justify-between items-end text-xs text-slate-300 print:text-slate-900 font-bold px-4">
+                        <div class="text-center">
+                            <div class="w-40 border-b-2 border-slate-500 print:border-slate-900 mb-2"></div>
+                            <span>Class Incharge Signature</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-40 border-b-2 border-slate-500 print:border-slate-900 mb-2"></div>
+                            <span>Section Head Signature</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-40 border-b-2 border-slate-500 print:border-slate-900 mb-2"></div>
+                            <span>Principal / IT Controller</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
