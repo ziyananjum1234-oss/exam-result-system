@@ -5598,11 +5598,24 @@
                 ];
 
                 subjects.forEach(sub => {
-                    const allocKey = `${cls}_${sec}_${sub.name}`;
-                    const teacherName = teacherAllocDatabase[allocKey] || 'Unassigned';
+                    let teacherInfo = '';
+                    if (sec === 'All') {
+                        const tSet = new Set();
+                        Object.keys(teacherAllocDatabase).forEach(k => {
+                            if (k.startsWith(`${cls}_`) && k.endsWith(`_${sub.name}`)) {
+                                const t = teacherAllocDatabase[k];
+                                if (t) tSet.add(t);
+                            }
+                        });
+                        const tArr = Array.from(tSet);
+                        teacherInfo = tArr.length > 0 ? tArr.join(' / ') : 'Unassigned';
+                    } else {
+                        const allocKey = `${cls}_${sec}_${sub.name}`;
+                        teacherInfo = teacherAllocDatabase[allocKey] || 'Unassigned';
+                    }
                     const opt = document.createElement('option');
                     opt.value = sub.name;
-                    opt.textContent = `${sub.name} (Teacher: ${teacherName})`;
+                    opt.textContent = `${sub.name} (Teacher: ${teacherInfo})`;
                     subSelect.appendChild(opt);
                 });
 
@@ -5611,7 +5624,8 @@
                 console.error("Error in loadTeacherProgressData:", e);
             }
         };
-window.renderTeacherProgressReport = function() {
+
+        window.renderTeacherProgressReport = function() {
             try {
                 const examSelect = document.getElementById('tp_examSelect');
                 const classSelect = document.getElementById('tp_classSelect');
@@ -5629,8 +5643,43 @@ window.renderTeacherProgressReport = function() {
                 const subObj = exam ? (exam.subjects || []).find(s => s.name === subName) : null;
                 const maxMarks = subObj ? Number(subObj.marks || 100) : 100;
 
-                const allocKey = `${cls}_${sec}_${subName}`;
-                const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Incharge';
+                let teacherName = 'Faculty Incharge';
+                let displaySectionText = `${cls} — Section ${sec}`;
+                let activeStudents = [];
+
+                if (sec === 'All') {
+                    const secTeacherMap = {};
+                    Object.keys(teacherAllocDatabase).forEach(k => {
+                        if (k.startsWith(`${cls}_`) && k.endsWith(`_${subName}`)) {
+                            const parts = k.split('_');
+                            const secName = parts[1];
+                            const tName = teacherAllocDatabase[k];
+                            if (secName && tName) secTeacherMap[secName] = tName;
+                        }
+                    });
+                    const uniqueTeachers = Array.from(new Set(Object.values(secTeacherMap)));
+                    if (uniqueTeachers.length === 1) {
+                        teacherName = uniqueTeachers[0];
+                    } else if (uniqueTeachers.length > 1) {
+                        teacherName = uniqueTeachers.join(' / ');
+                    } else {
+                        teacherName = teacherAllocDatabase[`${cls}_All_${subName}`] || 'Faculty Incharge';
+                    }
+
+                    const activeSecList = Object.keys(secTeacherMap);
+                    if (activeSecList.length > 0) {
+                        displaySectionText = `${cls} — Sections ${activeSecList.join(', ')} (Combined)`;
+                    } else {
+                        displaySectionText = `${cls} — All Sections (Combined)`;
+                    }
+
+                    activeStudents = studentsList.filter(s => s.class === cls && (s.status || 'Active') !== 'Left');
+                } else {
+                    const allocKey = `${cls}_${sec}_${subName}`;
+                    teacherName = teacherAllocDatabase[allocKey] || 'Faculty Incharge';
+                    displaySectionText = `${cls} — Section ${sec}`;
+                    activeStudents = studentsList.filter(s => s.class === cls && (s.group || 'General').trim() === sec && (s.status || 'Active') !== 'Left');
+                }
 
                 // DOM Card Elements
                 const cardTeacher = document.getElementById('tp_cardTeacherName');
@@ -5647,9 +5696,7 @@ window.renderTeacherProgressReport = function() {
                 const tableBody = document.getElementById('tp_studentTableBody');
 
                 if (cardTeacher) cardTeacher.textContent = teacherName;
-                if (cardClassSec) cardClassSec.textContent = `${cls} — Section ${sec}`;
-
-                const activeStudents = studentsList.filter(s => s.class === cls && (sec === 'All' || (s.group || 'General').trim() === sec) && (s.status || 'Active') !== 'Left');
+                if (cardClassSec) cardClassSec.textContent = displaySectionText;
                 
                 if (tableBody) tableBody.innerHTML = '';
 
@@ -5968,10 +6015,43 @@ window.renderTeacherProgressReport = function() {
                 const subObj = exam ? (exam.subjects || []).find(s => s.name === subName) : null;
                 const maxMarks = subObj ? Number(subObj.marks || 100) : 100;
 
-                const allocKey = `${cls}_${sec}_${subName}`;
-                const teacherName = teacherAllocDatabase[allocKey] || 'Faculty Member';
+                let teacherName = 'Faculty Member';
+                let displaySectionText = `${cls} — Section ${sec}`;
+                let activeStudents = [];
 
-                const activeStudents = studentsList.filter(s => s.class === cls && (sec === 'All' || (s.group || 'General').trim() === sec) && (s.status || 'Active') !== 'Left');
+                if (sec === 'All') {
+                    const secTeacherMap = {};
+                    Object.keys(teacherAllocDatabase).forEach(k => {
+                        if (k.startsWith(`${cls}_`) && k.endsWith(`_${subName}`)) {
+                            const parts = k.split('_');
+                            const secName = parts[1];
+                            const tName = teacherAllocDatabase[k];
+                            if (secName && tName) secTeacherMap[secName] = tName;
+                        }
+                    });
+                    const uniqueTeachers = Array.from(new Set(Object.values(secTeacherMap)));
+                    if (uniqueTeachers.length === 1) {
+                        teacherName = uniqueTeachers[0];
+                    } else if (uniqueTeachers.length > 1) {
+                        teacherName = uniqueTeachers.join(' / ');
+                    } else {
+                        teacherName = teacherAllocDatabase[`${cls}_All_${subName}`] || 'Faculty Member';
+                    }
+
+                    const activeSecList = Object.keys(secTeacherMap);
+                    if (activeSecList.length > 0) {
+                        displaySectionText = `${cls} — Sections ${activeSecList.join(', ')} (Combined)`;
+                    } else {
+                        displaySectionText = `${cls} — All Sections (Combined)`;
+                    }
+
+                    activeStudents = studentsList.filter(s => s.class === cls && (s.status || 'Active') !== 'Left');
+                } else {
+                    const allocKey = `${cls}_${sec}_${subName}`;
+                    teacherName = teacherAllocDatabase[allocKey] || 'Faculty Member';
+                    displaySectionText = `${cls} — Section ${sec}`;
+                    activeStudents = studentsList.filter(s => s.class === cls && (s.group || 'General').trim() === sec && (s.status || 'Active') !== 'Left');
+                }
 
                 let totalGpaPoints = 0;
                 let passedCount = 0;
@@ -6039,8 +6119,8 @@ window.renderTeacherProgressReport = function() {
                                 <span class="text-indigo-950 font-black text-xs uppercase">${subName}</span>
                             </div>
                             <div>
-                                <span class="text-slate-500 uppercase font-bold block">Class & Section:</span>
-                                <span class="text-slate-950 font-bold uppercase">${cls} — ${sec}</span>
+                                <span class="text-slate-500 uppercase font-bold block">Class & Scope:</span>
+                                <span class="text-slate-950 font-bold uppercase">${displaySectionText}</span>
                             </div>
                             <div>
                                 <span class="text-slate-500 uppercase font-bold block">Appeared / Total:</span>
