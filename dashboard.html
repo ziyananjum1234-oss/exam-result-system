@@ -1632,6 +1632,9 @@
                     <button type="button" onclick="window.printTeacherDossier()" class="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-teal-600/30 flex items-center gap-2 transition-all active:scale-95">
                         <i class="fa-solid fa-print"></i> Print Teacher Dossier (with Bell Curve)
                     </button>
+                    <button type="button" onclick="window.printPrincipalExecutiveReport()" class="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-purple-600/30 flex items-center gap-2 transition-all active:scale-95">
+                        <i class="fa-solid fa-crown text-amber-300"></i> Print Principal Executive Summary Report
+                    </button>
                 </div>
             </div>
 
@@ -6382,12 +6385,6 @@
                         const meanScore = t.totalMarks / t.validCount;
                         const avgPct = (meanScore / t.maxMarks) * 100;
 
-                        let stdDev = 0;
-                        if (t.validCount > 1) {
-                            const variance = t.marksList.reduce((acc, v) => acc + Math.pow(v - meanScore, 2), 0) / t.validCount;
-                            stdDev = Math.sqrt(variance);
-                        }
-
                         teacherRows.push({
                             teacher: t.teacher,
                             subject: t.subject,
@@ -6397,10 +6394,7 @@
                             gpa: avgGpa,
                             passRate: passRate,
                             avgPct: avgPct,
-                            maxMarks: t.maxMarks,
-                            meanScore: meanScore,
-                            stdDev: stdDev,
-                            marksList: t.marksList
+                            maxMarks: t.maxMarks
                         });
                     }
                 });
@@ -6410,77 +6404,98 @@
                     return;
                 }
 
-                // Sort Teachers by GPA Descending (Highest GPA Top 1st)
-                teacherRows.sort((a, b) => b.gpa - a.gpa);
+                // Sort Teachers by HIGHEST PERCENTAGE (%) Descending
+                teacherRows.sort((a, b) => b.avgPct - a.avgPct);
 
-                // Render Compact Cards Grid (Fits on 1 Landscape Page)
-                let cardsHtml = '';
+                // Render Table Rows (Without Bell Curves, With Blank Remarks)
+                let rowsHtml = '';
                 teacherRows.forEach((r, idx) => {
                     const rankBadge = idx === 0 ? '🥇 1st' : idx === 1 ? '🥈 2nd' : idx === 2 ? '🥉 3rd' : `#${idx + 1}`;
-                    const rankBg = idx === 0 ? 'bg-amber-100 text-amber-900 border-amber-300' :
-                                   idx === 1 ? 'bg-slate-100 text-slate-900 border-slate-300' :
-                                   idx === 2 ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                                   'bg-slate-50 text-slate-700 border-slate-200';
-
-                    const miniSvgChart = window.generateSvgBellCurve(r.marksList, r.maxMarks, r.meanScore, r.stdDev);
-
-                    cardsHtml += `
-                        <div class="border border-slate-400 rounded-lg p-2 bg-white flex flex-col justify-between" style="page-break-inside: avoid;">
-                            <div class="flex justify-between items-start border-b border-slate-200 pb-1 mb-1">
-                                <div class="truncate pr-1">
-                                    <span class="text-[10px] font-black uppercase text-slate-950 block truncate leading-tight">${r.teacher}</span>
-                                    <span class="text-[8px] font-bold text-indigo-950 block truncate">${r.subject} (${r.class}-${r.section})</span>
-                                </div>
-                                <span class="text-[8px] font-black px-1.5 py-0.5 rounded border ${rankBg} shrink-0">${rankBadge}</span>
-                            </div>
-
-                            <div class="my-0.5 h-10 w-full flex items-center justify-center overflow-hidden">
-                                ${miniSvgChart}
-                            </div>
-
-                            <div class="flex justify-between items-center text-[8px] font-bold pt-1 border-t border-slate-200 text-slate-800">
-                                <span class="bg-indigo-50 text-indigo-950 px-1 py-0.5 rounded border border-indigo-200">GPA: ${r.gpa.toFixed(2)}</span>
-                                <span class="text-emerald-700">Pass: ${r.passRate.toFixed(0)}%</span>
-                                <span class="text-slate-500">${r.students} Std</span>
-                            </div>
-                        </div>
+                    rowsHtml += `
+                        <tr class="border-b border-slate-300 hover:bg-slate-50 text-slate-900 text-[10px]">
+                            <td class="text-center font-bold py-2 px-3">${rankBadge}</td>
+                            <td class="font-black uppercase py-2 px-3 text-slate-950">${r.teacher}</td>
+                            <td class="font-bold uppercase py-2 px-3 text-indigo-950">${r.subject} (${r.class}-${r.section})</td>
+                            <td class="text-center font-black py-2 px-3 text-emerald-800 text-xs">${r.avgPct.toFixed(2)}%</td>
+                            <td class="text-center font-black py-2 px-3 text-indigo-950 text-xs">${r.gpa.toFixed(2)}</td>
+                            <td class="py-2 px-3 w-40 border-l border-slate-300"></td>
+                        </tr>
                     `;
                 });
 
                 printContainer.innerHTML = `
                     <style>
-                        @page { size: landscape; margin: 4mm; }
+                        @page { size: portrait; margin: 6mm; }
                         @media print {
-                            html, body { height: 100%; overflow: hidden; }
-                            .print-paper { box-shadow: none !important; border: 2px solid #0f172a !important; padding: 4mm !important; }
+                            html, body { background: white !important; }
+                            .print-paper { box-shadow: none !important; border: 2px solid #0f172a !important; padding: 6mm !important; }
                         }
                     </style>
-                    <div class="print-paper bg-white p-3 text-slate-900 border-2 border-slate-900 flex flex-col justify-between" style="min-height: 95vh;">
-                        <!-- Compact Header -->
-                        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-1.5 mb-2">
-                            <div class="w-9 h-9 flex items-center justify-center">
+                    <div class="print-paper bg-white p-5 text-slate-900 border-2 border-slate-900 space-y-4">
+                        <!-- Official College Header -->
+                        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3">
+                            <div class="w-14 h-14 flex items-center justify-center">
                                 <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" class="max-h-full max-w-full object-contain">
                             </div>
-                            <div class="text-center flex-1 px-2">
-                                <h1 class="text-base font-black uppercase font-royal-title text-slate-950 tracking-wide">Chenab College Shorkot</h1>
-                                <p class="text-[10px] font-black uppercase tracking-widest text-indigo-950">FACULTY PERFORMANCE MASTER SUMMARY & BELL CURVE RANKING (1-PAGE LANDSCAPE)</p>
+                            <div class="text-center flex-1 px-3">
+                                <h1 class="text-xl font-black uppercase font-royal-title text-slate-950 tracking-wider">Chenab College Shorkot</h1>
+                                <p class="text-xs font-black uppercase tracking-widest text-indigo-950">ALL-TEACHERS MASTER PERFORMANCE & PERCENTAGE RANKING SUMMARY</p>
+                                <p class="text-[10px] text-slate-600 font-bold mt-0.5">${exam ? exam.name : 'Examination'} — Session 2025-2026</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-[8px] font-black uppercase px-2 py-0.5 bg-slate-950 text-white rounded">Official Executive</span>
-                                <p class="text-[8px] text-slate-500 font-bold mt-0.5">${new Date().toLocaleDateString('en-GB')}</p>
+                                <span class="text-[8px] font-black uppercase px-2 py-0.5 bg-slate-950 text-white rounded">Confidential</span>
+                                <p class="text-[8px] text-slate-500 font-bold mt-1">${new Date().toLocaleDateString('en-GB')}</p>
                             </div>
                         </div>
 
-                        <!-- 1-Page Grid (4 Columns in Landscape) -->
-                        <div class="grid grid-cols-4 gap-2 flex-1">
-                            ${cardsHtml}
+                        <!-- Master Ranking Summary Table (Sorted by Highest Percentage) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xs font-black uppercase text-slate-900 tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-trophy text-amber-600"></i> Faculty Ranking Table (Ordered by Highest Subject Percentage)
+                                </h3>
+                                <span class="text-[9px] font-bold text-slate-500">Sorted Highest % to Lowest %</span>
+                            </div>
+
+                            <div class="overflow-x-auto border-2 border-slate-900 rounded-lg">
+                                <table class="w-full text-left text-[10px]">
+                                    <thead>
+                                        <tr class="bg-slate-900 text-white font-black uppercase text-[9px] tracking-wider text-center">
+                                            <th class="py-2.5 px-3 w-14">Rank</th>
+                                            <th class="py-2.5 px-3 text-left">Teacher Name</th>
+                                            <th class="py-2.5 px-3 text-left">Subject & Section</th>
+                                            <th class="py-2.5 px-3 bg-emerald-900">Subject Percentage (%)</th>
+                                            <th class="py-2.5 px-3 bg-indigo-900">Subject GPA (4.0)</th>
+                                            <th class="py-2.5 px-3 w-40 text-left">Official Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-300 text-slate-900">
+                                        ${rowsHtml || '<tr><td colspan="6" class="text-center py-4 text-slate-500 font-semibold">No faculty data available.</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
-                        <!-- Mini Footer Signatures -->
-                        <div class="flex justify-between items-end text-[8px] text-slate-950 font-bold pt-1.5 mt-2 border-t border-slate-900">
-                            <span>Faculty Evaluated: <b>${teacherRows.length} Teachers</b></span>
-                            <span>Highest GPA: <b>${teacherRows[0] ? teacherRows[0].gpa.toFixed(2) : '-'} (${teacherRows[0] ? teacherRows[0].teacher : '-'})</b></span>
-                            <span>Principal Stamp & Sign: ___________________________</span>
+                        <!-- Principal Directives & Signature Block -->
+                        <div class="border-2 border-slate-900 rounded-xl p-3 bg-slate-50 mt-4">
+                            <span class="text-[10px] font-black uppercase text-slate-900 block mb-1">Principal / Controller Assessment & Directives:</span>
+                            <div class="h-10 border-b border-dashed border-slate-400 mb-3 flex items-center">
+                                <span class="text-[9px] text-slate-400 italic">Official Principal directives and remarks on faculty percentage rankings...</span>
+                            </div>
+                            <div class="flex justify-between items-end text-[9px] text-slate-950 font-bold pt-1">
+                                <div class="text-center">
+                                    <div class="w-32 border-b border-slate-900 mb-1"></div>
+                                    <span>Examination Controller</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-32 border-b border-slate-900 mb-1"></div>
+                                    <span>Academic Coordinator</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-40 border-b border-slate-900 mb-1"></div>
+                                    <span>Principal Stamp & Signature</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -6495,7 +6510,256 @@
 
             } catch(e) {
                 console.error("Error in printAllTeachersMasterSummary:", e);
-                alert("Error generating 1-Page Master Summary. Check console for details.");
+                alert("Error generating Master Summary. Check console for details.");
+            }
+        };
+
+        window.generateSvgDonutChart = function(subjects) {
+            if (!Array.isArray(subjects) || subjects.length === 0) return '';
+            
+            const colors = ['#10b981', '#3b82f6', '#6366f1', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316'];
+            const totalPct = subjects.reduce((sum, s) => sum + (s.pct || 0), 0);
+            if (totalPct === 0) return '';
+
+            let currentAngle = 0;
+            const cx = 140, cy = 140, rOuter = 100, rInner = 55;
+            let pathsSvg = '';
+
+            subjects.forEach((s, idx) => {
+                const slicePct = (s.pct || 0) / totalPct;
+                const angle = slicePct * 360;
+                const startAngle = currentAngle;
+                const endAngle = currentAngle + angle;
+                currentAngle = endAngle;
+
+                const color = colors[idx % colors.length];
+
+                const startRad = (startAngle - 90) * Math.PI / 180;
+                const endRad = (endAngle - 90) * Math.PI / 180;
+
+                const x1Outer = cx + rOuter * Math.cos(startRad);
+                const y1Outer = cy + rOuter * Math.sin(startRad);
+                const x2Outer = cx + rOuter * Math.cos(endRad);
+                const y2Outer = cy + rOuter * Math.sin(endRad);
+
+                const x1Inner = cx + rInner * Math.cos(endRad);
+                const y1Inner = cy + rInner * Math.sin(endRad);
+                const x2Inner = cx + rInner * Math.cos(startRad);
+                const y2Inner = cy + rInner * Math.sin(startRad);
+
+                const largeArc = angle > 180 ? 1 : 0;
+
+                const pathD = `
+                    M ${x1Outer} ${y1Outer}
+                    A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2Outer} ${y2Outer}
+                    L ${x1Inner} ${y1Inner}
+                    A ${rInner} ${rInner} 0 ${largeArc} 0 ${x2Inner} ${y2Inner}
+                    Z
+                `;
+
+                pathsSvg += `<path d="${pathD}" fill="${color}" stroke="#ffffff" stroke-width="2" />`;
+            });
+
+            return `
+                <div class="flex flex-col items-center justify-center">
+                    <svg viewBox="0 0 280 280" class="w-48 h-48">
+                        ${pathsSvg}
+                        <circle cx="${cx}" cy="${cy}" r="${rInner - 2}" fill="#ffffff" />
+                        <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="10" font-weight="900" fill="#0f172a" font-family="sans-serif">SUBJECTS</text>
+                        <text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="8" font-weight="700" fill="#475569" font-family="sans-serif">DISTRIBUTION</text>
+                    </svg>
+                </div>
+            `;
+        };
+
+        window.printPrincipalExecutiveReport = function() {
+            try {
+                const examSelect = document.getElementById('tp_examSelect');
+                const classSelect = document.getElementById('tp_classSelect');
+                const printContainer = document.getElementById('tp_printDossierContainer');
+
+                if (!examSelect || !classSelect || !printContainer) return;
+
+                const examId = examSelect.value;
+                const cls = classSelect.value;
+                const exam = examsSetupList.find(e => e.id === examId);
+
+                const activeStudents = studentsList.filter(s => s.class === cls && (s.status || 'Active') !== 'Left');
+                if (activeStudents.length === 0) {
+                    alert(`No active students found for class ${cls}`);
+                    return;
+                }
+
+                const definedSubjects = (exam && Array.isArray(exam.subjects) && exam.subjects.length > 0) ? exam.subjects : [
+                    { name: "English", marks: 100 }, { name: "Mathematics", marks: 100 }, { name: "Physics", marks: 100 },
+                    { name: "Chemistry", marks: 100 }, { name: "Biology", marks: 100 }, { name: "Computer Science", marks: 100 },
+                    { name: "Urdu", marks: 100 }, { name: "Islamiat", marks: 100 }
+                ];
+
+                let grandObtainedMarks = 0;
+                let grandMaxMarks = 0;
+                let grandValidCount = 0;
+                let grandGpaSum = 0;
+
+                const subjectsData = [];
+                let tableRowsHtml = '';
+
+                definedSubjects.forEach((sub, idx) => {
+                    const maxMarks = Number(sub.marks || 100);
+                    let subObtained = 0;
+                    let subValid = 0;
+                    let subGpaSum = 0;
+
+                    activeStudents.forEach(st => {
+                        const key1 = `${examId}_${st.rollNo}`;
+                        const key2 = `${st.id}_${examId}`;
+                        const stMarks = marksDatabase[key1] || (marksDatabase[st.id] && marksDatabase[st.id][examId]) || marksDatabase[key2] || {};
+                        const rawVal = stMarks[sub.name];
+
+                        if (rawVal !== undefined && rawVal !== null && rawVal !== '' && rawVal !== 'A' && rawVal !== 'L' && rawVal !== 'a' && rawVal !== 'l') {
+                            const numVal = Number(rawVal);
+                            if (!isNaN(numVal)) {
+                                subValid++;
+                                subObtained += numVal;
+                                const pct = (numVal / maxMarks) * 100;
+                                const gpaObj = window.getGpaGrade(pct);
+                                subGpaSum += gpaObj.gpa;
+                            }
+                        }
+                    });
+
+                    if (subValid > 0) {
+                        const totalSubMax = subValid * maxMarks;
+                        const subPct = (subObtained / totalSubMax) * 100;
+                        const subGpa = subGpaSum / subValid;
+
+                        grandObtainedMarks += subObtained;
+                        grandMaxMarks += totalSubMax;
+                        grandValidCount += subValid;
+                        grandGpaSum += subGpaSum;
+
+                        subjectsData.push({ name: sub.name, pct: subPct, gpa: subGpa });
+
+                        tableRowsHtml += `
+                            <tr class="border-b border-slate-200 hover:bg-slate-50 font-semibold text-slate-900 text-[10px]">
+                                <td class="py-2 px-3 text-center font-bold text-slate-600">${idx + 1}</td>
+                                <td class="py-2 px-3 font-bold uppercase text-indigo-950">${sub.name}</td>
+                                <td class="py-2 px-3 text-center font-black text-slate-950">${subPct.toFixed(2)}%</td>
+                                <td class="py-2 px-3 text-center font-black text-indigo-900">${subGpa.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                const grandPct = grandMaxMarks > 0 ? (grandObtainedMarks / grandMaxMarks) * 100 : 0;
+                const grandGpa = grandValidCount > 0 ? (grandGpaSum / grandValidCount) : 0;
+
+                const donutChartSvg = window.generateSvgDonutChart(subjectsData);
+
+                printContainer.innerHTML = `
+                    <style>
+                        @page { size: portrait; margin: 8mm; }
+                        @media print {
+                            html, body { background: white !important; }
+                            .print-paper { box-shadow: none !important; border: 2px solid #0f172a !important; padding: 6mm !important; }
+                        }
+                    </style>
+                    <div class="print-paper bg-white p-5 text-slate-900 border-2 border-slate-900 flex flex-col justify-between" style="min-height: 96vh;">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3">
+                            <div class="w-16 h-16 flex items-center justify-center">
+                                <img src="logo.png" onerror="this.onerror=null; this.src='logo.jpg';" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <div class="text-center flex-1 px-4">
+                                <h1 class="text-xl font-black uppercase font-royal-title tracking-wider text-slate-950">Chenab College Shorkot</h1>
+                                <p class="text-xs font-black uppercase tracking-widest text-indigo-950">EXECUTIVE PRINCIPAL SUMMARY & ACADEMIC EVALUATION REPORT</p>
+                                <p class="text-[10px] text-slate-600 font-semibold mt-0.5">${cls} Class ${exam ? exam.name : 'Examination'} — Session 2025-2026</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] font-black uppercase px-2.5 py-1 bg-slate-950 text-white rounded">Confidential</span>
+                                <p class="text-[9px] text-slate-500 font-bold mt-1">${new Date().toLocaleDateString('en-GB')}</p>
+                            </div>
+                        </div>
+
+                        <!-- Donut Pie Chart & Grand Highlights -->
+                        <div class="grid grid-cols-2 gap-4 items-center my-2 p-4 bg-slate-50 border-2 border-slate-900 rounded-xl">
+                            <!-- Left: SVG Circle Donut Chart -->
+                            <div class="flex flex-col items-center justify-center">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-2">Subject Performance Circle Chart</h3>
+                                ${donutChartSvg}
+                            </div>
+
+                            <!-- Right: Grand Percentage & Grand GPA Boxes -->
+                            <div class="space-y-4">
+                                <div class="p-4 bg-white border-2 border-slate-900 rounded-xl text-center shadow-md">
+                                    <span class="text-xs font-black uppercase tracking-wider text-slate-600 block mb-1">Grand Percentage (%)</span>
+                                    <span class="text-4xl font-black text-slate-950">${grandPct.toFixed(2)}%</span>
+                                </div>
+
+                                <div class="p-4 bg-indigo-50 border-2 border-indigo-950 rounded-xl text-center shadow-md">
+                                    <span class="text-xs font-black uppercase tracking-wider text-indigo-950 block mb-1">Grand Cumulative GPA Index</span>
+                                    <span class="text-4xl font-black text-indigo-950">${grandGpa.toFixed(2)} <span class="text-sm font-bold text-slate-600">/ 4.00</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject Summary Table -->
+                        <div class="my-2">
+                            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-2 flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-check text-indigo-700"></i> Subject-Wise Percentage & GPA Index Table
+                            </h3>
+                            <div class="overflow-x-auto border-2 border-slate-900 rounded-lg">
+                                <table class="w-full text-left text-[10px]">
+                                    <thead>
+                                        <tr class="bg-slate-900 text-white font-black uppercase tracking-wider text-center">
+                                            <th class="py-2 px-3 w-12">S.No</th>
+                                            <th class="py-2 px-3 text-left">Subject Name</th>
+                                            <th class="py-2 px-3">Subject Percentage (%)</th>
+                                            <th class="py-2 px-3">Subject GPA (4.0 Scale)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        ${tableRowsHtml || '<tr><td colspan="4" class="text-center py-4 text-slate-500 font-semibold">No subject data found.</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Principal Stamp & Signature Directive Block -->
+                        <div class="border-2 border-slate-900 rounded-xl p-3 bg-slate-50 mt-2">
+                            <span class="text-[10px] font-black uppercase text-slate-900 block mb-1">Principal Official Directive & Endorsement:</span>
+                            <div class="h-8 border-b border-dashed border-slate-400 mb-2 flex items-center">
+                                <span class="text-[9px] text-slate-400 italic">Official Principal endorsement and academic directives for class outcome...</span>
+                            </div>
+                            <div class="flex justify-between items-end text-[9px] text-slate-950 font-bold pt-1">
+                                <div class="text-center">
+                                    <div class="w-32 border-b border-slate-900 mb-1"></div>
+                                    <span>Examination Controller</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-32 border-b border-slate-900 mb-1"></div>
+                                    <span>Academic Coordinator</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-40 border-b border-slate-900 mb-1"></div>
+                                    <span>Principal Stamp & Signature</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                printContainer.classList.remove('hidden');
+                printContainer.classList.add('block');
+                window.print();
+                setTimeout(() => {
+                    printContainer.classList.add('hidden');
+                    printContainer.classList.remove('block');
+                }, 1000);
+
+            } catch(e) {
+                console.error("Error in printPrincipalExecutiveReport:", e);
+                alert("Error generating Principal Executive Summary Report. Check console for details.");
             }
         };
 
