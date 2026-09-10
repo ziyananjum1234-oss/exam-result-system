@@ -6306,6 +6306,7 @@ window.renderTeacherProgressReport = function() {
                 });
 
                 const instSvgChart = window.generateSvgBellCurve(overallMarksList, 100, instMeanPct, instStdDev);
+                const topTeacher = teacherRows.length > 0 ? teacherRows[0] : null;
 
                 printContainer.innerHTML = `
                     <div class="print-paper bg-white p-6 text-slate-900 border-2 border-slate-900 space-y-4">
@@ -6325,12 +6326,16 @@ window.renderTeacherProgressReport = function() {
                             </div>
                         </div>
 
-                        <!-- Institutional Overall Summary & Bell Curve -->
+                        <!-- Institutional Overall Summary & Top Teacher Spotlight -->
                         <div class="grid grid-cols-12 gap-4 border border-slate-900 rounded-xl p-3 bg-slate-50/80">
                             <div class="col-span-5 flex flex-col justify-between border-r border-slate-300 pr-3">
                                 <div>
-                                    <span class="text-[9px] font-black text-slate-500 uppercase block tracking-wider mb-1">Institutional Overview</span>
-                                    <div class="grid grid-cols-2 gap-2 text-center">
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <span class="text-[9px] font-black text-slate-600 uppercase tracking-wider">Institutional Overview</span>
+                                        <span class="text-[8px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0.5 rounded">Highest GPA Spotlight</span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 text-center mb-2">
                                         <div class="bg-white border border-slate-300 p-2 rounded-lg">
                                             <span class="text-[8px] font-bold text-slate-500 block uppercase">Overall Subject GPA</span>
                                             <span class="text-xl font-black text-indigo-950">${instGPA.toFixed(2)}</span>
@@ -6341,6 +6346,13 @@ window.renderTeacherProgressReport = function() {
                                             <span class="text-xl font-black text-emerald-700">${instPassRate.toFixed(1)}%</span>
                                             <span class="text-[7px] text-slate-400 block font-semibold">${overallPassedCount} / ${overallValidCount} Passed</span>
                                         </div>
+                                    </div>
+
+                                    <!-- Top Teacher with Highest GPA -->
+                                    <div class="bg-amber-50 border border-amber-300 p-2 rounded-lg">
+                                        <span class="text-[8px] font-black text-amber-800 uppercase block">🥇 Top Performing Faculty (Highest GPA):</span>
+                                        <span class="text-xs font-black text-slate-950 uppercase block mt-0.5">${topTeacher ? topTeacher.teacher : 'N/A'}</span>
+                                        <span class="text-[9px] font-bold text-emerald-700 block">${topTeacher ? `${topTeacher.subject} (${topTeacher.class} - ${topTeacher.section}) — GPA: ${topTeacher.gpa.toFixed(2)}` : '-'}</span>
                                     </div>
                                 </div>
                                 <div class="mt-2 pt-2 border-t border-slate-200 text-[9px] text-slate-600 font-bold flex justify-between">
